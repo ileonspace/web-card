@@ -7,22 +7,18 @@
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
+        /* 样式保持不变... */
         :root { --bg-color: #EAF3F7; --card-bg: #ffffff; --text-main: #334155; --text-sub: #64748b; --accent: #3a7bd5; --border-color: #cbd5e1; --shadow: 0 20px 40px rgba(0, 0, 0, 0.08); --danger: #ff4757; }
         body.dark-mode { --bg-color: #0f172a; --card-bg: #1e293b; --text-main: #f8fafc; --text-sub: #94a3b8; --border-color: #475569; --shadow: 0 20px 40px rgba(0, 0, 0, 0.4); }
         body { background-color: var(--bg-color); font-family: system-ui, -apple-system, sans-serif; color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; transition: background 0.5s ease; }
-
-        /* 工具栏 */
         .toolbar, .visitor-bar { position: absolute; top: 20px; z-index: 100; display: flex; gap: 10px; transition: 0.3s; }
         .toolbar { right: 20px; } .visitor-bar { left: 20px; display: none; }
         @media (max-width: 480px) { .toolbar { gap: 8px; right: 10px; top: 15px; } .visitor-bar { left: 10px; top: 15px; } .tool-btn { padding: 0 10px; font-size: 12px; height: 32px; } }
-
         .tool-btn { background: rgba(255,255,255,0.2); border: 1px solid var(--border-color); color: var(--text-main); height: 36px; padding: 0 15px; border-radius: 20px; cursor: pointer; backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 13px; font-weight: 500; transition: all 0.3s ease; white-space: nowrap; }
         .tool-btn:hover { transform: translateY(-3px); background: rgba(255,255,255,0.6); }
         body.dark-mode .tool-btn:hover { background: rgba(255,255,255,0.1); }
         .btn-logout:hover { background: var(--danger) !important; color: white !important; border-color: var(--danger); }
         .btn-admin { border-color: #8e44ad; color: #8e44ad; } .btn-admin:hover { background: #8e44ad !important; color: white !important; }
-
-        /* 卡片主体 */
         .container { background: var(--card-bg); width: 100%; max-width: 340px; padding: 45px 30px; border-radius: 24px; text-align: center; box-shadow: var(--shadow); position: relative; transition: all 0.5s ease; }
         @media (max-width: 480px) { .container { padding: 30px 20px; width: 90%; } }
         .avatar { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 4px solid var(--card-bg); box-shadow: 0 8px 20px rgba(0,0,0,0.1); margin-bottom: 15px; transition: transform 0.8s; cursor: pointer; }
@@ -38,26 +34,17 @@
         body:not(.readonly-mode) .info-item i:hover { color: var(--accent); background: rgba(58, 123, 213, 0.1); }
         body.readonly-mode .info-item i { pointer-events: none; margin-right: 15px; font-size: 20px; color: var(--text-sub); }
         .info-text { font-size: 14px; color: var(--text-main); flex: 1; outline: none; word-break: break-all; }
-
-        /* --- 管理面板 (移动端适配) --- */
         #admin-panel { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 800px; height: 80vh; background: var(--card-bg); border-radius: 20px; box-shadow: 0 50px 100px rgba(0,0,0,0.3); z-index: 2000; display: none; flex-direction: column; overflow: hidden; border: 1px solid var(--border-color); }
         .admin-header { padding: 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
         .admin-content { flex: 1; overflow: hidden; padding: 0; display: flex; flex-direction: column; }
-        
-        /* 🔥 表格滚动容器 */
         .table-wrapper { flex: 1; overflow: auto; padding: 10px; -webkit-overflow-scrolling: touch; }
         .user-table { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }
         .user-table th, .user-table td { padding: 12px 8px; text-align: left; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
         .user-table th { color: var(--text-sub); font-weight: 600; background: rgba(0,0,0,0.02); position: sticky; top: 0; }
-
         .badge { padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-        .badge-active { background: rgba(46, 213, 115, 0.1); color: #2ed573; }
-        .badge-banned { background: rgba(255, 71, 87, 0.1); color: #ff4757; }
-        .badge-admin { background: rgba(142, 68, 173, 0.1); color: #8e44ad; }
+        .badge-active { background: rgba(46, 213, 115, 0.1); color: #2ed573; } .badge-banned { background: rgba(255, 71, 87, 0.1); color: #ff4757; } .badge-admin { background: rgba(142, 68, 173, 0.1); color: #8e44ad; }
         .action-btn { padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; margin-right: 4px; }
         .btn-ban { background: #ffeaa7; color: #d35400; } .btn-del { background: #ff7675; color: white; } .btn-unban { background: #55efc4; color: #00b894; }
-
-        /* 弹窗 & 提示 */
         #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(5px); z-index: 999; display: none; justify-content: center; align-items: center; }
         .auth-box { background: var(--card-bg); padding: 30px; border-radius: 20px; width: 300px; text-align: center; }
         .auth-input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid var(--border-color); border-radius: 8px; background: transparent; color: var(--text-main); font-size: 16px; }
@@ -65,27 +52,22 @@
         .close-btn { font-size: 24px; color: var(--text-sub); cursor: pointer; }
         .toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%); background: rgba(50,50,50,0.9); color: #fff; padding: 8px 20px; border-radius: 50px; opacity: 0; transition: all 0.5s; pointer-events: none; z-index: 200; font-size: 13px; }
         #save-status { position: fixed; bottom: 20px; right: 20px; font-size: 12px; color: var(--text-sub); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+
+        /* 🔥 新增：加载遮罩层 */
+        #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 5000; display: none; flex-direction: column; justify-content: center; align-items: center; color: var(--text-main); }
     </style>
 </head>
 <body>
-    <input type="file" id="img-upload-input" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
 
-    <div id="auth-overlay"><div class="auth-box"><div class="close-btn" onclick="closeAuth()" style="position:absolute;top:15px;right:15px">&times;</div><h3 id="auth-title">登录</h3><input type="text" id="username" class="auth-input" placeholder="用户名"><input type="password" id="password" class="auth-input" placeholder="密码"><button class="auth-btn" onclick="handleAuth()">确定</button><div style="margin-top:15px; font-size:13px; color:#666; cursor:pointer" onclick="switchMode()" id="auth-switch">没有账号？去注册</div></div></div>
-
-    <div id="admin-panel">
-        <div class="admin-header">
-            <div class="admin-title">用户管理</div>
-            <div class="close-btn" onclick="toggleAdminPanel(false)">&times;</div>
-        </div>
-        <div class="admin-content">
-            <div class="table-wrapper">
-                <table class="user-table">
-                    <thead><tr><th>用户</th><th>角色</th><th>状态</th><th>注册时间</th><th>操作</th></tr></thead>
-                    <tbody id="user-table-body"></tbody>
-                </table>
-            </div>
-        </div>
+    <div id="loading-screen">
+        <i class="ri-loader-4-line ri-spin" style="font-size: 40px; margin-bottom: 20px; color: var(--accent)"></i>
+        <h3 id="loading-text">正在读取数据...</h3>
     </div>
+
+    <input type="file" id="img-upload-input" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+    <div id="auth-overlay"><div class="auth-box"><div class="close-btn" onclick="closeAuth()" style="position:absolute;top:15px;right:15px">&times;</div><h3 id="auth-title">登录</h3><input type="text" id="username" class="auth-input" placeholder="用户名"><input type="password" id="password" class="auth-input" placeholder="密码"><button class="auth-btn" onclick="handleAuth()">确定</button><div style="margin-top:15px; font-size:13px; color:#666; cursor:pointer" onclick="switchMode()" id="auth-switch">没有账号？去注册</div></div></div>
+    
+    <div id="admin-panel"><div class="admin-header"><div class="admin-title">用户管理</div><div class="close-btn" onclick="toggleAdminPanel(false)">&times;</div></div><div class="admin-content"><div class="table-wrapper"><table class="user-table"><thead><tr><th>用户</th><th>角色</th><th>状态</th><th>注册时间</th><th>操作</th></tr></thead><tbody id="user-table-body"></tbody></table></div></div></div>
 
     <div class="toolbar" id="editor-toolbar">
         <button class="tool-btn" id="btn-login" onclick="openAuth()"><i class="ri-user-line"></i> 登录</button>
@@ -119,8 +101,13 @@
         const FRONTEND_ADMIN_NAME = 'admin'; 
 
         window.onload = function() {
-            const pathName = window.location.pathname.substring(1);
+            // 🔥 更好的 URL 处理：去掉尾部斜杠，防止 Cloudflare 有时候加 / 导致 bug
+            let pathName = window.location.pathname.replace(/\/$/, ""); 
+            pathName = pathName.substring(1);
+
             if (pathName && pathName !== 'index.html') {
+                // 如果是访客模式，立刻显示遮罩
+                document.getElementById('loading-screen').style.display = 'flex';
                 loadUserFromCloud(decodeURIComponent(pathName));
             } else {
                 checkLoginState();
@@ -130,47 +117,33 @@
         let isLoginMode = true;
         let autoSaveTimer = null;
 
-        // --- 🔥 修复登录逻辑：云端验证 ---
         async function handleAuth() {
             const u = document.getElementById('username').value;
             const p = document.getElementById('password').value;
             if(!u || !p) return showToast("请输入账号密码");
 
             if(isLoginMode) {
-                // 1. 先尝试本地验证 (兼容旧用户)
+                // 优先本地验证
                 const localPass = localStorage.getItem('pass_' + u);
-                if (localPass === p) {
-                    loginSuccess(u, p);
-                    return;
-                }
+                if (localPass === p) { loginSuccess(u, p); return; }
 
-                // 2. 本地没有，尝试去云端拉取数据验证 (新设备登录)
+                // 本地没有，去云端验证
                 showToast("正在云端验证...");
                 try {
                     const response = await fetch(`/api/user?name=${u}`);
                     if (response.ok) {
                         const resData = await response.json();
-                        // 检查云端数据里是否存了密码 (我们在 saveData 里存了)
                         if (resData.data && resData.data._secret_pass === p) {
                             loginSuccess(u, p);
-                            // 同步数据到本地
                             localStorage.setItem('userData_' + u, JSON.stringify(resData.data));
-                        } else {
-                            showToast("❌ 密码错误");
-                        }
-                    } else {
-                        showToast("❌ 用户不存在");
-                    }
+                        } else { showToast("❌ 密码错误"); }
+                    } else { showToast("❌ 用户不存在"); }
                 } catch(e) { showToast("❌ 网络错误"); }
 
             } else {
-                // 注册逻辑
                 if(localStorage.getItem('pass_'+u)) return showToast("用户已存在(本地)");
-                
-                // 先检查云端是否占用
                 const check = await fetch(`/api/user?name=${u}`);
                 if(check.ok) return showToast("用户名已被占用");
-
                 localStorage.setItem('pass_'+u, p);
                 showToast("注册成功，请登录");
                 switchMode();
@@ -180,22 +153,15 @@
         function loginSuccess(user, pass) {
             localStorage.setItem('isLoggedIn', 'true');
             localStorage.setItem('currentUser', user);
-            // 确保本地也存一份密码，供下次自动保存使用
             localStorage.setItem('pass_' + user, pass);
-            
             if(user === FRONTEND_ADMIN_NAME) document.getElementById('btn-admin-trigger').style.display = 'flex';
-            
-            updateUI(true);
-            checkLoginState();
-            closeAuth();
-            showToast("✅ 欢迎回来 " + user);
+            updateUI(true); checkLoginState(); closeAuth(); showToast("✅ 欢迎回来 " + user);
         }
 
-        // --- 🔥 修复保存逻辑：把密码存入 data 以便跨设备登录 ---
         async function saveData(isSilent = false) {
             if(localStorage.getItem('isLoggedIn') !== 'true') return;
             const user = localStorage.getItem('currentUser');
-            const pass = localStorage.getItem('pass_' + user); // 获取当前密码
+            const pass = localStorage.getItem('pass_' + user);
 
             const status = document.getElementById('save-status');
             status.innerHTML = '<i class="ri-upload-cloud-2-line"></i> 同步云端...'; status.style.opacity = 1;
@@ -211,8 +177,6 @@
                 emailIcon: document.getElementById('icon-email').className,
                 addrText: document.getElementById('user-addr').innerText,
                 addrIcon: document.getElementById('icon-addr').className,
-                // 🔥 关键：把密码也存进 JSON，这样换手机也能验证！
-                // 注意：这是简易做法，不适合高安全场景
                 _secret_pass: pass 
             };
 
@@ -232,14 +196,35 @@
             } catch (e) { status.innerHTML = '❌ 网络错误'; }
         }
 
-        // --- 其他原有逻辑 ---
+        async function loadUserFromCloud(username) {
+            enterVisitorMode(username);
+            try {
+                const response = await fetch(`/api/user?name=${username}`);
+                if (response.ok) {
+                    const resData = await response.json();
+                    if (resData.status === 'banned' && resData.ban_until > Date.now()) {
+                        document.body.innerHTML = "<h1 style='color:red;text-align:center;margin-top:100px'>🚫 该账号已被封禁</h1>";
+                        return;
+                    }
+                    renderData(resData.data);
+                    // 🔥 隐藏遮罩
+                    document.getElementById('loading-screen').style.display = 'none';
+                } else { 
+                    // 显示错误信息
+                    document.getElementById('loading-screen').innerHTML = `<h3>❌ 用户 ${username} 不存在</h3><br><a href='/' style='color:var(--accent)'>我也要创建</a>`;
+                }
+            } catch (e) { 
+                 document.getElementById('loading-screen').innerHTML = `<h3>❌ 网络连接失败</h3>`;
+            }
+        }
+
+        // --- 其他辅助函数 ---
         async function loadAdminData() {
             toggleAdminPanel(true);
             const tbody = document.getElementById('user-table-body');
             tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">加载中...</td></tr>';
             const user = localStorage.getItem('currentUser');
             const pass = localStorage.getItem('pass_' + user);
-
             try {
                 const res = await fetch('/api/admin', { headers: { 'X-Admin-Name': user, 'X-Admin-Pass': pass } });
                 if (res.status === 401) { alert("权限不足"); toggleAdminPanel(false); return; }
@@ -278,19 +263,6 @@
             if(res.ok) { showToast("成功"); loadAdminData(); } else { alert("失败"); }
         }
 
-        // 基础函数
-        async function loadUserFromCloud(username) {
-            enterVisitorMode(username);
-            try {
-                const response = await fetch(`/api/user?name=${username}`);
-                if (response.ok) {
-                    const resData = await response.json();
-                    if (resData.status === 'banned') { document.body.innerHTML = "<h1 style='color:red;text-align:center;margin-top:100px'>🚫 已封禁</h1>"; return; }
-                    renderData(resData.data);
-                } else { alert("无数据"); }
-            } catch (e) { console.error(e); }
-        }
-
         function triggerAutoSave() {
             if(document.body.classList.contains('readonly-mode') || localStorage.getItem('isLoggedIn') !== 'true') return;
             const status = document.getElementById('save-status');
@@ -311,7 +283,7 @@
             if(!data) return;
             document.getElementById('user-name').innerText = data.name || "Code Master";
             document.getElementById('user-role').innerText = data.role || "Developer";
-            document.getElementById('user-avatar').src = data.avatar || "";
+            document.getElementById('user-avatar').src = data.avatar || "https://cdn.pixabay.com/photo/2021/08/04/13/06/software-developer-6521720_1280.jpg";
             document.getElementById('user-site').innerText = data.siteText || "";
             document.getElementById('icon-site').className = data.siteIcon || "ri-global-line";
             document.getElementById('user-email').innerText = data.emailText || "";
@@ -319,7 +291,6 @@
             document.getElementById('user-addr').innerText = data.addrText || "";
             document.getElementById('icon-addr').className = data.addrIcon || "ri-map-pin-line";
         }
-
         function triggerFileUpload() { if(!document.body.classList.contains('readonly-mode') && localStorage.getItem('isLoggedIn')==='true') document.getElementById('img-upload-input').click(); }
         function handleFileSelect(event) { 
             const file = event.target.files[0]; if(!file)return;
