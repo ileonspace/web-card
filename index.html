@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Web Card V32 - 排序增强版</title>
+    <title>Web Card V33 - 自由分割线版</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
@@ -12,9 +12,8 @@
         :root {
             --bg: #EAF3F7; --card: #ffffff; --text: #334155; --sub: #64748b;
             --accent: #3a7bd5; --danger: #ff4757; --success: #2ed573;
+            --divider: #94a3b8; /* 分割线颜色 */
             --shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-            /* 🔥 新增：分割线颜色 (深灰色) */
-            --divider: #94a3b8; 
         }
         body.dark {
             --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --sub: #94a3b8;
@@ -28,76 +27,77 @@
             transition: background 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-        /* --- 2. 列表与排序 (核心修改) --- */
-        .list { display: flex; flex-direction: column; text-align: left; gap: 0; /* 间距由 padding 控制 */ }
+        /* --- 2. 列表与条目 (核心修改) --- */
+        .list { display: flex; flex-direction: column; gap: 10px; text-align: left; }
         
         .item {
-            display: flex; align-items: center; padding: 15px 10px; 
+            display: flex; align-items: center; padding: 12px 10px; 
+            background: rgba(0,0,0,0.03); border-radius: 12px; 
             transition: all 0.2s; position: relative; border: 1px solid transparent;
-            background: transparent; border-radius: 8px; /* 稍微圆角 */
         }
         
-        /* 🔥 1. 分割线样式 */
-        .item:not(:last-child) {
-            border-bottom: 1px dashed var(--divider); /* 深灰色虚线 */
-        }
-
         /* 拖拽时的样式 */
-        .item.dragging {
-            background: rgba(58, 123, 213, 0.1);
-            border: 1px dashed var(--accent);
-            opacity: 0.8;
-        }
+        .item.dragging { opacity: 0.5; border: 2px dashed var(--accent); background: rgba(255,255,255,0.8); }
 
-        /* 访客模式：整行可点 */
-        body.read .item { cursor: pointer; border-bottom-style: solid; /* 访客模式用实线或保持虚线均可，这里保持虚线 */ }
-        body.read .item:hover { background: rgba(0,0,0,0.03); transform: translateX(5px); }
-        
-        /* 🔥 2. 拖拽手柄 (仅编辑模式显示) */
-        .drag-handle {
-            cursor: grab; color: var(--sub); margin-right: 8px; font-size: 18px;
-            display: none; /* 默认隐藏 */
-            opacity: 0.5; transition: 0.2s;
+        /* 🔥 特殊条目：分割线 */
+        .item.type-divider {
+            background: transparent; padding: 10px 0; justify-content: center;
+            cursor: move; /* 分割线也可以拖拽 */
         }
-        .drag-handle:hover { opacity: 1; color: var(--text); }
-        .drag-handle:active { cursor: grabbing; }
+        .divider-line {
+            width: 100%; height: 0; border-top: 2px dashed var(--divider); opacity: 0.6;
+        }
+        /* 访客模式下，分割线就是一条纯线 */
+        body.read .item.type-divider { pointer-events: none; }
+        /* 编辑模式下，分割线显示删除按钮 */
+        .divider-del {
+            position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+            background: var(--card); color: var(--danger); padding: 5px; border-radius: 50%;
+            cursor: pointer; display: none; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        body:not(.read) .item.type-divider:hover .divider-del { display: flex; }
+
+        /* 普通条目样式 */
+        body.read .item:not(.type-divider) { cursor: pointer; }
+        body.read .item:not(.type-divider):hover { background: rgba(0,0,0,0.06); transform: translateY(-2px); }
         
-        /* 只有在非只读模式下显示手柄 */
+        /* 拖拽/排序手柄 */
+        .drag-handle {
+            cursor: grab; color: var(--sub); margin-right: 8px; font-size: 18px; display: none;
+        }
         body:not(.read) .drag-handle { display: flex; }
 
-        /* 图标 */
-        .item-icon { 
-            font-size: 22px; color: var(--sub); margin-right: 15px; 
-            min-width: 24px; text-align: center; transition: 0.2s; 
-        }
+        .item-icon { font-size: 22px; color: var(--sub); margin-right: 12px; min-width: 24px; text-align: center; }
         body:not(.read) .item-icon { cursor: pointer; }
         body:not(.read) .item-icon:hover { color: var(--accent); transform: scale(1.1); }
         
-        .item-content { flex: 1; overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
+        .item-content { flex: 1; overflow: hidden; }
         .item-title { font-size: 15px; font-weight: 600; color: var(--text); outline: none; }
-        .item-link-preview { font-size: 11px; color: var(--sub); margin-top: 2px; opacity: 0.7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px;}
+        .item-link-preview { font-size: 11px; color: var(--sub); margin-top: 2px; opacity: 0.7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px;}
         
-        /* 操作按钮 */
-        .item-actions { display: none; align-items: center; gap: 5px; margin-left: 10px; }
+        /* 操作按钮组 (增加上下移按钮) */
+        .item-actions { display: none; align-items: center; gap: 4px; margin-left: 8px; }
         body:not(.read) .item-actions { display: flex; }
         
         .act-icon {
-            width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
-            color: var(--sub); cursor: pointer; transition: 0.2s; background: rgba(255,255,255,0.5);
+            width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+            color: var(--sub); cursor: pointer; background: rgba(255,255,255,0.5); font-size: 14px;
         }
-        .act-icon:hover { background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .act-icon:hover { background: #fff; color: var(--text); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .act-del:hover { color: var(--danger); }
 
-        /* 添加按钮 */
+        /* 底部添加按钮组 */
+        .add-group { display: none; gap: 10px; margin-top: 15px; }
+        body:not(.read) .add-group { display: flex; }
+        
         .add-btn {
-            margin-top: 15px; width: 100%; padding: 12px; border: 2px dashed var(--border-color);
+            flex: 1; padding: 10px; border: 2px dashed var(--border-color);
             border-radius: 14px; color: var(--sub); font-size: 13px; cursor: pointer;
-            background: transparent; transition: 0.2s; display: none;
+            background: transparent; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 5px;
         }
         .add-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(58,123,213,0.05); }
-        body:not(.read) .add-btn { display: block; }
 
-        /* --- 3. 其他通用样式 (保持 V30) --- */
+        /* --- 3. 这里的 CSS 保持稳定版不变 --- */
         .toolbar, .visitor-nav { position: absolute; top: 20px; z-index: 100; display: flex; gap: 10px; }
         .toolbar { right: 20px; } .visitor-nav { left: 20px; display: none; }
         .tool-btn { background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.05); color: var(--text); padding: 0 16px; height: 40px; border-radius: 20px; cursor: pointer; backdrop-filter: blur(5px); display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; transition: 0.1s; user-select: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
@@ -156,6 +156,7 @@
 
     <input type="file" id="file" hidden accept="image/*" onchange="uploadImg(event)">
 
+    <!-- 登录窗 -->
     <div id="modal"><div class="box">
         <h3 id="m-title" style="margin:0 0 15px 0">用户登录</h3>
         <input id="u" class="inp" placeholder="用户名" autocomplete="off">
@@ -167,17 +168,20 @@
         </div>
     </div></div>
 
+    <!-- 图标库 -->
     <div id="icon-modal"><div class="icon-box">
         <div class="icon-header"><h3>图标库</h3><button onclick="document.getElementById('icon-modal').style.display='none'" style="border:none;background:none;font-size:24px;cursor:pointer">&times;</button></div>
-        <input id="custom-icon" class="inp" placeholder="搜索或输入 (如 ri-home-line)" oninput="filterIcons(this.value)">
+        <input id="custom-icon" class="inp" placeholder="搜索 (如 home)" oninput="filterIcons(this.value)">
         <div class="icon-grid" id="lib-grid"></div>
     </div></div>
 
+    <!-- 管理面板 -->
     <div id="admin"><div class="admin-card">
         <div class="admin-head"><h3 style="margin:0;font-size:16px">用户管理</h3><button onclick="toggleAdmin(0)" style="border:none;background:none;font-size:20px;cursor:pointer;color:var(--text)">&times;</button></div>
         <div class="admin-body"><div class="table-wrapper"><table class="user-table" id="tbl"><thead><tr><th>用户</th><th>角色</th><th>状态</th><th>注册时间</th><th>操作</th></tr></thead><tbody></tbody></table></div></div>
     </div></div>
 
+    <!-- 顶部栏 -->
     <div class="toolbar" id="tb-edit">
         <button class="tool-btn" id="btn-login" onclick="openM()"><i class="ri-user-3-line"></i> <span>登录</span></button>
         <button class="tool-btn btn-admin" id="btn-admin" onclick="loadAdmin()" style="display:none"><i class="ri-command-line"></i> <span>管理</span></button>
@@ -186,6 +190,7 @@
         <button class="tool-btn" onclick="mode()" style="padding:0;width:40px;justify-content:center"><i class="ri-moon-line"></i></button>
     </div>
 
+    <!-- 访客栏 -->
     <div class="visitor-nav" id="tb-read">
         <button class="tool-btn" onclick="goHome()"><i class="ri-arrow-left-s-line"></i> <span>返回</span></button>
         <button class="tool-btn" onclick="mode()" style="padding:0;width:40px;justify-content:center"><i class="ri-moon-line"></i></button>
@@ -198,146 +203,118 @@
         <h1 id="user-name" contenteditable="true">Code Master</h1>
         <div id="user-role" class="role" contenteditable="true">全栈开发练习生</div>
         
-        <!-- 🔥 动态列表区域 -->
+        <!-- 动态列表 -->
         <div class="list" id="dynamic-list"></div>
-        <button class="add-btn" onclick="addItem()">+ 添加条目</button>
+        
+        <!-- 🔥 双按钮：添加条目 / 添加分割线 -->
+        <div class="add-group">
+            <button class="add-btn" onclick="addItem('link')"><i class="ri-add-line"></i> 条目</button>
+            <button class="add-btn" onclick="addItem('divider')"><i class="ri-subtract-line"></i> 分割线</button>
+        </div>
     </div>
 
     <script>
         const ADMIN_NAME = 'admin';
         const DEFAULT_AVATAR = 'https://avatars.githubusercontent.com/u/85006660?v=4';
-        
-        const ALL_ICONS = [
-            'ri-global-line', 'ri-home-line', 'ri-user-line', 'ri-mail-line', 'ri-phone-line',
-            'ri-wechat-line', 'ri-qq-line', 'ri-github-line', 'ri-twitter-x-line', 'ri-instagram-line',
-            'ri-youtube-line', 'ri-bilibili-line', 'ri-tiktok-line', 'ri-weibo-line', 'ri-zhihu-line',
-            'ri-linkedin-line', 'ri-facebook-circle-line', 'ri-telegram-line', 'ri-discord-line', 'ri-whatsapp-line',
-            'ri-map-pin-line', 'ri-navigation-line', 'ri-store-line', 'ri-shopping-bag-line', 'ri-wallet-3-line',
-            'ri-alipay-line', 'ri-paypal-line', 'ri-bank-card-line', 'ri-gift-line', 'ri-heart-line',
-            'ri-star-line', 'ri-thumb-up-line', 'ri-message-3-line', 'ri-chat-3-line', 'ri-discuss-line',
-            'ri-image-line', 'ri-camera-line', 'ri-video-line', 'ri-music-2-line', 'ri-headphone-line',
-            'ri-file-text-line', 'ri-book-open-line', 'ri-article-line', 'ri-folder-line', 'ri-cloud-line',
-            'ri-download-cloud-line', 'ri-link', 'ri-share-line', 'ri-rss-line', 'ri-code-line',
-            'ri-terminal-box-line', 'ri-bug-line', 'ri-cpu-line', 'ri-database-2-line', 'ri-server-line',
-            'ri-smartphone-line', 'ri-computer-line', 'ri-robot-line', 'ri-gamepad-line', 'ri-rocket-line',
-            'ri-lightbulb-line', 'ri-calendar-line', 'ri-time-line', 'ri-alarm-line', 'ri-timer-line',
-            'ri-sun-line', 'ri-moon-line', 'ri-cloudy-line', 'ri-rainy-line', 'ri-flashlight-line',
-            'ri-cup-line', 'ri-restaurant-line', 'ri-cake-line', 'ri-beer-line', 'ri-goblet-line',
-            'ri-briefcase-line', 'ri-medal-line', 'ri-trophy-line', 'ri-flag-line', 'ri-map-2-line',
-            'ri-car-line', 'ri-bus-line', 'ri-plane-line', 'ri-ship-line', 'ri-bike-line',
-            'ri-basketball-line', 'ri-football-line', 'ri-ping-pong-line', 'ri-t-shirt-line', 'ri-scissors-line'
-        ];
+        const ALL_ICONS = ['ri-global-line', 'ri-home-line', 'ri-user-line', 'ri-mail-line', 'ri-phone-line', 'ri-wechat-line', 'ri-qq-line', 'ri-github-line', 'ri-twitter-x-line', 'ri-instagram-line', 'ri-youtube-line', 'ri-bilibili-line', 'ri-tiktok-line', 'ri-weibo-line', 'ri-zhihu-line', 'ri-linkedin-line', 'ri-facebook-circle-line', 'ri-telegram-line', 'ri-discord-line', 'ri-whatsapp-line', 'ri-map-pin-line', 'ri-navigation-line', 'ri-store-line', 'ri-shopping-bag-line', 'ri-wallet-3-line', 'ri-alipay-line', 'ri-paypal-line', 'ri-bank-card-line', 'ri-gift-line', 'ri-heart-line', 'ri-star-line', 'ri-thumb-up-line', 'ri-message-3-line', 'ri-chat-3-line', 'ri-discuss-line', 'ri-image-line', 'ri-camera-line', 'ri-video-line', 'ri-music-2-line', 'ri-headphone-line', 'ri-file-text-line', 'ri-book-open-line', 'ri-article-line', 'ri-folder-line', 'ri-cloud-line', 'ri-download-cloud-line', 'ri-link', 'ri-share-line', 'ri-rss-line', 'ri-code-line', 'ri-terminal-box-line', 'ri-bug-line', 'ri-cpu-line', 'ri-database-2-line', 'ri-server-line', 'ri-smartphone-line', 'ri-computer-line', 'ri-robot-line', 'ri-gamepad-line', 'ri-rocket-line', 'ri-lightbulb-line', 'ri-calendar-line', 'ri-time-line', 'ri-alarm-line', 'ri-timer-line', 'ri-sun-line', 'ri-moon-line', 'ri-cloudy-line', 'ri-rainy-line', 'ri-flashlight-line', 'ri-cup-line', 'ri-restaurant-line', 'ri-cake-line', 'ri-beer-line', 'ri-goblet-line', 'ri-briefcase-line', 'ri-medal-line', 'ri-trophy-line', 'ri-flag-line', 'ri-map-2-line', 'ri-car-line', 'ri-bus-line', 'ri-plane-line', 'ri-ship-line', 'ri-bike-line', 'ri-basketball-line', 'ri-football-line', 'ri-ping-pong-line', 'ri-t-shirt-line', 'ri-scissors-line'];
 
         let currentData = { items: [] };
         let isReg = false, timer = null, editingIndex = -1;
-        // 🔥 拖拽相关变量
-        let dragSrcIndex = null;
+        let dragSrc = null;
 
         window.onload = () => {
             initIconLib();
             let path = window.location.pathname.replace(/\/$/, "").substring(1);
             setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 3000);
-            
-            if (path && path !== 'index.html') {
-                loadCloud(decodeURIComponent(path));
-            } else {
-                checkLog();
-                document.getElementById('loader').style.display = 'none';
-                if(!localStorage.getItem('login')) fill(null); 
-            }
+            if (path && path !== 'index.html') { loadCloud(decodeURIComponent(path)); } 
+            else { checkLog(); document.getElementById('loader').style.display = 'none'; if(!localStorage.getItem('login')) fill(null); }
         };
 
-        // --- 核心：渲染列表 (带拖拽) ---
+        // --- 列表渲染 (带分割线逻辑) ---
         function renderList() {
             const el = document.getElementById('dynamic-list');
             el.innerHTML = '';
             
             currentData.items.forEach((item, i) => {
                 const div = document.createElement('div');
-                div.className = 'item';
+                div.className = `item ${item.type === 'divider' ? 'type-divider' : ''}`;
                 
-                // 🔥 拖拽属性 (仅在编辑模式有效)
+                // 拖拽逻辑
                 if (!isRead()) {
                     div.draggable = true;
-                    div.ondragstart = (e) => dragStart(e, i);
-                    div.ondragover = (e) => dragOver(e);
-                    div.ondrop = (e) => drop(e, i);
+                    div.ondragstart = (e) => { dragSrc = i; e.target.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; };
+                    div.ondragover = (e) => { e.preventDefault(); return false; };
+                    div.ondrop = (e) => {
+                        e.stopPropagation(); document.querySelectorAll('.item').forEach(e=>e.classList.remove('dragging'));
+                        if (dragSrc !== i) {
+                            const moved = currentData.items.splice(dragSrc, 1)[0];
+                            currentData.items.splice(i, 0, moved);
+                            renderList(); save(true);
+                        }
+                        return false;
+                    };
                 }
-                
-                div.onclick = (e) => handleJump(e, item.url);
-                
-                div.innerHTML = `
-                    <!-- 🔥 拖拽手柄 -->
-                    <div class="drag-handle"><i class="ri-draggable"></i></div>
-                    <i class="${item.icon} item-icon" onclick="openIconLib(${i}, event)"></i>
-                    <div class="item-content">
-                        <div class="item-title" contenteditable="${!isRead()}" oninput="updateItem(${i}, 'text', this.innerText)">${item.text}</div>
-                        ${!isRead() ? `<div class="item-link-preview">${item.url || '未设置链接'}</div>` : ''}
-                    </div>
-                    <div class="item-actions">
-                        <div class="act-icon" onclick="editUrl(${i}, event)"><i class="ri-link"></i></div>
-                        <div class="act-icon act-del" onclick="delItem(${i}, event)"><i class="ri-delete-bin-line"></i></div>
-                    </div>
-                `;
+
+                if (item.type === 'divider') {
+                    // 分割线渲染
+                    div.innerHTML = `
+                        ${!isRead() ? '<div class="drag-handle"><i class="ri-draggable"></i></div>' : ''}
+                        <div class="divider-line"></div>
+                        <div class="divider-del" onclick="delItem(${i}, event)"><i class="ri-close-circle-fill"></i></div>
+                    `;
+                } else {
+                    // 普通条目渲染
+                    div.onclick = (e) => handleJump(e, item.url);
+                    div.innerHTML = `
+                        <div class="drag-handle"><i class="ri-draggable"></i></div>
+                        <i class="${item.icon} item-icon" onclick="openIconLib(${i}, event)"></i>
+                        <div class="item-content">
+                            <div class="item-title" contenteditable="${!isRead()}" oninput="updateItem(${i}, 'text', this.innerText)">${item.text}</div>
+                            ${!isRead() ? `<div class="item-link-preview">${item.url || '未设置链接'}</div>` : ''}
+                        </div>
+                        <div class="item-actions">
+                            <div class="act-icon" onclick="moveItem(${i}, -1, event)"><i class="ri-arrow-up-s-line"></i></div>
+                            <div class="act-icon" onclick="moveItem(${i}, 1, event)"><i class="ri-arrow-down-s-line"></i></div>
+                            <div class="act-icon" onclick="editUrl(${i}, event)"><i class="ri-link"></i></div>
+                            <div class="act-icon act-del" onclick="delItem(${i}, event)"><i class="ri-delete-bin-line"></i></div>
+                        </div>
+                    `;
+                }
                 el.appendChild(div);
             });
         }
 
-        // --- 拖拽逻辑 ---
-        function dragStart(e, i) {
-            dragSrcIndex = i;
-            e.target.classList.add('dragging');
-            e.dataTransfer.effectAllowed = 'move';
-        }
-        function dragOver(e) {
-            e.preventDefault();
-            return false;
-        }
-        function drop(e, targetIndex) {
-            e.stopPropagation();
-            document.querySelectorAll('.item').forEach(el => el.classList.remove('dragging'));
-            if (dragSrcIndex !== targetIndex) {
-                // 移动数组元素
-                const movedItem = currentData.items.splice(dragSrcIndex, 1)[0];
-                currentData.items.splice(targetIndex, 0, movedItem);
-                renderList();
-                save(true);
-            }
-            return false;
-        }
-
-        // --- 跳转 ---
+        // --- 逻辑函数 ---
         function handleJump(e, url) {
             if(!isRead() || !url) return;
             if(url.startsWith('mailto:')) window.location.href = url;
             else if(url.startsWith('http')) window.open(url, '_blank');
             else window.open(`https://www.google.com/search?q=${encodeURIComponent(url)}`, '_blank');
         }
-
-        function editUrl(i, e) {
+        function editUrl(i, e) { e.stopPropagation(); const u = prompt("输入链接:", currentData.items[i].url); if(u!==null){currentData.items[i].url=u;renderList();save(true);} }
+        function addItem(type) { 
+            if(type==='divider') currentData.items.push({ type: 'divider' });
+            else currentData.items.push({ type: 'link', icon: 'ri-star-line', text: '新条目', url: '' });
+            renderList(); save(true);
+        }
+        function delItem(i, e) { e.stopPropagation(); if(confirm('删除?')) { currentData.items.splice(i, 1); renderList(); save(true); } }
+        function updateItem(i, k, v) { currentData.items[i][k] = v; debounceSave(); }
+        function moveItem(i, dir, e) {
             e.stopPropagation();
-            const u = prompt("输入跳转链接:", currentData.items[i].url);
-            if(u !== null) { currentData.items[i].url = u; renderList(); save(true); }
+            if ((i===0 && dir===-1) || (i===currentData.items.length-1 && dir===1)) return;
+            const temp = currentData.items[i];
+            currentData.items[i] = currentData.items[i+dir];
+            currentData.items[i+dir] = temp;
+            renderList(); save(true);
         }
 
-        // --- 图标库 ---
-        function initIconLib() { renderIcons(ALL_ICONS); }
-        function renderIcons(icons) { document.getElementById('lib-grid').innerHTML = icons.map(icon => `<div class="lib-icon" onclick="selectIcon('${icon}')"><i class="${icon}"></i></div>`).join(''); }
-        function filterIcons(val) { const filtered = ALL_ICONS.filter(i => i.includes(val.toLowerCase())); renderIcons(filtered); }
-        function openIconLib(i, e) { if(isRead()) return; e.stopPropagation(); editingIndex = i; document.getElementById('icon-modal').style.display = 'flex'; }
-        function selectIcon(icon) { if(editingIndex > -1) { currentData.items[editingIndex].icon = icon; renderList(); save(true); } document.getElementById('icon-modal').style.display = 'none'; }
-        
-        // --- 增删改 ---
-        function addItem() { currentData.items.push({ icon: 'ri-star-line', text: '新条目', url: '' }); renderList(); save(true); }
-        function delItem(i, e) { e.stopPropagation(); if(confirm('删除?')) { currentData.items.splice(i, 1); renderList(); save(true); } }
-        function updateItem(i, key, val) { currentData.items[i][key] = val; debounceSave(); }
-        
-        // --- 填充数据 (兼容旧版) ---
+        // --- 兼容旧数据填充 ---
         function fill(d) {
             if(!d) {
                 currentData.items = [
-                    { icon: 'ri-global-line', text: '我的网站', url: 'https://example.com' },
-                    { icon: 'ri-mail-send-line', text: '联系邮箱', url: 'mailto:hi@test.com' }
+                    { type:'link', icon: 'ri-global-line', text: '我的网站', url: 'https://example.com' },
+                    { type:'divider' },
+                    { type:'link', icon: 'ri-mail-send-line', text: '联系邮箱', url: 'mailto:hi@test.com' }
                 ];
             } else {
                 id('user-name').innerText = d.name || 'Code Master';
@@ -346,15 +323,21 @@
                 if(d.items && Array.isArray(d.items)) currentData.items = d.items;
                 else {
                     currentData.items = [];
-                    if(d.siteText) currentData.items.push({ icon: d.siteIcon, text: d.siteText, url: d.siteText });
-                    if(d.emailText) currentData.items.push({ icon: d.emailIcon, text: d.emailText, url: 'mailto:'+d.emailText });
-                    if(d.addrText) currentData.items.push({ icon: d.addrIcon, text: d.addrText, url: d.addrText });
+                    if(d.siteText) currentData.items.push({ type:'link', icon: d.siteIcon, text: d.siteText, url: d.siteText });
+                    if(d.emailText) currentData.items.push({ type:'link', icon: d.emailIcon, text: d.emailText, url: 'mailto:'+d.emailText });
+                    if(d.addrText) currentData.items.push({ type:'link', icon: d.addrIcon, text: d.addrText, url: d.addrText });
                 }
             }
             renderList();
         }
 
-        // --- 保存 ---
+        // --- 基础部分 (保持稳定) ---
+        function initIconLib() { renderIcons(ALL_ICONS); }
+        function renderIcons(icons) { document.getElementById('lib-grid').innerHTML = icons.map(icon => `<div class="lib-icon" onclick="selectIcon('${icon}')"><i class="${icon}"></i></div>`).join(''); }
+        function filterIcons(val) { const filtered = ALL_ICONS.filter(i => i.includes(val.toLowerCase())); renderIcons(filtered); }
+        function openIconLib(i, e) { if(isRead()) return; e.stopPropagation(); editingIndex = i; document.getElementById('icon-modal').style.display = 'flex'; }
+        function selectIcon(icon) { if(editingIndex > -1) { currentData.items[editingIndex].icon = icon; renderList(); save(true); } document.getElementById('icon-modal').style.display = 'none'; }
+        
         async function save(silent = false) {
             if (localStorage.getItem('login') !== '1') return;
             const u = localStorage.getItem('u'), p = localStorage.getItem('p');
@@ -387,7 +370,6 @@
             }
         }
         function success(u,p,d) { localStorage.setItem('login','1'); localStorage.setItem('u',u); localStorage.setItem('p',p); localStorage.setItem('pass_'+u, p); if(d) fill(d); checkLog(); closeM(); toast('欢迎回来'); }
-        
         function checkLog() {
             const isLog = localStorage.getItem('login') === '1';
             const u = localStorage.getItem('u');
@@ -397,7 +379,6 @@
             if(isLog && u === ADMIN_NAME) id('btn-admin').style.display = 'flex';
             if(isLog) { const c = localStorage.getItem('userData_'+u); if(c) fill(JSON.parse(c)); }
         }
-        
         async function loadCloud(user) {
             const l = id('loader'); l.style.display = 'flex';
             id('tb-edit').style.display='none'; id('tb-read').style.display='flex';
@@ -405,7 +386,6 @@
             document.querySelectorAll('[contenteditable]').forEach(e => e.setAttribute('contenteditable', 'false'));
             try { const res = await fetch(`/api/user?name=${user}`); if(res.ok) { const json = await res.json(); if(json.status!=='banned') { fill(json.data); l.style.display='none'; } else document.body.innerHTML="<h2 style='text-align:center;margin-top:100px;color:red'>已封禁</h2>"; } else document.body.innerHTML="<h2 style='text-align:center;margin-top:100px'>用户不存在</h2>"; } catch(e) { l.innerHTML = "<h3>网络错误</h3>"; }
         }
-        
         function clickAv() { if(!isRead() && localStorage.getItem('login')==='1') id('file').click(); }
         function uploadImg(e) {
             const f = e.target.files[0]; if(!f) return;
@@ -419,22 +399,18 @@
                 }; img.src = ev.target.result;
             }; r.readAsDataURL(f);
         }
-        
-        // 管理员逻辑
         async function loadAdmin() {
-            toggleAdmin(1); const tbody = document.getElementById('tbl').querySelector('tbody');
-            tbody.innerHTML = '<tr><td colspan="5">加载中...</td></tr>';
+            toggleAdmin(1); id('tbl').querySelector('tbody').innerHTML = '<tr><td colspan="5">加载中...</td></tr>';
             const u = localStorage.getItem('u'), p = localStorage.getItem('p');
             try {
                 const res = await fetch('/api/admin', { headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p } });
                 if(res.status===401) return toast('无权访问');
                 const list = await res.json();
-                tbody.innerHTML = list.map(x => `<tr><td>${x.name}</td><td>${x.role||'user'}</td><td>${x.status==='banned'?'<span class="badge badge-ban">封</span>':'<span class="badge badge-ok">正</span>'}</td><td>${new Date(x.created_at).toLocaleDateString()}</td><td>${x.name!==u?`<button class="act-btn act-ban" onclick="act('ban','${x.name}')">禁</button><button class="act-btn act-unban" onclick="act('unban','${x.name}')">解</button><button class="act-btn act-del" onclick="act('delete','${x.name}')">删</button>`:'-'}</td></tr>`).join('');
+                id('tbl').querySelector('tbody').innerHTML = list.map(x => `<tr><td>${x.name}</td><td>${x.role||'user'}</td><td>${x.status==='banned'?'<span class="badge badge-ban">封</span>':'<span class="badge badge-ok">正</span>'}</td><td>${new Date(x.created_at).toLocaleDateString()}</td><td>${x.name!==u?`<button class="act-btn act-ban" onclick="act('ban','${x.name}')">禁</button><button class="act-btn act-unban" onclick="act('unban','${x.name}')">解</button><button class="act-btn act-del" onclick="act('delete','${x.name}')">删</button>`:'-'}</td></tr>`).join('');
             } catch(e){ }
         }
         async function act(a, t) { if(confirm('确定?')) { const u = localStorage.getItem('u'), p = localStorage.getItem('p'); await fetch('/api/admin', { method: 'POST', headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p }, body: JSON.stringify({ action: a, targetUser: t, duration: 24 }) }); loadAdmin(); }}
         function toggleAdmin(s) { id('admin').style.display = s ? 'flex' : 'none'; }
-        
         function openM() { id('modal').style.display='flex'; }
         function closeM() { id('modal').style.display='none'; }
         function flip() { isReg=!isReg; id('m-title').innerText=isReg?"注册":"登录"; document.querySelector('.btn-sub').innerText=isReg?"注册":"登录"; }
