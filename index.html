@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <!-- 强制不缓存 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Web Card V39 - 极致流畅版</title>
+    <title>Web Card V40 - 流畅拖拽版</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
@@ -30,7 +30,6 @@
             color: var(--text-main); display: flex; justify-content: center; align-items: center;
             min-height: 100vh; margin: 0; padding: 20px;
             transition: background 0.5s ease, color 0.5s ease;
-            /* 防止手机端拖拽时整个页面回弹 */
             overscroll-behavior-y: contain;
         }
 
@@ -45,23 +44,24 @@
             position: relative; border: 1px solid transparent;
             max-width: 100%; box-sizing: border-box;
             user-select: none;
-            touch-action: pan-y; /* 允许垂直滚动，但在抓手处会被 JS 拦截 */
+            touch-action: pan-y; 
         }
         
-        /* 🔥 拖拽激活状态 */
+        /* 🔥 拖拽激活状态 (高亮) */
         .item.sort-dragging {
-            background: #fff;
+            background: #fff !important;
             box-shadow: 0 10px 20px rgba(0,0,0,0.15);
             border-color: var(--accent);
             z-index: 100;
-            opacity: 0.9;
+            opacity: 0.95;
             transform: scale(1.02);
         }
 
-        /* 悬停效果 */
+        /* 🔥 1. 悬停效果：颜色变深 */
         body:not(.touch-device) .item:hover {
             transform: translateY(-2px);
-            background: rgba(255,255,255,0.5);
+            /* 改为深色遮罩，而不是白色遮罩 */
+            background: rgba(0,0,0,0.06); 
         }
 
         /* 标题类型 */
@@ -94,15 +94,14 @@
         .divider-line { width: 100%; height: 0; border-top: 1px dashed var(--divider); opacity: 0.5; }
         .divider-line.solid { border-top-style: solid; opacity: 0.7; }
         
-        /* 访客模式交互 */
         body.read .item:not(.type-divider):not(.type-text) { cursor: pointer; }
         body.read .text-controls, body.read .item-actions, body.read .divider-del, body.read .drag-handle { display: none !important; }
 
-        /* 🔥 拖拽手柄 (关键交互区域) */
+        /* 🔥 2. 拖拽手柄 (增大触控区) */
         .drag-handle { 
-            cursor: grab; color: var(--text-sub); margin-right: 10px; font-size: 20px; 
-            display: none; opacity: 0.4; flex-shrink: 0; padding: 5px;
-            touch-action: none; /* 关键：禁止浏览器默认滑动，完全由 JS 接管 */
+            cursor: grab; color: var(--text-sub); margin-right: 5px; font-size: 20px; 
+            display: none; opacity: 0.5; flex-shrink: 0; padding: 10px 5px; /* 增大点击范围 */
+            touch-action: none; /* 禁止浏览器默认滚动 */
         }
         body:not(.read) .drag-handle { display: flex; }
         body:not(.read) .drag-handle:active { opacity: 1; color: var(--accent); cursor: grabbing; }
@@ -134,38 +133,29 @@
         .add-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(58,123,213,0.05); transform: translateY(-1px); }
         .add-btn:active { transform: scale(0.98); }
 
-        /* --- 3. 外观设置弹窗 --- */
+        /* --- 外观弹窗 --- */
         #theme-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 4000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
         .theme-box { background: var(--card-bg); width: 90%; max-width: 340px; padding: 25px; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); text-align: left; max-height: 85vh; overflow-y: auto; }
-        
         .setting-section { margin-bottom: 20px; }
         .setting-title { font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 10px; display: block; }
-        
         .preset-grid { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
-        .color-dot { 
-            width: 36px; height: 36px; border-radius: 50%; cursor: pointer; 
-            border: 2px solid rgba(0,0,0,0.1); transition: 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: relative;
-        }
+        .color-dot { width: 36px; height: 36px; border-radius: 50%; cursor: pointer; border: 2px solid rgba(0,0,0,0.1); transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: relative; }
         .color-dot:active { transform: scale(0.9); }
         .color-dot.active { border-color: var(--accent); transform: scale(1.1); box-shadow: 0 0 0 3px var(--card-bg), 0 0 0 5px var(--accent); }
-
         .color-picker-row { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
         .color-picker-item { flex: 1; display: flex; flex-direction: column; gap: 5px; font-size: 12px; color: var(--text-sub); align-items: center; }
         .color-input { width: 100%; height: 36px; padding: 0; border: none; border-radius: 8px; cursor: pointer; background: none; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .color-input::-webkit-color-swatch-wrapper { padding: 0; }
-        .color-input::-webkit-color-swatch { border: none; }
-
         .range-slider { width: 100%; -webkit-appearance: none; height: 6px; background: #ddd; border-radius: 3px; outline: none; }
         .range-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: var(--accent); border-radius: 50%; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
-        /* --- 4. 通用 UI (V30 样式) --- */
+        /* --- 4. 通用 UI (V27 稳定版按钮) --- */
         .toolbar, .visitor-nav { position: absolute; top: 20px; z-index: 100; display: flex; gap: 10px; }
         .toolbar { right: 20px; } .visitor-nav { left: 20px; display: none; }
         
         .tool-btn { background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.05); color: #334155; padding: 0 16px; height: 40px; border-radius: 20px; cursor: pointer; backdrop-filter: blur(5px); display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; transition: 0.1s; user-select: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .tool-btn:hover { transform: translateY(-2px); background: rgba(255,255,255,0.9); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .tool-btn:active { transform: scale(0.95); }
+        body.dark .tool-btn { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.1); color: #fff; }
         .btn-red { color: var(--danger); border-color: var(--danger); } .btn-red:hover { background: var(--danger) !important; color: #fff !important; }
         .btn-admin { color: #8e44ad; border-color: #8e44ad; } .btn-admin:hover { background: #8e44ad !important; color: #fff !important; }
         
@@ -185,7 +175,7 @@
         .inp { width: 100%; padding: 10px 12px; margin: 8px 0; border: 1px solid var(--divider); border-radius: 10px; background: rgba(0,0,0,0.02); color: var(--text-main); font-size: 14px; box-sizing: border-box; outline: none; }
         .btn-sub { width: 100%; padding: 10px; background: var(--accent); color: #fff; border: none; border-radius: 10px; cursor: pointer; margin-top: 10px; font-weight: bold; }
 
-        #toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-20px); background: rgba(0,0,0,0.8); color: #fff; padding: 8px 20px; border-radius: 30px; font-size: 13px; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 10000; backdrop-filter: blur(4px); }
+        #toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-20px); background: rgba(0,0,0,0.8); color: #fff; padding: 8px 20px; border-radius: 30px; font-size: 13px; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 10000; backdrop-filter: blur(4px); display: flex; align-items: center; gap: 6px; }
         #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
         #save-status { position: fixed; bottom: 20px; right: 20px; font-size: 12px; color: var(--text-sub); opacity: 0; transition: 0.3s; pointer-events: none; }
         #loader { position: fixed; inset: 0; background: var(--page-bg); z-index: 5000; display: none; justify-content: center; align-items: center; flex-direction: column; }
@@ -229,12 +219,9 @@
         </div>
     </div></div>
 
-    <!-- 图标库 -->
+    <!-- 100+ 图标库弹窗 -->
     <div id="icon-modal"><div class="icon-box">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-            <h3 style="color:var(--text-main)">图标库 (100+)</h3>
-            <button onclick="document.getElementById('icon-modal').style.display='none'" style="border:none;background:none;font-size:24px;cursor:pointer;color:var(--text-main)">&times;</button>
-        </div>
+        <div class="icon-header"><h3>图标库</h3><button onclick="document.getElementById('icon-modal').style.display='none'" style="border:none;background:none;font-size:24px;cursor:pointer;color:var(--text-main)">&times;</button></div>
         <input id="custom-icon" class="inp" placeholder="搜索 (如 wechat)" oninput="filterIcons(this.value)">
         <div class="icon-grid" id="lib-grid"></div>
     </div></div>
@@ -274,7 +261,7 @@
         <div class="admin-body"><div class="table-wrapper"><table class="user-table" id="tbl"><thead><tr><th>用户</th><th>角色</th><th>状态</th><th>注册时间</th><th>操作</th></tr></thead><tbody></tbody></table></div></div>
     </div></div>
 
-    <!-- 工具栏 -->
+    <!-- 顶部工具栏 -->
     <div class="toolbar" id="tb-edit">
         <button class="tool-btn" id="btn-login" onclick="openM()"><i class="ri-user-3-line"></i> <span>登录</span></button>
         <button class="tool-btn btn-admin" id="btn-admin" onclick="loadAdmin()" style="display:none"><i class="ri-command-line"></i> <span>管理</span></button>
@@ -283,6 +270,7 @@
         <button class="tool-btn" onclick="toggleThemeModal(true)"><i class="ri-palette-line"></i> <span>外观</span></button>
     </div>
 
+    <!-- 访客栏 -->
     <div class="visitor-nav" id="tb-read">
         <button class="tool-btn" onclick="goHome()"><i class="ri-arrow-left-s-line"></i> <span>返回</span></button>
     </div>
@@ -307,29 +295,30 @@
         const ADMIN_NAME = 'admin';
         const DEFAULT_AVATAR = 'https://avatars.githubusercontent.com/u/85006660?v=4';
         
-        // --- 🔥 100+ 图标库 (分类整理) ---
         const ALL_ICONS = [
-            // 常用
-            'ri-global-line', 'ri-home-line', 'ri-user-line', 'ri-mail-line', 'ri-phone-line', 'ri-map-pin-line',
-            // 社交
-            'ri-wechat-line', 'ri-qq-line', 'ri-github-line', 'ri-twitter-x-line', 'ri-instagram-line', 'ri-youtube-line',
-            'ri-bilibili-line', 'ri-tiktok-line', 'ri-weibo-line', 'ri-zhihu-line', 'ri-linkedin-line', 'ri-facebook-circle-line',
-            'ri-telegram-line', 'ri-discord-line', 'ri-whatsapp-line', 'ri-slack-line', 'ri-messenger-line', 'ri-snapchat-line',
-            'ri-line-line', 'ri-kakao-talk-line', 'ri-mastodon-line', 'ri-reddit-line', 'ri-pinterest-line', 'ri-tumblr-line',
-            // 科技 & 开发
-            'ri-code-line', 'ri-terminal-box-line', 'ri-bug-line', 'ri-cpu-line', 'ri-database-2-line', 'ri-server-line',
-            'ri-git-merge-line', 'ri-robot-line', 'ri-openai-fill', 'ri-copilot-fill', 'ri-android-line', 'ri-apple-line',
-            'ri-windows-line', 'ri-chrome-line', 'ri-edge-line', 'ri-stack-line', 'ri-layout-masonry-line', 'ri-macbook-line',
-            // 内容 & 媒体
-            'ri-article-line', 'ri-book-open-line', 'ri-file-text-line', 'ri-folder-line', 'ri-image-line', 'ri-video-line',
-            'ri-music-2-line', 'ri-headphone-line', 'ri-mic-line', 'ri-camera-line', 'ri-film-line', 'ri-mv-line',
-            'ri-netease-cloud-music-line', 'ri-spotify-line', 'ri-soundcloud-line', 'ri-twitch-line', 'ri-netflix-line',
-            // 生活 & 工具
-            'ri-shopping-bag-line', 'ri-store-line', 'ri-wallet-3-line', 'ri-bank-card-line', 'ri-gift-line', 'ri-calendar-line',
-            'ri-time-line', 'ri-alarm-line', 'ri-map-2-line', 'ri-car-line', 'ri-bus-line', 'ri-plane-line', 'ri-rocket-line',
-            'ri-sun-line', 'ri-moon-line', 'ri-flashlight-line', 'ri-lightbulb-line', 'ri-key-2-line', 'ri-lock-line',
-            'ri-search-line', 'ri-settings-3-line', 'ri-share-line', 'ri-link', 'ri-download-cloud-line', 'ri-cloud-line',
-            'ri-cup-line', 'ri-restaurant-line', 'ri-cake-line', 'ri-briefcase-line', 'ri-medal-line', 'ri-trophy-line'
+            'ri-global-line', 'ri-home-line', 'ri-user-line', 'ri-mail-line', 'ri-phone-line',
+            'ri-wechat-line', 'ri-qq-line', 'ri-github-line', 'ri-twitter-x-line', 'ri-instagram-line',
+            'ri-youtube-line', 'ri-bilibili-line', 'ri-tiktok-line', 'ri-weibo-line', 'ri-zhihu-line',
+            'ri-linkedin-line', 'ri-facebook-circle-line', 'ri-telegram-line', 'ri-discord-line', 'ri-whatsapp-line',
+            'ri-slack-line', 'ri-messenger-line', 'ri-snapchat-line', 'ri-line-line', 'ri-reddit-line',
+            
+            'ri-map-pin-line', 'ri-navigation-line', 'ri-store-line', 'ri-shopping-bag-line', 'ri-wallet-3-line',
+            'ri-alipay-line', 'ri-paypal-line', 'ri-bank-card-line', 'ri-gift-line', 'ri-heart-line',
+            'ri-star-line', 'ri-thumb-up-line', 'ri-message-3-line', 'ri-chat-3-line', 'ri-discuss-line',
+            
+            'ri-image-line', 'ri-camera-line', 'ri-video-line', 'ri-music-2-line', 'ri-headphone-line',
+            'ri-mic-line', 'ri-film-line', 'ri-netease-cloud-music-line', 'ri-spotify-line', 'ri-soundcloud-line',
+            'ri-twitch-line', 'ri-netflix-line', 'ri-article-line', 'ri-book-open-line', 'ri-file-text-line',
+            
+            'ri-code-line', 'ri-terminal-box-line', 'ri-bug-line', 'ri-cpu-line', 'ri-database-2-line',
+            'ri-server-line', 'ri-robot-line', 'ri-openai-fill', 'ri-android-line', 'ri-apple-line',
+            'ri-windows-line', 'ri-chrome-line', 'ri-stack-line', 'ri-macbook-line', 'ri-smartphone-line',
+            
+            'ri-calendar-line', 'ri-time-line', 'ri-alarm-line', 'ri-map-2-line', 'ri-car-line',
+            'ri-bus-line', 'ri-plane-line', 'ri-rocket-line', 'ri-sun-line', 'ri-moon-line',
+            'ri-lightbulb-line', 'ri-key-2-line', 'ri-lock-line', 'ri-search-line', 'ri-settings-3-line',
+            'ri-share-line', 'ri-link', 'ri-download-cloud-line', 'ri-cloud-line', 'ri-cup-line',
+            'ri-restaurant-line', 'ri-cake-line', 'ri-briefcase-line', 'ri-medal-line', 'ri-trophy-line'
         ];
 
         let currentData = { items: [], theme: { radius: 12, preset: 'default', colors: { page: '#EAF3F7', card: '#ffffff', item: '#f8f8f8' } } };
@@ -349,14 +338,21 @@
             }
         };
 
-        // --- 🔥 拖拽逻辑 (Touch & Mouse 统一方案) ---
-        let dragItem = null;
-        let dragIndex = null;
-        let touchStartY = 0;
+        // --- 🔥 拖拽逻辑 (DOM 直接交换 - 极致流畅版) ---
+        let dragSrcEl = null;
+        let dragSrcIndex = null;
 
         function renderList() {
             const el = document.getElementById('dynamic-list');
-            el.innerHTML = '';
+            // 如果列表为空，清空并重新渲染
+            if(el.children.length !== currentData.items.length) {
+                el.innerHTML = '';
+            } else {
+                // 如果长度一样，可能是局部更新，但为了保险，这里我们还是全量更新，
+                // 因为 DOM 交换后 innerHTML 会乱。为了逻辑简单，每次重绘。
+                // (由于数据量小，性能无影响，且避免了复杂的 DOM Diff)
+                el.innerHTML = '';
+            }
             
             currentData.items.forEach((item, i) => {
                 const div = document.createElement('div');
@@ -403,75 +399,94 @@
             });
         }
 
-        // 生成抓手 HTML 并绑定事件
         function getDragHandle(index) {
-            // 注意：ontouchstart 和 onmousedown 直接绑定到 DOM 元素上
+            // 🔥 绑定 Touch 事件到抓手
             return `<div class="drag-handle" 
-                ontouchstart="dragStart(event, ${index})" 
-                onmousedown="dragStart(event, ${index})">
+                ontouchstart="touchDragStart(event)" 
+                onmousedown="mouseDragStart(event)">
                 <i class="ri-draggable"></i>
             </div>`;
         }
 
-        // --- 核心：流畅拖拽逻辑 ---
-        function dragStart(e, index) {
+        // --- 核心：DOM 交换拖拽引擎 ---
+        function touchDragStart(e) {
             e.preventDefault(); // 防止滚动
-            dragIndex = index;
-            const handle = e.target.closest('.drag-handle');
-            const item = handle.closest('.item');
-            dragItem = item;
+            if (navigator.vibrate) navigator.vibrate(20); // 震动反馈
+            initDrag(e.target.closest('.item'), e.touches[0].clientY);
             
-            item.classList.add('sort-dragging');
-            touchStartY = (e.touches ? e.touches[0].clientY : e.clientY);
-
-            // 绑定全局移动事件
-            document.addEventListener('touchmove', dragMove, { passive: false });
+            document.addEventListener('touchmove', touchDragMove, { passive: false });
             document.addEventListener('touchend', dragEnd);
-            document.addEventListener('mousemove', dragMove);
+        }
+
+        function mouseDragStart(e) {
+            e.preventDefault();
+            initDrag(e.target.closest('.item'), e.clientY);
+            
+            document.addEventListener('mousemove', mouseDragMove);
             document.addEventListener('mouseup', dragEnd);
         }
 
-        function dragMove(e) {
-            if (dragIndex === null) return;
-            e.preventDefault(); // 锁定屏幕滚动
+        function initDrag(item, startY) {
+            dragSrcEl = item;
+            dragSrcIndex = [...item.parentNode.children].indexOf(item);
+            item.classList.add('sort-dragging');
+        }
 
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            
-            // 获取当前手指下的元素
-            const targetEl = document.elementFromPoint(window.innerWidth / 2, clientY);
+        function touchDragMove(e) {
+            e.preventDefault(); // 锁死滚动
+            const touch = e.touches[0];
+            handleMove(touch.clientX, touch.clientY);
+        }
+
+        function mouseDragMove(e) {
+            e.preventDefault();
+            handleMove(e.clientX, e.clientY);
+        }
+
+        function handleMove(x, y) {
+            const container = document.getElementById('dynamic-list');
+            const targetEl = document.elementFromPoint(x, y);
             const targetItem = targetEl ? targetEl.closest('.item') : null;
 
-            if (targetItem && targetItem !== dragItem) {
-                const targetIndex = parseInt(targetItem.dataset.index);
-                // 交换数据
-                if (!isNaN(targetIndex) && targetIndex !== dragIndex) {
-                    const temp = currentData.items[dragIndex];
-                    currentData.items.splice(dragIndex, 1);
-                    currentData.items.splice(targetIndex, 0, temp);
-                    
-                    // 更新索引
-                    dragIndex = targetIndex;
-                    
-                    // 重新渲染列表 (保持拖拽状态)
-                    renderList();
-                    // 重新获取 DOM 引用并保持样式
-                    const newItems = document.querySelectorAll('.item');
-                    dragItem = newItems[dragIndex];
-                    dragItem.classList.add('sort-dragging');
+            // 如果手指在另一个条目上，且不是自己
+            if (targetItem && targetItem !== dragSrcEl && container.contains(targetItem)) {
+                const items = [...container.children];
+                const curIndex = items.indexOf(dragSrcEl);
+                const targetIndex = items.indexOf(targetItem);
+
+                // 🔥 DOM 直接插队 (最流畅的做法)
+                if (curIndex < targetIndex) {
+                    container.insertBefore(dragSrcEl, targetItem.nextSibling);
+                } else {
+                    container.insertBefore(dragSrcEl, targetItem);
                 }
             }
         }
 
         function dragEnd() {
-            if (dragItem) dragItem.classList.remove('sort-dragging');
-            dragItem = null;
-            dragIndex = null;
-            document.removeEventListener('touchmove', dragMove);
+            if (dragSrcEl) dragSrcEl.classList.remove('sort-dragging');
+            
+            // 移除事件
+            document.removeEventListener('touchmove', touchDragMove);
             document.removeEventListener('touchend', dragEnd);
-            document.removeEventListener('mousemove', dragMove);
+            document.removeEventListener('mousemove', mouseDragMove);
             document.removeEventListener('mouseup', dragEnd);
-            renderList(); // 最终刷新
+
+            // 🔥 核心：根据 DOM 新顺序，重排数据数组
+            const container = document.getElementById('dynamic-list');
+            const newItems = [];
+            [...container.children].forEach(dom => {
+                const oldIndex = parseInt(dom.dataset.index); // 拿到旧数据的索引
+                newItems.push(currentData.items[oldIndex]);
+            });
+            
+            // 更新数据源
+            currentData.items = newItems;
+            
+            // 重新渲染以修正 dataset.index (非常重要！)
+            renderList();
             save(true);
+            dragSrcEl = null;
         }
 
         // --- 其他逻辑保持 V38 ---
