@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Web Card V24 - 完美修复版</title>
+    <title>Web Card V25 - 稳定修复版</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
-        /* --- 1. 核心配色 (保持你喜欢的原版 V22) --- */
+        /* --- 1. 基础样式 (回归 V22 风格) --- */
         :root {
             --bg: #EAF3F7; --card: #ffffff; --text: #334155; --sub: #64748b;
             --accent: #3a7bd5; --danger: #ff4757; --success: #2ed573;
@@ -24,7 +24,89 @@
             min-height: 100vh; margin: 0; padding: 20px; transition: background 0.3s;
         }
 
-        /* --- 2. 按钮优化 (增加按压感 + 修复消失问题) --- */
+        /* --- 2. 卡片与内容 (修复图标大小与数据丢失) --- */
+        .card {
+            background: var(--card); width: 100%; max-width: 360px;
+            padding: 45px 30px; border-radius: 24px; text-align: center;
+            box-shadow: var(--shadow); position: relative;
+        }
+        .avatar {
+            width: 110px; height: 110px; border-radius: 50%; object-fit: cover;
+            border: 4px solid var(--card); box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            margin-bottom: 15px; cursor: pointer; transition: 0.5s;
+        }
+        .avatar:hover { transform: rotate(360deg); }
+        
+        [contenteditable]:focus { outline: none; border-bottom: 2px solid var(--accent); background: rgba(58,123,213,0.05); }
+        
+        h1 { margin: 10px 0 5px; font-size: 24px; font-weight: bold; }
+        .role { color: var(--sub); font-size: 14px; margin-bottom: 35px; }
+        
+        /* 列表样式还原 */
+        .list { text-align: left; }
+        .item { display: flex; align-items: center; padding: 12px; margin-bottom: 8px; border-radius: 12px; transition: 0.2s; }
+        body:not(.read) .item:hover { background: rgba(0,0,0,0.03); }
+        
+        /* 🔥 修复：图标大小调大，与文字协调 */
+        .item i { 
+            font-size: 24px; /* 调大 */
+            color: var(--sub); margin-right: 15px; 
+            width: 30px; text-align: center; /* 保证对齐 */
+            cursor: pointer; transition: 0.2s;
+        }
+        body:not(.read) .item i:hover { color: var(--accent); transform: scale(1.1); }
+        .txt { font-size: 15px; flex: 1; outline: none; word-break: break-all; color: var(--text); }
+
+        /* --- 3. 登录弹窗 (保留 V24 的精致感) --- */
+        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); z-index: 2000; display: none; justify-content: center; align-items: center; }
+        .box {
+            background: var(--card); width: 85%; max-width: 280px; padding: 30px 25px;
+            border-radius: 20px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+        .inp {
+            width: 100%; padding: 10px 12px; margin: 8px 0; border: 1px solid var(--border-color);
+            border-radius: 10px; background: rgba(0,0,0,0.02); color: var(--text); font-size: 14px;
+            box-sizing: border-box; outline: none;
+        }
+        .inp:focus { border-color: var(--accent); background: var(--card); }
+        .btn-sub {
+            width: 100%; padding: 10px; background: var(--accent); color: #fff; border: none; 
+            border-radius: 10px; cursor: pointer; margin-top: 10px; font-weight: bold;
+        }
+
+        /* --- 4. 管理面板 (回归文字按钮) --- */
+        #admin { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 3000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
+        .admin-card {
+            background: var(--card); width: 95%; max-width: 650px; max-height: 80vh;
+            border-radius: 16px; display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+        }
+        .admin-head {
+            padding: 15px 20px; border-bottom: 1px solid rgba(0,0,0,0.1);
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.02);
+        }
+        .admin-body { flex: 1; overflow-y: auto; padding: 0; -webkit-overflow-scrolling: touch; }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }
+        th { text-align: left; padding: 12px 15px; color: var(--sub); font-weight: 600; background: rgba(0,0,0,0.02); position: sticky; top: 0; }
+        td { padding: 12px 15px; border-bottom: 1px solid rgba(0,0,0,0.05); color: var(--text); vertical-align: middle; }
+        
+        /* 🔥 管理按钮样式 (文字版) */
+        .act-btn {
+            padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold;
+            border: 1px solid transparent; cursor: pointer; margin-right: 5px; background: transparent;
+        }
+        .act-ban { color: var(--danger); border-color: var(--danger); }
+        .act-ban:hover { background: var(--danger); color: white; }
+        
+        .act-unban { color: var(--success); border-color: var(--success); }
+        .act-unban:hover { background: var(--success); color: white; }
+        
+        .act-del { color: var(--sub); border-color: var(--border-color); }
+        .act-del:hover { background: var(--sub); color: white; }
+
+        /* --- 5. 工具栏 & 提示 --- */
         .toolbar, .visitor-nav { position: absolute; top: 20px; z-index: 100; display: flex; gap: 10px; }
         .toolbar { right: 20px; } .visitor-nav { left: 20px; display: none; }
         
@@ -36,120 +118,39 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         .btn:hover { transform: translateY(-2px); background: rgba(255,255,255,0.9); }
-        /* 🔥 按压效果 */
-        .btn:active { transform: scale(0.95) translateY(0); }
-        
+        .btn:active { transform: scale(0.95); }
         body.dark .btn { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.1); color: #fff; }
         
-        /* 红色退出按钮 */
         .btn-red { color: var(--danger); border-color: var(--danger); }
         .btn-red:hover { background: var(--danger) !important; color: #fff !important; }
-        
-        /* 管理按钮 */
         .btn-admin { color: #8e44ad; border-color: #8e44ad; }
         .btn-admin:hover { background: #8e44ad !important; color: #fff !important; }
 
-        /* --- 3. 登录界面 (精致化 + 手机适配) --- */
-        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); z-index: 2000; display: none; justify-content: center; align-items: center; }
-        
-        .box {
-            background: var(--card); width: 85%; max-width: 280px; padding: 30px 25px;
-            border-radius: 20px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            /* 手机适配关键：防止溢出 */
-            box-sizing: border-box; 
-        }
-        .box h3 { margin: 0 0 20px 0; color: var(--text); font-size: 18px; }
-        
-        .inp {
-            width: 100%; padding: 10px 12px; margin-bottom: 12px; 
-            border: 1px solid var(--border-color); border-radius: 10px; 
-            background: rgba(0,0,0,0.03); color: var(--text); font-size: 14px;
-            box-sizing: border-box; outline: none; transition: 0.3s;
-        }
-        .inp:focus { background: var(--card); border-color: var(--accent); box-shadow: 0 0 0 3px rgba(58,123,213,0.1); }
-        
-        .btn-sub {
-            width: 100%; padding: 10px; background: var(--accent); color: #fff; border: none; 
-            border-radius: 10px; cursor: pointer; margin-top: 10px; font-weight: bold; font-size: 14px;
-        }
-        .btn-sub:active { transform: scale(0.98); }
-
-        /* --- 4. 管理面板 (科技图标风) --- */
-        #admin { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 3000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
-        
-        .admin-card {
-            background: var(--card); width: 95%; max-width: 650px; max-height: 85vh;
-            border-radius: 16px; display: flex; flex-direction: column; overflow: hidden;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
-        }
-        .admin-head {
-            padding: 15px 20px; border-bottom: 1px solid rgba(0,0,0,0.1);
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(0,0,0,0.02);
-        }
-        .admin-body { flex: 1; overflow-y: auto; padding: 0; -webkit-overflow-scrolling: touch; }
-        
-        table { width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap; }
-        th { text-align: left; padding: 12px 15px; color: var(--sub); font-weight: 600; background: rgba(0,0,0,0.02); position: sticky; top: 0; }
-        td { padding: 12px 15px; border-bottom: 1px solid rgba(0,0,0,0.05); color: var(--text); vertical-align: middle; }
-        
-        /* 🔥 图标化操作按钮 */
-        .act-btn {
-            width: 28px; height: 28px; border-radius: 6px; border: 1px solid transparent;
-            background: transparent; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
-            margin-right: 5px; transition: 0.2s; font-size: 14px;
-        }
-        .act-btn:hover { background: rgba(0,0,0,0.05); }
-        .act-ban { color: orange; } .act-ban:hover { background: rgba(255,165,0,0.1); }
-        .act-unban { color: var(--success); } .act-unban:hover { background: rgba(46,213,115,0.1); }
-        .act-del { color: var(--danger); } .act-del:hover { background: rgba(255,59,48,0.1); }
-
-        /* --- 5. 提示条优化 (顶部居中) --- */
-        #toast {
-            position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-20px);
-            background: rgba(0,0,0,0.85); color: #fff; padding: 8px 20px;
-            border-radius: 50px; font-size: 13px; font-weight: 500;
-            opacity: 0; pointer-events: none; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 10000; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(4px);
-        }
-        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-        /* --- 卡片 & 其他 (保持原样) --- */
-        .card { background: var(--card); width: 100%; max-width: 360px; padding: 40px 30px; border-radius: 24px; text-align: center; box-shadow: var(--shadow); position: relative; }
-        .avatar { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 4px solid var(--card); box-shadow: 0 8px 24px rgba(0,0,0,0.12); margin-bottom: 15px; cursor: pointer; transition: 0.5s; }
-        .avatar:hover { transform: rotate(360deg); }
-        [contenteditable]:focus { outline: none; border-bottom: 2px solid var(--accent); background: rgba(58,123,213,0.05); }
-        h1 { margin: 10px 0; font-size: 24px; } .role { color: var(--sub); font-size: 13px; margin-bottom: 30px; }
-        .list { text-align: left; } .item { display: flex; align-items: center; padding: 12px; margin-bottom: 8px; border-radius: 12px; }
-        body:not(.read) .item:hover { background: rgba(0,0,0,0.03); }
-        .item i { font-size: 20px; color: var(--sub); margin-right: 15px; cursor: pointer; }
-        .txt { font-size: 14px; flex: 1; outline: none; word-break: break-all; }
-        
-        #save-status { position: fixed; bottom: 20px; right: 20px; font-size: 12px; color: var(--sub); opacity: 0; transition: 0.3s; pointer-events: none; }
-        #loader { position: fixed; inset: 0; background: var(--bg); z-index: 5000; display: none; justify-content: center; align-items: center; flex-direction: column; }
-        .read .avatar, .read i { pointer-events: none; }
-        
-        /* 移动端适配 */
         @media (max-width: 480px) {
-            .btn span { display: none; } /* 手机端隐藏按钮文字，只显示图标 */
+            .btn span { display: none; }
             .btn { padding: 0 10px; }
-            .toolbar { gap: 8px; right: 15px; }
+            .toolbar { right: 15px; }
         }
+
+        #toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-20px); background: rgba(0,0,0,0.8); color: #fff; padding: 8px 20px; border-radius: 30px; font-size: 13px; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 9999; backdrop-filter: blur(4px); }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        #loader { position: fixed; inset: 0; background: var(--bg); z-index: 5000; display: none; justify-content: center; align-items: center; flex-direction: column; }
+        
+        .read .avatar, .read i { pointer-events: none; }
     </style>
 </head>
 <body>
 
-    <div id="toast"><i class="ri-info-i"></i> <span>提示</span></div>
-    
-    <div id="loader"><i class="ri-loader-4-line ri-spin" style="font-size:32px;color:var(--accent)"></i><p style="margin-top:10px;font-size:12px;color:var(--sub)">加载数据...</p></div>
+    <div id="toast">提示信息</div>
+    <div id="loader"><i class="ri-loader-4-line ri-spin" style="font-size:32px;color:var(--accent)"></i></div>
 
     <input type="file" id="file" hidden accept="image/*" onchange="uploadImg(event)">
 
     <div id="modal"><div class="box">
         <h3 id="m-title" style="margin:0 0 15px 0">用户登录</h3>
-        <input id="u" class="inp" placeholder="请输入用户名" autocomplete="off">
-        <input id="p" type="password" class="inp" placeholder="请输入密码">
-        <button class="btn-sub" onclick="auth()">立即登录</button>
+        <input id="u" class="inp" placeholder="用户名" autocomplete="off">
+        <input id="p" type="password" class="inp" placeholder="密码">
+        <button class="btn-sub" id="btn-submit" onclick="auth()">立即登录</button>
         <div style="margin-top:15px;display:flex;justify-content:space-between;font-size:12px;color:var(--sub)">
             <span onclick="flip()" id="m-tip" style="cursor:pointer;color:var(--accent)">注册新账号</span>
             <span onclick="closeM()" style="cursor:pointer">取消</span>
@@ -158,7 +159,7 @@
 
     <div id="admin"><div class="admin-card">
         <div class="admin-head">
-            <h3 style="margin:0;font-size:16px"><i class="ri-dashboard-line"></i> 控制台</h3>
+            <h3 style="margin:0;font-size:16px">用户管理</h3>
             <button onclick="toggleAdmin(0)" style="border:none;background:none;font-size:20px;cursor:pointer;color:var(--text)">&times;</button>
         </div>
         <div class="admin-body">
@@ -182,28 +183,34 @@
         <button class="btn" onclick="mode()"><i class="ri-contrast-2-line"></i></button>
     </div>
 
-    <div id="save-status"></div>
+    <div id="save-status" style="position:fixed;bottom:20px;right:20px;font-size:12px;color:var(--sub);opacity:0;transition:0.3s"></div>
 
     <div class="card" oninput="debounceSave()">
-        <img src="https://cdn.pixabay.com/photo/2021/08/04/13/06/software-developer-6521720_1280.jpg" class="avatar" id="av" onclick="clickAv()">
-        <h1 id="name" contenteditable="true">Code Master</h1>
-        <div id="role" class="role" contenteditable="true">全栈开发练习生</div>
+        <img src="https://cdn.pixabay.com/photo/2021/08/04/13/06/software-developer-6521720_1280.jpg" class="avatar" id="user-avatar" onclick="clickAv()">
+        <h1 id="user-name" contenteditable="true">Code Master</h1>
+        <div id="user-role" class="role" contenteditable="true">全栈开发练习生</div>
         <div class="list">
-            <div class="item"><i class="ri-global-line" id="i1" onclick="ic(this)"></i><div id="t1" class="txt" contenteditable="true">www.my-site.com</div></div>
-            <div class="item"><i class="ri-mail-send-line" id="i2" onclick="ic(this)"></i><div id="t2" class="txt" contenteditable="true">hello@email.com</div></div>
-            <div class="item"><i class="ri-map-pin-line" id="i3" onclick="ic(this)"></i><div id="t3" class="txt" contenteditable="true">Shanghai</div></div>
+            <div class="item">
+                <i class="ri-global-line" id="icon-site" onclick="ic(this)"></i>
+                <div id="user-site" class="txt" contenteditable="true">www.my-site.com</div>
+            </div>
+            <div class="item">
+                <i class="ri-mail-send-line" id="icon-email" onclick="ic(this)"></i>
+                <div id="user-email" class="txt" contenteditable="true">hello@email.com</div>
+            </div>
+            <div class="item">
+                <i class="ri-map-pin-line" id="icon-addr" onclick="ic(this)"></i>
+                <div id="user-addr" class="txt" contenteditable="true">Shanghai</div>
+            </div>
         </div>
     </div>
 
     <script>
-        // ⚠️ 必须与环境变量 ADMIN_USER 一致
-        const ADMIN_NAME = 'admin'; 
+        const ADMIN_NAME = 'admin'; // ⚠️ 确保与环境变量一致
 
         window.onload = () => {
             let path = window.location.pathname.replace(/\/$/, "").substring(1);
-            // 安全超时强制显示，防止白屏
             setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 3000);
-
             if (path && path !== 'index.html') {
                 loadCloud(decodeURIComponent(path));
             } else {
@@ -214,66 +221,39 @@
 
         let isReg = false, timer = null;
 
-        // --- 登录逻辑 (使用你之前验证过的逻辑) ---
-        async function auth() {
-            const u = val('u'), p = val('p');
-            if(!u || !p) return toast('请填写完整', 'ri-error-warning-line');
+        // --- 1. 数据填充 (对应 HTML ID) ---
+        function fill(d) {
+            if(!d) return;
+            // 🔥 这里的 ID 必须和 HTML 里的 ID 一一对应，数据才能回来
+            id('user-name').innerText = d.name || 'Code Master';
+            id('user-role').innerText = d.role || 'Developer';
+            id('user-avatar').src = d.avatar || '';
             
-            if(isReg) {
-                if(localStorage.getItem('pass_'+u)) return toast('本地已存在，请直接登录');
-                toast('检查用户名...');
-                try {
-                    const check = await fetch(`/api/user?name=${u}`);
-                    if(check.ok) return toast('用户名已被占用', 'ri-close-circle-line');
-                    localStorage.setItem('pass_'+u, p);
-                    toast('注册成功，请登录', 'ri-check-line');
-                    flip();
-                } catch(e) { toast('网络错误'); }
-            } else {
-                const localPass = localStorage.getItem('pass_' + u);
-                if (localPass === p) { success(u, p, null); return; }
-
-                toast('云端验证中...', 'ri-loader-2-line');
-                try {
-                    const res = await fetch(`/api/user?name=${u}`);
-                    if(res.ok) {
-                        const json = await res.json();
-                        // 兼容新旧密码字段
-                        const cloudP = json.data ? (json.data._secret_pass || json.data._p) : null;
-                        if(cloudP === p) {
-                            localStorage.setItem('userData_' + u, JSON.stringify(json.data));
-                            success(u, p, json.data);
-                        } else { toast('密码错误', 'ri-lock-line'); }
-                    } else { toast('用户不存在', 'ri-user-unfollow-line'); }
-                } catch(e) { toast('网络错误'); }
-            }
+            id('user-site').innerText = d.siteText || '';
+            id('icon-site').className = d.siteIcon || 'ri-global-line';
+            
+            id('user-email').innerText = d.emailText || '';
+            id('icon-email').className = d.emailIcon || 'ri-mail-send-line';
+            
+            id('user-addr').innerText = d.addrText || '';
+            id('icon-addr').className = d.addrIcon || 'ri-map-pin-line';
         }
 
-        function success(u, p, data) {
-            localStorage.setItem('login', '1');
-            localStorage.setItem('u', u);
-            localStorage.setItem('p', p);
-            localStorage.setItem('pass_' + u, p); 
-            if(data) fill(data);
-            checkLog();
-            closeM();
-            toast('欢迎回来', 'ri-user-smile-line');
-        }
-
-        // --- 保存 ---
+        // --- 2. 保存逻辑 (对应 HTML ID) ---
         async function save(silent = false) {
             if (localStorage.getItem('login') !== '1') return;
             const u = localStorage.getItem('u'), p = localStorage.getItem('p');
             const st = document.getElementById('save-status');
             
             st.style.opacity = 1; st.innerText = '云端同步...';
-            if(!silent) toast('正在保存...', 'ri-upload-cloud-line');
+            if(!silent) toast('正在保存...');
 
             const data = {
-                name: text('name'), role: text('role'), av: src('av'),
-                t1: text('t1'), i1: cls('i1'),
-                t2: text('t2'), i2: cls('i2'),
-                t3: text('t3'), i3: cls('i3'),
+                // 🔥 收集数据时，也要找对 ID
+                name: text('user-name'), role: text('user-role'), avatar: src('user-avatar'),
+                siteText: text('user-site'), siteIcon: cls('icon-site'),
+                emailText: text('user-email'), emailIcon: cls('icon-email'),
+                addrText: text('user-addr'), addrIcon: cls('icon-addr'),
                 _secret_pass: p 
             };
 
@@ -286,12 +266,57 @@
                     localStorage.setItem('userData_' + u, JSON.stringify(data));
                     st.innerText = '已同步';
                     setTimeout(() => st.style.opacity = 0, 2000);
-                    if(!silent) toast('已保存', 'ri-check-line');
+                    if(!silent) toast('已保存');
                 } else { st.innerText = '同步失败'; }
             } catch(e) { st.innerText = '网络错误'; }
         }
 
-        // --- 管理面板逻辑 (科技风图标生成) ---
+        // --- 3. 认证逻辑 ---
+        async function auth() {
+            const u = val('u'), p = val('p');
+            if(!u || !p) return toast('请填写完整');
+            
+            if(isReg) {
+                if(localStorage.getItem('pass_'+u)) return toast('本地已存在，请直接登录');
+                toast('检查用户名...');
+                try {
+                    const check = await fetch(`/api/user?name=${u}`);
+                    if(check.ok) return toast('用户名已被占用');
+                    localStorage.setItem('pass_'+u, p);
+                    toast('注册成功，请登录');
+                    flip();
+                } catch(e) { toast('网络错误'); }
+            } else {
+                const localPass = localStorage.getItem('pass_' + u);
+                if (localPass === p) { success(u, p, null); return; }
+
+                toast('云端验证中...');
+                try {
+                    const res = await fetch(`/api/user?name=${u}`);
+                    if(res.ok) {
+                        const json = await res.json();
+                        const cloudP = json.data ? (json.data._secret_pass || json.data._p) : null;
+                        if(cloudP === p) {
+                            localStorage.setItem('userData_' + u, JSON.stringify(json.data));
+                            success(u, p, json.data);
+                        } else { toast('密码错误'); }
+                    } else { toast('用户不存在'); }
+                } catch(e) { toast('网络错误'); }
+            }
+        }
+
+        function success(u, p, data) {
+            localStorage.setItem('login', '1');
+            localStorage.setItem('u', u);
+            localStorage.setItem('p', p);
+            localStorage.setItem('pass_' + u, p); 
+            if(data) fill(data);
+            checkLog();
+            closeM();
+            toast('欢迎回来');
+        }
+
+        // --- 4. 管理面板 (文字按钮) ---
         async function loadAdmin() {
             toggleAdmin(1);
             const tbody = document.querySelector('tbody');
@@ -302,28 +327,23 @@
                 if(res.status===401) return toast('无权访问');
                 const list = await res.json();
                 
-                // 🔥 生成图标表格
                 tbody.innerHTML = list.map(x => {
                     const isBan = x.status === 'banned';
                     const isAdmin = x.role === 'admin';
-                    // 状态图标
-                    const statusIcon = isBan 
-                        ? `<i class="ri-prohibited-line" style="color:var(--danger)"></i>` 
-                        : `<i class="ri-checkbox-circle-fill" style="color:var(--success)"></i>`;
                     
                     return `
                     <tr>
-                        <td><b>${x.name}</b> ${isAdmin ? '<i class="ri-vip-crown-fill" style="color:#f1c40f"></i>' : ''}</td>
+                        <td><b>${x.name}</b> ${isAdmin ? '<span style="color:#f1c40f">★</span>' : ''}</td>
                         <td>${x.role||'user'}</td>
-                        <td style="text-align:center">${statusIcon}</td>
+                        <td>${isBan ? '<span style="color:var(--danger)">封禁</span>' : '<span style="color:var(--success)">正常</span>'}</td>
                         <td style="font-size:12px;color:var(--sub)">${new Date(x.created_at).toLocaleDateString()}</td>
                         <td>
                             ${x.name !== u ? `
                             ${!isBan ? 
-                                `<button class="act-btn act-ban" onclick="act('ban','${x.name}')" title="禁用"><i class="ri-indeterminate-circle-line"></i></button>` : 
-                                `<button class="act-btn act-unban" onclick="act('unban','${x.name}')" title="解禁"><i class="ri-checkbox-circle-line"></i></button>`
+                                `<button class="act-btn act-ban" onclick="act('ban','${x.name}')">禁</button>` : 
+                                `<button class="act-btn act-unban" onclick="act('unban','${x.name}')">解</button>`
                             }
-                            <button class="act-btn act-del" onclick="act('delete','${x.name}')" title="删除"><i class="ri-delete-bin-line"></i></button>
+                            <button class="act-btn act-del" onclick="act('delete','${x.name}')">删</button>
                             ` : '-'}
                         </td>
                     </tr>`;
@@ -338,19 +358,13 @@
                 method: 'POST', headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p },
                 body: JSON.stringify({ action: a, targetUser: t, duration: 24 })
             });
-            if(res.ok) { toast('操作成功', 'ri-check-line'); loadAdmin(); } else { toast('操作失败'); }
+            if(res.ok) { toast('操作成功'); loadAdmin(); } else { toast('操作失败'); }
         }
 
         // --- 基础工具 ---
-        function debounceSave() { clearTimeout(timer); timer = setTimeout(() => save(true), 1500); }
-        function fill(d) {
-            if(!d) return;
-            id('name').innerText = d.name||'Name'; id('role').innerText = d.role||'Role';
-            id('av').src = d.av||''; id('t1').innerText = d.t1||''; id('i1').className = d.i1||'';
-            id('t2').innerText = d.t2||''; id('i2').className = d.i2||''; id('t3').innerText = d.t3||''; id('i3').className = d.i3||'';
-        }
         const id = x => document.getElementById(x);
         const text = x => id(x).innerText; const src = x => id(x).src; const cls = x => id(x).className; const val = x => id(x).value;
+        function debounceSave() { clearTimeout(timer); timer = setTimeout(() => save(true), 1500); }
         
         function checkLog() {
             const isLog = localStorage.getItem('login') === '1';
@@ -364,7 +378,7 @@
         function clickAv() { if(canEdit()) id('file').click(); }
         function uploadImg(e) {
             const f = e.target.files[0]; if(!f) return;
-            toast('压缩图片...', 'ri-image-edit-line');
+            toast('压缩图片...');
             const r = new FileReader(); r.onload = ev => {
                 const img = new Image(); img.onload = () => {
                     const c = document.createElement('canvas'); c.width = 400; c.height = 400;
@@ -372,7 +386,7 @@
                     if(img.width>img.height){sh=img.height;sw=img.height;sx=(img.width-img.height)/2;sy=0;}
                     else{sw=img.width;sh=img.width;sx=0;sy=(img.height-img.width)/2;}
                     ctx.drawImage(img,sx,sy,sw,sh,0,0,400,400);
-                    id('av').src = c.toDataURL('image/jpeg',0.8); save(true);
+                    id('user-avatar').src = c.toDataURL('image/jpeg',0.8); save(true);
                 }; img.src = ev.target.result;
             }; r.readAsDataURL(f);
         }
@@ -383,7 +397,7 @@
         function flip() { 
             isReg = !isReg; 
             id('m-title').innerText=isReg?"注册账号":"用户登录"; 
-            document.querySelector('.btn-sub').innerText=isReg?"立即注册":"立即登录";
+            document.getElementById('btn-submit').innerText=isReg?"立即注册":"立即登录";
             id('m-tip').innerText=isReg?"去登录":"注册新账号"; 
         }
         function logout() { localStorage.setItem('login','0'); localStorage.removeItem('u'); location.href="/"; }
@@ -392,7 +406,7 @@
         function goHome() { location.href="/"; }
         function share() { 
             const u = localStorage.getItem('u'); const url = location.origin + '/' + u;
-            navigator.clipboard.writeText(url).then(()=>toast('链接已复制', 'ri-links-line')).catch(()=>prompt("复制:", url)); 
+            navigator.clipboard.writeText(url).then(()=>toast('链接已复制')).catch(()=>prompt("复制:", url)); 
         }
         function loadCloud(user) {
             const l = document.getElementById('loader'); l.style.display = 'flex';
@@ -401,11 +415,11 @@
             document.querySelectorAll('[contenteditable]').forEach(e => e.setAttribute('contenteditable', 'false'));
             fetch(`/api/user?name=${user}`).then(r=>r.ok?r.json():null).then(json=>{
                 if(json && json.status!=='banned') { fill(json.data); l.style.display='none'; }
-                else document.body.innerHTML="<h2 style='color:#666'>用户不存在或已封禁</h2>";
+                else document.body.innerHTML="<h2 style='color:#666;text-align:center;margin-top:50px'>用户不存在或已封禁</h2>";
             }).catch(()=>document.body.innerHTML="<h2>网络错误</h2>");
         }
-        function toast(t, i='ri-info-i') { 
-            const el = document.getElementById('toast'); el.innerHTML = `<i class="${i}"></i> <span>${t}</span>`;
+        function toast(t) { 
+            const el = document.getElementById('toast'); el.innerHTML = `<span>${t}</span>`;
             el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2000); 
         }
     </script>
