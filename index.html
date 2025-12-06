@@ -3,14 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>我的智能主页</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>我的智能主页 V19</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
-        /* 样式保持不变... */
+        /* --- 调试标签 (看到它说明更新成功) --- */
+        .debug-tag {
+            position: fixed; top: 0; left: 0; background: red; color: white; 
+            padding: 2px 5px; font-size: 10px; z-index: 9999;
+        }
+
+        /* --- 基础样式 --- */
         :root { --bg-color: #EAF3F7; --card-bg: #ffffff; --text-main: #334155; --text-sub: #64748b; --accent: #3a7bd5; --border-color: #cbd5e1; --shadow: 0 20px 40px rgba(0, 0, 0, 0.08); --danger: #ff4757; }
         body.dark-mode { --bg-color: #0f172a; --card-bg: #1e293b; --text-main: #f8fafc; --text-sub: #94a3b8; --border-color: #475569; --shadow: 0 20px 40px rgba(0, 0, 0, 0.4); }
         body { background-color: var(--bg-color); font-family: system-ui, -apple-system, sans-serif; color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; transition: background 0.5s ease; }
+        
+        /* 工具栏 */
         .toolbar, .visitor-bar { position: absolute; top: 20px; z-index: 100; display: flex; gap: 10px; transition: 0.3s; }
         .toolbar { right: 20px; } .visitor-bar { left: 20px; display: none; }
         @media (max-width: 480px) { .toolbar { gap: 8px; right: 10px; top: 15px; } .visitor-bar { left: 10px; top: 15px; } .tool-btn { padding: 0 10px; font-size: 12px; height: 32px; } }
@@ -19,6 +30,8 @@
         body.dark-mode .tool-btn:hover { background: rgba(255,255,255,0.1); }
         .btn-logout:hover { background: var(--danger) !important; color: white !important; border-color: var(--danger); }
         .btn-admin { border-color: #8e44ad; color: #8e44ad; } .btn-admin:hover { background: #8e44ad !important; color: white !important; }
+
+        /* 卡片主体 */
         .container { background: var(--card-bg); width: 100%; max-width: 340px; padding: 45px 30px; border-radius: 24px; text-align: center; box-shadow: var(--shadow); position: relative; transition: all 0.5s ease; }
         @media (max-width: 480px) { .container { padding: 30px 20px; width: 90%; } }
         .avatar { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 4px solid var(--card-bg); box-shadow: 0 8px 20px rgba(0,0,0,0.1); margin-bottom: 15px; transition: transform 0.8s; cursor: pointer; }
@@ -34,6 +47,8 @@
         body:not(.readonly-mode) .info-item i:hover { color: var(--accent); background: rgba(58, 123, 213, 0.1); }
         body.readonly-mode .info-item i { pointer-events: none; margin-right: 15px; font-size: 20px; color: var(--text-sub); }
         .info-text { font-size: 14px; color: var(--text-main); flex: 1; outline: none; word-break: break-all; }
+
+        /* 管理面板 */
         #admin-panel { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 800px; height: 80vh; background: var(--card-bg); border-radius: 20px; box-shadow: 0 50px 100px rgba(0,0,0,0.3); z-index: 2000; display: none; flex-direction: column; overflow: hidden; border: 1px solid var(--border-color); }
         .admin-header { padding: 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
         .admin-content { flex: 1; overflow: hidden; padding: 0; display: flex; flex-direction: column; }
@@ -45,6 +60,8 @@
         .badge-active { background: rgba(46, 213, 115, 0.1); color: #2ed573; } .badge-banned { background: rgba(255, 71, 87, 0.1); color: #ff4757; } .badge-admin { background: rgba(142, 68, 173, 0.1); color: #8e44ad; }
         .action-btn { padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; margin-right: 4px; }
         .btn-ban { background: #ffeaa7; color: #d35400; } .btn-del { background: #ff7675; color: white; } .btn-unban { background: #55efc4; color: #00b894; }
+
+        /* 弹窗 & 加载层 */
         #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(5px); z-index: 999; display: none; justify-content: center; align-items: center; }
         .auth-box { background: var(--card-bg); padding: 30px; border-radius: 20px; width: 300px; text-align: center; }
         .auth-input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid var(--border-color); border-radius: 8px; background: transparent; color: var(--text-main); font-size: 16px; }
@@ -52,17 +69,14 @@
         .close-btn { font-size: 24px; color: var(--text-sub); cursor: pointer; }
         .toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%); background: rgba(50,50,50,0.9); color: #fff; padding: 8px 20px; border-radius: 50px; opacity: 0; transition: all 0.5s; pointer-events: none; z-index: 200; font-size: 13px; }
         #save-status { position: fixed; bottom: 20px; right: 20px; font-size: 12px; color: var(--text-sub); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
-
-        /* 🔥 新增：加载遮罩层 */
         #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 5000; display: none; flex-direction: column; justify-content: center; align-items: center; color: var(--text-main); }
     </style>
 </head>
 <body>
 
-    <div id="loading-screen">
-        <i class="ri-loader-4-line ri-spin" style="font-size: 40px; margin-bottom: 20px; color: var(--accent)"></i>
-        <h3 id="loading-text">正在读取数据...</h3>
-    </div>
+    <div class="debug-tag">V19.0</div>
+
+    <div id="loading-screen"><i class="ri-loader-4-line ri-spin" style="font-size: 40px; margin-bottom: 20px; color: var(--accent)"></i><h3 id="loading-text">正在读取数据...</h3></div>
 
     <input type="file" id="img-upload-input" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
     <div id="auth-overlay"><div class="auth-box"><div class="close-btn" onclick="closeAuth()" style="position:absolute;top:15px;right:15px">&times;</div><h3 id="auth-title">登录</h3><input type="text" id="username" class="auth-input" placeholder="用户名"><input type="password" id="password" class="auth-input" placeholder="密码"><button class="auth-btn" onclick="handleAuth()">确定</button><div style="margin-top:15px; font-size:13px; color:#666; cursor:pointer" onclick="switchMode()" id="auth-switch">没有账号？去注册</div></div></div>
@@ -101,12 +115,11 @@
         const FRONTEND_ADMIN_NAME = 'admin'; 
 
         window.onload = function() {
-            // 🔥 更好的 URL 处理：去掉尾部斜杠，防止 Cloudflare 有时候加 / 导致 bug
             let pathName = window.location.pathname.replace(/\/$/, ""); 
             pathName = pathName.substring(1);
 
+            // 🔥 关键调试：如果发现有路径参数，立刻显示遮罩并加载
             if (pathName && pathName !== 'index.html') {
-                // 如果是访客模式，立刻显示遮罩
                 document.getElementById('loading-screen').style.display = 'flex';
                 loadUserFromCloud(decodeURIComponent(pathName));
             } else {
@@ -117,22 +130,24 @@
         let isLoginMode = true;
         let autoSaveTimer = null;
 
+        // --- 核心修复：登录逻辑 ---
         async function handleAuth() {
             const u = document.getElementById('username').value;
             const p = document.getElementById('password').value;
             if(!u || !p) return showToast("请输入账号密码");
 
             if(isLoginMode) {
-                // 优先本地验证
+                // 1. 尝试本地
                 const localPass = localStorage.getItem('pass_' + u);
                 if (localPass === p) { loginSuccess(u, p); return; }
 
-                // 本地没有，去云端验证
+                // 2. 尝试云端
                 showToast("正在云端验证...");
                 try {
                     const response = await fetch(`/api/user?name=${u}`);
                     if (response.ok) {
                         const resData = await response.json();
+                        // 检查云端是否有密码字段
                         if (resData.data && resData.data._secret_pass === p) {
                             loginSuccess(u, p);
                             localStorage.setItem('userData_' + u, JSON.stringify(resData.data));
@@ -141,9 +156,11 @@
                 } catch(e) { showToast("❌ 网络错误"); }
 
             } else {
-                if(localStorage.getItem('pass_'+u)) return showToast("用户已存在(本地)");
+                // 注册前先检查云端是否占用
+                showToast("正在检查用户名...");
                 const check = await fetch(`/api/user?name=${u}`);
                 if(check.ok) return showToast("用户名已被占用");
+
                 localStorage.setItem('pass_'+u, p);
                 showToast("注册成功，请登录");
                 switchMode();
@@ -162,7 +179,6 @@
             if(localStorage.getItem('isLoggedIn') !== 'true') return;
             const user = localStorage.getItem('currentUser');
             const pass = localStorage.getItem('pass_' + user);
-
             const status = document.getElementById('save-status');
             status.innerHTML = '<i class="ri-upload-cloud-2-line"></i> 同步云端...'; status.style.opacity = 1;
             if(!isSilent) showToast("正在保存...");
@@ -207,8 +223,7 @@
                         return;
                     }
                     renderData(resData.data);
-                    // 🔥 隐藏遮罩
-                    document.getElementById('loading-screen').style.display = 'none';
+                    document.getElementById('loading-screen').style.display = 'none'; // 隐藏遮罩
                 } else { 
                     // 显示错误信息
                     document.getElementById('loading-screen').innerHTML = `<h3>❌ 用户 ${username} 不存在</h3><br><a href='/' style='color:var(--accent)'>我也要创建</a>`;
@@ -218,7 +233,15 @@
             }
         }
 
-        // --- 其他辅助函数 ---
+        function triggerAutoSave() {
+            if(document.body.classList.contains('readonly-mode') || localStorage.getItem('isLoggedIn') !== 'true') return;
+            const status = document.getElementById('save-status');
+            status.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> 修改中...'; status.style.opacity = 1;
+            if (autoSaveTimer) clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(() => { saveData(true); }, 1500);
+        }
+
+        // --- 辅助函数 ---
         async function loadAdminData() {
             toggleAdminPanel(true);
             const tbody = document.getElementById('user-table-body');
@@ -232,7 +255,6 @@
                 renderUserTable(users);
             } catch (e) { tbody.innerHTML = '<tr><td colspan="5">加载失败</td></tr>'; }
         }
-
         function renderUserTable(users) {
             const tbody = document.getElementById('user-table-body');
             tbody.innerHTML = '';
@@ -251,7 +273,6 @@
                 tbody.appendChild(tr);
             });
         }
-
         async function adminAction(action, targetUser) {
             if(!confirm(`确定执行 ${action}?`)) return;
             const user = localStorage.getItem('currentUser');
@@ -262,15 +283,13 @@
             });
             if(res.ok) { showToast("成功"); loadAdminData(); } else { alert("失败"); }
         }
-
-        function triggerAutoSave() {
-            if(document.body.classList.contains('readonly-mode') || localStorage.getItem('isLoggedIn') !== 'true') return;
-            const status = document.getElementById('save-status');
-            status.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> 修改中...'; status.style.opacity = 1;
-            if (autoSaveTimer) clearTimeout(autoSaveTimer);
-            autoSaveTimer = setTimeout(() => { saveData(true); }, 1500);
+        function toggleAdminPanel(show) { document.getElementById('admin-panel').style.display = show ? 'flex' : 'none'; }
+        function updateUI(logged) { 
+            document.getElementById('btn-login').style.display=logged?'none':'flex'; 
+            document.getElementById('btn-logout').style.display=logged?'flex':'none'; 
+            document.getElementById('btn-share').style.display=logged?'flex':'none';
+            if(logged && localStorage.getItem('currentUser') === FRONTEND_ADMIN_NAME) document.getElementById('btn-admin-trigger').style.display = 'flex';
         }
-
         function checkLoginState() {
             if(localStorage.getItem('isLoggedIn') === 'true') {
                 const user = localStorage.getItem('currentUser');
@@ -283,7 +302,7 @@
             if(!data) return;
             document.getElementById('user-name').innerText = data.name || "Code Master";
             document.getElementById('user-role').innerText = data.role || "Developer";
-            document.getElementById('user-avatar').src = data.avatar || "https://cdn.pixabay.com/photo/2021/08/04/13/06/software-developer-6521720_1280.jpg";
+            document.getElementById('user-avatar').src = data.avatar || "";
             document.getElementById('user-site').innerText = data.siteText || "";
             document.getElementById('icon-site').className = data.siteIcon || "ri-global-line";
             document.getElementById('user-email').innerText = data.emailText || "";
@@ -304,13 +323,6 @@
         function closeAuth() { document.getElementById('auth-overlay').style.display='none'; }
         function switchMode() { isLoginMode=!isLoginMode; document.getElementById('auth-title').innerText=isLoginMode?"登录":"注册"; document.getElementById('auth-switch').innerText=isLoginMode?"去注册":"去登录"; }
         function logout() { localStorage.setItem('isLoggedIn','false'); localStorage.removeItem('currentUser'); location.href="/"; }
-        function toggleAdminPanel(show) { document.getElementById('admin-panel').style.display = show ? 'flex' : 'none'; }
-        function updateUI(logged) { 
-            document.getElementById('btn-login').style.display=logged?'none':'flex'; 
-            document.getElementById('btn-logout').style.display=logged?'flex':'none'; 
-            document.getElementById('btn-share').style.display=logged?'flex':'none';
-            if(logged && localStorage.getItem('currentUser') === FRONTEND_ADMIN_NAME) document.getElementById('btn-admin-trigger').style.display = 'flex';
-        }
         function toggleMode() { document.body.classList.toggle('dark-mode'); }
         function showToast(m) { const t=document.getElementById('toast'); t.innerText=m; t.style.opacity=1; t.style.top="50px"; setTimeout(()=>{t.style.opacity=0;t.style.top="30px"},2000); }
     </script>
