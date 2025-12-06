@@ -2,61 +2,121 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的智能主页 V15 - 环境变量管理版</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>我的智能主页</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
-        /* --- 基础样式 --- */
-        :root { --bg-color: #EAF3F7; --card-bg: #ffffff; --text-main: #334155; --text-sub: #64748b; --accent: #3a7bd5; --border-color: #cbd5e1; --shadow: 0 20px 40px rgba(0, 0, 0, 0.08); --danger: #ff4757; --success: #2ed573; }
-        body.dark-mode { --bg-color: #0f172a; --card-bg: #1e293b; --text-main: #f8fafc; --text-sub: #94a3b8; --border-color: #475569; --shadow: 0 20px 40px rgba(0, 0, 0, 0.4); }
-        body { background-color: var(--bg-color); font-family: -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif; color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; transition: background 0.5s ease; }
+        /* --- 1. 字体改为系统默认 (最清晰) --- */
+        :root {
+            --bg-color: #EAF3F7; --card-bg: #ffffff; --text-main: #334155; --text-sub: #64748b;
+            --accent: #3a7bd5; --border-color: #cbd5e1; --shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            --danger: #ff4757;
+        }
+        body.dark-mode {
+            --bg-color: #0f172a; --card-bg: #1e293b; --text-main: #f8fafc; --text-sub: #94a3b8;
+            --border-color: #475569; --shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
         
-        /* 工具栏 */
-        .toolbar, .visitor-bar { position: absolute; top: 20px; z-index: 100; display: flex; gap: 12px; transition: 0.3s; }
+        /* 系统默认字体栈：兼容 iOS, macOS, Windows, Android */
+        body {
+            background-color: var(--bg-color);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: var(--text-main); display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; margin: 0; padding: 20px; transition: background 0.5s ease;
+        }
+
+        /* --- 工具栏 --- */
+        .toolbar, .visitor-bar { position: absolute; top: 20px; z-index: 100; display: flex; gap: 10px; transition: 0.3s; }
         .toolbar { right: 20px; } .visitor-bar { left: 20px; display: none; }
-        .tool-btn { background: rgba(255,255,255,0.2); border: 1px solid var(--border-color); color: var(--text-main); height: 36px; padding: 0 15px; border-radius: 20px; cursor: pointer; backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 13px; font-weight: 500; transition: all 0.3s ease; }
+        
+        /* 移动端优化：工具栏按钮调小一点，防止换行 */
+        @media (max-width: 480px) {
+            .toolbar { gap: 8px; right: 10px; top: 15px; }
+            .visitor-bar { left: 10px; top: 15px; }
+            .tool-btn { padding: 0 10px; font-size: 12px; height: 32px; }
+            /* 手机上隐藏文字，只留图标，节省空间 (可选) */
+            /* .tool-btn span { display: none; } */ 
+        }
+
+        .tool-btn {
+            background: rgba(255,255,255,0.2); border: 1px solid var(--border-color);
+            color: var(--text-main); height: 36px; padding: 0 15px; border-radius: 20px;
+            cursor: pointer; backdrop-filter: blur(4px); display: flex;
+            align-items: center; justify-content: center; gap: 5px;
+            font-size: 13px; font-weight: 500; transition: all 0.3s ease; white-space: nowrap;
+        }
         .tool-btn:hover { transform: translateY(-3px); background: rgba(255,255,255,0.6); }
         body.dark-mode .tool-btn:hover { background: rgba(255,255,255,0.1); }
-        
-        /* 按钮颜色 */
         .btn-logout { border-color: var(--danger); color: var(--danger); }
         .btn-logout:hover { background: var(--danger) !important; color: white !important; }
-        .btn-admin { border-color: #8e44ad; color: #8e44ad; } 
+        .btn-admin { border-color: #8e44ad; color: #8e44ad; }
         .btn-admin:hover { background: #8e44ad !important; color: white !important; }
-        .btn-share { color: var(--accent); border-color: var(--accent); }
-        .btn-share:hover { background: var(--accent); color: #fff; }
 
-        /* 卡片 */
-        .container { background: var(--card-bg); width: 100%; max-width: 340px; padding: 45px 30px; border-radius: 24px; text-align: center; box-shadow: var(--shadow); position: relative; transition: all 0.5s ease; }
+        /* --- 卡片主体 --- */
+        .container {
+            background: var(--card-bg); width: 100%; max-width: 340px;
+            padding: 45px 30px; border-radius: 24px; text-align: center;
+            box-shadow: var(--shadow); position: relative; transition: all 0.5s ease;
+        }
+        /* 移动端卡片适配 */
+        @media (max-width: 480px) {
+            .container { padding: 30px 20px; width: 90%; }
+            h1 { font-size: 22px; }
+        }
+
         .avatar { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 4px solid var(--card-bg); box-shadow: 0 8px 20px rgba(0,0,0,0.1); margin-bottom: 15px; transition: transform 0.8s; cursor: pointer; }
         .avatar:hover { transform: rotate(360deg); }
         [contenteditable="true"]:focus { outline: none; border-bottom: 2px solid var(--accent); background: rgba(58, 123, 213, 0.05); }
         [contenteditable="false"] { pointer-events: none; }
-        
-        /* 列表 & 图标 */
         h1 { margin: 10px 0 5px; font-size: 24px; }
         .role { color: var(--text-sub); font-size: 13px; margin-bottom: 35px; display: inline-block; font-weight: 500;}
         .info-list { text-align: left; margin-top: 10px; }
         .info-item { display: flex; align-items: center; padding: 14px; margin-bottom: 8px; border-radius: 16px; transition: 0.2s; }
         body:not(.readonly-mode) .info-item:hover { background: rgba(0,0,0,0.03); }
-        body:not(.readonly-mode) .info-item i { font-size: 20px; color: var(--text-sub); margin-right: 15px; transition: 0.3s; cursor: pointer; padding: 5px; border-radius: 50%; }
+        body:not(.readonly-mode) .info-item i { font-size: 20px; color: var(--text-sub); margin-right: 15px; cursor: pointer; padding: 5px; border-radius: 50%; }
         body:not(.readonly-mode) .info-item i:hover { color: var(--accent); background: rgba(58, 123, 213, 0.1); }
         body.readonly-mode .info-item i { pointer-events: none; margin-right: 15px; font-size: 20px; color: var(--text-sub); }
-        .info-text { font-size: 14px; color: var(--text-main); flex: 1; outline: none; }
+        .info-text { font-size: 14px; color: var(--text-main); flex: 1; outline: none; word-break: break-all; }
 
-        /* 管理员面板 */
-        #admin-panel { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 800px; height: 80vh; background: var(--card-bg); border-radius: 20px; box-shadow: 0 50px 100px rgba(0,0,0,0.3); z-index: 2000; display: none; flex-direction: column; overflow: hidden; border: 1px solid var(--border-color); }
+        /* --- 2. 管理面板 (移动端适配修复) --- */
+        #admin-panel {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 90%; max-width: 800px; height: 80vh;
+            background: var(--card-bg); border-radius: 20px;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.3);
+            z-index: 2000; display: none; flex-direction: column; overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
         .admin-header { padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
-        .admin-title { font-weight: bold; font-size: 18px; color: var(--text-main); }
         .admin-content { flex: 1; overflow-y: auto; padding: 20px; }
-        .user-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+
+        /* 🔥 关键修复：给表格加个外壳，允许横向滚动 */
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto; /* 允许横向滚动 */
+            -webkit-overflow-scrolling: touch; /* 手机滚动更顺滑 */
+        }
+
+        .user-table { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; /* 防止文字换行导致排版乱 */ }
         .user-table th { text-align: left; color: var(--text-sub); padding: 10px; border-bottom: 2px solid var(--border-color); }
         .user-table td { padding: 15px 10px; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
+        
+        /* 移动端管理表格调整 */
+        @media (max-width: 600px) {
+            #admin-panel { width: 95%; height: 90vh; } /* 弹窗更大 */
+            .admin-header { padding: 15px; }
+            .admin-content { padding: 10px; }
+            .user-table th, .user-table td { padding: 10px 5px; font-size: 12px; } /* 字体变小 */
+            .badge { font-size: 10px; padding: 2px 4px; }
+            .action-btn { padding: 4px 8px; margin-right: 2px; }
+        }
+
         .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
         .badge-active { background: rgba(46, 213, 115, 0.1); color: #2ed573; }
         .badge-banned { background: rgba(255, 71, 87, 0.1); color: #ff4757; }
         .badge-admin { background: rgba(142, 68, 173, 0.1); color: #8e44ad; }
+
         .action-btn { padding: 5px 10px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; margin-right: 5px; transition: 0.2s; }
         .btn-ban { background: #ffeaa7; color: #d35400; }
         .btn-del { background: #ff7675; color: white; }
@@ -80,14 +140,16 @@
 
     <div id="admin-panel">
         <div class="admin-header">
-            <div class="admin-title"><i class="ri-shield-user-line"></i> 用户管理中心</div>
-            <div class="close-btn" onclick="toggleAdminPanel(false)" style="position:static">&times;</div>
+            <div class="admin-title"><i class="ri-shield-user-line"></i> 用户管理</div>
+            <div class="close-btn" onclick="toggleAdminPanel(false)" style="position:static; padding:10px">&times;</div>
         </div>
         <div class="admin-content">
-            <table class="user-table">
-                <thead><tr><th>用户</th><th>角色</th><th>状态</th><th>注册时间</th><th>操作</th></tr></thead>
-                <tbody id="user-table-body"></tbody>
-            </table>
+            <div class="table-wrapper">
+                <table class="user-table">
+                    <thead><tr><th>用户</th><th>角色</th><th>状态</th><th>注册时间</th><th>操作</th></tr></thead>
+                    <tbody id="user-table-body"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -95,12 +157,12 @@
         <button class="tool-btn" id="btn-login" onclick="openAuth()"><i class="ri-user-line"></i> 登录</button>
         <button class="tool-btn btn-admin" id="btn-admin-trigger" onclick="loadAdminData()" style="display:none"><i class="ri-settings-4-line"></i> 管理</button>
         <button class="tool-btn btn-logout" id="btn-logout" onclick="logout()" style="display:none"><i class="ri-logout-box-line"></i> 退出</button>
-        <button class="tool-btn btn-share" id="btn-share" onclick="copyLink()" style="display:none"><i class="ri-share-forward-line"></i> 生成链接</button>
+        <button class="tool-btn btn-share" id="btn-share" onclick="copyLink()" style="display:none"><i class="ri-share-forward-line"></i> 链接</button>
         <button class="tool-btn" onclick="toggleMode()"><i class="ri-moon-line"></i></button>
     </div>
 
     <div class="visitor-bar" id="visitor-toolbar">
-        <button class="tool-btn" onclick="goHome()"><i class="ri-arrow-left-line"></i> 返回主页</button>
+        <button class="tool-btn" onclick="goHome()"><i class="ri-arrow-left-line"></i> 主页</button>
         <button class="tool-btn" onclick="toggleMode()"><i class="ri-contrast-line"></i></button>
     </div>
 
@@ -120,17 +182,16 @@
     <div class="toast" id="toast">✅ 操作成功</div>
 
     <script>
-        // --- ⚠️ 配置区域 ---
-        // 这里必须填写你在 Cloudflare 环境变量 ADMIN_USER 中设置的那个名字
-        // 只有当前登录名等于它时，前端才会显示管理按钮
-        const FRONTEND_ADMIN_NAME = 'admin'; 
+        const FRONTEND_ADMIN_NAME = 'admin'; // ⚠️ 请确保这里与环境变量 ADMIN_USER 一致
 
-        // --- 程序入口 ---
         window.onload = function() {
+            // 获取路径
             const pathName = window.location.pathname.substring(1);
             if (pathName && pathName !== 'index.html') {
+                // 如果是分享链接，进入访客模式
                 loadUserFromCloud(decodeURIComponent(pathName));
             } else {
+                // 如果是主页，检查登录
                 checkLoginState();
             }
         };
@@ -138,30 +199,23 @@
         let isLoginMode = true;
         let autoSaveTimer = null;
 
-        // --- 🔥 管理员面板逻辑 (适配环境变量) ---
+        // --- 管理员逻辑 ---
         async function loadAdminData() {
             toggleAdminPanel(true);
             const tbody = document.getElementById('user-table-body');
             tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">验证身份中...</td></tr>';
-
             const user = localStorage.getItem('currentUser');
-            const pass = localStorage.getItem('pass_' + user); // 拿本地存的密码去跟服务器环境变量对暗号
+            const pass = localStorage.getItem('pass_' + user);
 
             try {
                 const res = await fetch('/api/admin', {
                     headers: { 'X-Admin-Name': user, 'X-Admin-Pass': pass }
                 });
-
-                if (res.status === 401) { 
-                    alert("验证失败：账号或密码与 Cloudflare 环境变量不匹配！"); 
-                    toggleAdminPanel(false); 
-                    return; 
-                }
-                
+                if (res.status === 401) { alert("验证失败：账号密码与环境变量不符"); toggleAdminPanel(false); return; }
                 const users = await res.json();
                 renderUserTable(users);
             } catch (e) {
-                tbody.innerHTML = '<tr><td colspan="5" style="color:red">加载失败，请检查网络</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="color:red">加载失败</td></tr>';
             }
         }
 
@@ -169,55 +223,38 @@
             const tbody = document.getElementById('user-table-body');
             tbody.innerHTML = '';
             const myName = localStorage.getItem('currentUser');
-
             users.forEach(u => {
-                let statusBadge = `<span class="badge badge-active">正常</span>`;
-                if(u.status === 'banned') statusBadge = `<span class="badge badge-banned">已封禁</span>`;
-                if(u.role === 'admin') statusBadge += ` <span class="badge badge-admin">管理员</span>`;
-
+                let statusBadge = u.status === 'banned' ? `<span class="badge badge-banned">已封</span>` : `<span class="badge badge-active">正常</span>`;
+                if(u.role === 'admin') statusBadge += ` <span class="badge badge-admin">管</span>`;
+                
                 let btns = '';
-                // 只有不是自己，且自己是管理员时才能操作 (后端也会二次校验)
                 if(u.name !== myName) {
-                    if(u.status !== 'banned') {
-                        btns += `<button class="action-btn btn-ban" onclick="adminAction('ban', '${u.name}')">禁用</button>`;
-                    } else {
-                        btns += `<button class="action-btn btn-unban" onclick="adminAction('unban', '${u.name}')">解禁</button>`;
-                    }
-                    btns += `<button class="action-btn btn-del" onclick="adminAction('delete', '${u.name}')">删除</button>`;
-                } else {
-                    btns = '<span style="font-size:12px;color:#999">当前用户</span>';
-                }
+                    if(u.status !== 'banned') btns += `<button class="action-btn btn-ban" onclick="adminAction('ban', '${u.name}')">禁</button>`;
+                    else btns += `<button class="action-btn btn-unban" onclick="adminAction('unban', '${u.name}')">解</button>`;
+                    btns += `<button class="action-btn btn-del" onclick="adminAction('delete', '${u.name}')">删</button>`;
+                } else { btns = '<span style="color:#999;font-size:12px">自己</span>'; }
 
                 const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><b>${u.name}</b></td>
-                    <td>${u.role || 'user'}</td>
-                    <td>${statusBadge}</td>
-                    <td>${new Date(u.created_at).toLocaleDateString()}</td>
-                    <td>${btns}</td>
-                `;
+                tr.innerHTML = `<td><b>${u.name}</b></td><td>${u.role||'user'}</td><td>${statusBadge}</td><td>${new Date(u.created_at).toLocaleDateString()}</td><td>${btns}</td>`;
                 tbody.appendChild(tr);
             });
         }
 
         async function adminAction(action, targetUser) {
-            if(!confirm(`确定要对 ${targetUser} 执行 ${action} 操作吗？`)) return;
+            if(!confirm(`确定对 ${targetUser} 执行操作?`)) return;
             const user = localStorage.getItem('currentUser');
             const pass = localStorage.getItem('pass_' + user);
-
             const res = await fetch('/api/admin', {
                 method: 'POST',
                 headers: { 'X-Admin-Name': user, 'X-Admin-Pass': pass },
                 body: JSON.stringify({ action: action, targetUser: targetUser, duration: 24 })
             });
-
-            if(res.ok) { showToast("操作成功"); loadAdminData(); } 
-            else { alert("操作失败"); }
+            if(res.ok) { showToast("操作成功"); loadAdminData(); } else { alert("失败"); }
         }
 
         function toggleAdminPanel(show) { document.getElementById('admin-panel').style.display = show ? 'flex' : 'none'; }
 
-        // --- 核心通用逻辑 ---
+        // --- 核心逻辑 ---
         async function loadUserFromCloud(username) {
             enterVisitorMode(username);
             try {
@@ -225,17 +262,16 @@
                 if (response.ok) {
                     const resData = await response.json();
                     if (resData.status === 'banned' && resData.ban_until > Date.now()) {
-                        document.body.innerHTML = "<h1 style='color:red;text-align:center;margin-top:100px'><i class='ri-prohibited-line'></i> 该账号已被封禁</h1>";
+                        document.body.innerHTML = "<h1 style='color:red;text-align:center;margin-top:100px'>🚫 该账号已被封禁</h1>";
                         return;
                     }
-                    renderData(resData.data); 
+                    renderData(resData.data);
                 } else { alert(`用户 ${username} 暂无数据`); }
             } catch (e) { console.error(e); }
         }
 
         function triggerAutoSave() {
-            if(document.body.classList.contains('readonly-mode')) return;
-            if(localStorage.getItem('isLoggedIn') !== 'true') return;
+            if(document.body.classList.contains('readonly-mode') || localStorage.getItem('isLoggedIn') !== 'true') return;
             const status = document.getElementById('save-status');
             status.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> 修改中...'; status.style.opacity = 1;
             if (autoSaveTimer) clearTimeout(autoSaveTimer);
@@ -262,7 +298,6 @@
             };
 
             try {
-                // 这里的 password 仅用于普通用户保存数据的验证（如果你的 user.js API 没加验证则忽略）
                 const pass = localStorage.getItem('pass_' + user); 
                 const response = await fetch('/api/user', {
                     method: 'POST',
@@ -279,7 +314,7 @@
             } catch (e) { status.innerHTML = '❌ 网络错误'; }
         }
 
-        // --- 辅助逻辑 ---
+        // --- 辅助 ---
         function triggerFileUpload() { if(!document.body.classList.contains('readonly-mode') && localStorage.getItem('isLoggedIn')==='true') document.getElementById('img-upload-input').click(); }
         function handleFileSelect(event) { 
             const file = event.target.files[0]; if(!file)return;
@@ -307,7 +342,6 @@
             document.getElementById('user-addr').innerText = data.addrText || "";
             document.getElementById('icon-addr').className = data.addrIcon || "ri-map-pin-line";
         }
-        
         function handleAuth() {
             const u = document.getElementById('username').value;
             const p = document.getElementById('password').value;
@@ -315,6 +349,7 @@
             if(isLoginMode) {
                 if(localStorage.getItem('pass_'+u) === p) {
                     localStorage.setItem('isLoggedIn', 'true'); localStorage.setItem('currentUser', u);
+                    if(u === FRONTEND_ADMIN_NAME) document.getElementById('btn-admin-trigger').style.display = 'flex';
                     updateUI(true); checkLoginState(); closeAuth(); showToast("欢迎回来 " + u);
                 } else { showToast("密码错误或无此账号"); }
             } else {
@@ -322,21 +357,16 @@
                 localStorage.setItem('pass_'+u, p); showToast("注册成功，请登录"); switchMode();
             }
         }
-        
         function updateUI(logged) { 
             document.getElementById('btn-login').style.display=logged?'none':'flex'; 
             document.getElementById('btn-logout').style.display=logged?'flex':'none'; 
-            document.getElementById('btn-share').style.display=logged?'flex':'none'; 
-            
-            // 🔥 根据配置常量决定是否显示管理按钮
-            const currentUser = localStorage.getItem('currentUser');
-            if (logged && currentUser === FRONTEND_ADMIN_NAME) {
-                document.getElementById('btn-admin-trigger').style.display = 'flex';
+            document.getElementById('btn-share').style.display=logged?'flex':'none';
+            if(logged && localStorage.getItem('currentUser') === FRONTEND_ADMIN_NAME) {
+                 document.getElementById('btn-admin-trigger').style.display = 'flex';
             } else {
-                document.getElementById('btn-admin-trigger').style.display = 'none';
+                 document.getElementById('btn-admin-trigger').style.display = 'none';
             }
         }
-
         function enterVisitorMode(u) { document.getElementById('editor-toolbar').style.display='none'; document.getElementById('visitor-toolbar').style.display='flex'; document.body.classList.add('readonly-mode'); document.querySelectorAll('[contenteditable]').forEach(el=>el.setAttribute('contenteditable','false')); }
         function goHome() { window.location.href="/"; }
         function openAuth() { document.getElementById('auth-overlay').style.display='flex'; }
