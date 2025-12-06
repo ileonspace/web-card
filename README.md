@@ -49,8 +49,8 @@ Fork 本仓库到你的 GitHub 账号。
 5. 点击 **Save and Deploy**。
 
 ### 3. 创建数据库 (D1)
-1. 在 Cloudflare 后台，进入 **Storage & Databases** -> **D1**。
-2. 点击 **Create**，创建一个数据库，命名为 `web-card-db`。
+1. 在 Cloudflare 后台，进入 **Storage & Databases** -> **D1**
+2. 点击 **Create**，创建一个数据库，命名为 `web-card-db`
 3. 进入该数据库的 **Console** 标签页，粘贴并执行以下 SQL 初始化表结构：
 
     CREATE TABLE users (
