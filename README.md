@@ -43,9 +43,9 @@ Fork 本仓库到你的 GitHub 账号。
 2. 进入 **Workers & Pages** -> **Create application** -> **Pages** -> **Connect to Git**。
 3. 选择你 Fork 的仓库。
 4. **构建配置 (Build configuration)** - ⚠️ **非常重要**：
-   * **Framework preset**: `None`
-   * **Build command**: `(留空，不要填任何内容)`
-   * **Build output directory**: `.` `(填一个英文句号)`
+    * **Framework preset**: `None`
+    * **Build command**: `(留空，不要填任何内容)`
+    * **Build output directory**: `.` `(填一个英文句号)`
 5. 点击 **Save and Deploy**。
 
 ### 3. 创建数据库 (D1)
@@ -53,78 +53,63 @@ Fork 本仓库到你的 GitHub 账号。
 2. 点击 **Create**，创建一个数据库，命名为 `web-card-db`。
 3. 进入该数据库的 **Console** 标签页，粘贴并执行以下 SQL 初始化表结构：
 
-```sql
-CREATE TABLE users (
-    name TEXT PRIMARY KEY,
-    data TEXT,
-    status TEXT DEFAULT 'active',
-    ban_until INTEGER DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-4. 绑定资源与环境变量
-进入你的 Pages 项目设置页面 (Settings)：
+    CREATE TABLE users (
+        name TEXT PRIMARY KEY,
+        data TEXT,
+        status TEXT DEFAULT 'active',
+        ban_until INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
 
-A. 绑定数据库 (Functions 选项卡)
+### 4. 绑定资源与环境变量
+进入你的 Pages 项目设置页面 (**Settings**)：
 
-找到 D1 Database Bindings。
+**A. 绑定数据库 (Functions 选项卡)**
+1. 找到 **D1 Database Bindings**。
+2. 点击 **Add binding**：
+    * **Variable name**: `DB` (必须大写)
+    * **D1 Database**: 选择刚才创建的 `web-card-db`
+3. 保存。
 
-点击 Add binding：
+**B. 设置管理员 (Environment variables 选项卡)**
+1. 点击 **Add variable**，添加以下两个变量：
+    * `ADMIN_USER`: `admin` (设置你的管理员用户名)
+    * `ADMIN_PASS`: `your_password` (设置你的管理员密码)
+2. 保存。
 
-Variable name: DB (必须大写)
+### 5. 前端适配与重部署
+1. 修改仓库中的 `index.html` 文件（约第 330 行），确保前端配置名与环境变量一致：
 
-D1 Database: 选择刚才创建的 web-card-db
+    const FRONTEND_ADMIN_NAME = 'admin'; // 需与 ADMIN_USER 一致
 
-保存。
+2. 回到 Cloudflare Pages 的 **Deployments** 页面。
+3. 点击最新部署记录右侧的菜单，选择 **Retry deployment** (重试部署)。
+    * *注意：绑定数据库和环境变量后，必须重部署才能生效。*
 
-B. 设置管理员 (Environment variables 选项卡)
+## 📖 使用手册
 
-点击 Add variable，添加以下两个变量：
+### 👤 普通用户
+* **注册/登录**：访问首页，点击登录/注册。
+* **编辑**：直接点击文字修改，点击图标更换样式（支持 RemixIcon 代码）。
+* **传图**：点击头像上传本地图片（自动压缩至 20-30KB）。
+* **分享**：点击右上角“生成链接”，分享专属 URL（如 `domain.com/username`）。
 
-ADMIN_USER: admin (设置你的管理员用户名)
+### ⚙️ 管理员
+* 使用环境变量中设置的 `ADMIN_USER` 账号登录。
+* 顶部工具栏会自动显示紫色的 **⚙️ 管理** 按钮。
+* 点击进入后台，可查看所有用户，支持 **禁用**、**解封**、**删除** 操作。
 
-ADMIN_PASS: your_password (设置你的管理员密码)
+## 📂 目录结构
 
-保存。
+    /
+    ├── index.html        # 前端入口 (UI、交互、业务逻辑)
+    ├── _redirects        # 路由重定向配置 (解决 SPA 路由问题)
+    ├── _headers          # HTTP 头配置 (强制 UTF-8 编码)
+    └── functions/        # 后端逻辑 (Cloudflare Functions)
+        └── api/
+            ├── user.js   # 用户 API (查/改/增)
+            └── admin.js  # 管理员 API (鉴权/管理操作)
 
-5. 前端适配与重部署
-修改仓库中的 index.html 文件（约第 330 行），确保前端配置名与环境变量一致：
+## 📄 License
 
-JavaScript
-
-const FRONTEND_ADMIN_NAME = 'admin'; // 需与 ADMIN_USER 一致
-回到 Cloudflare Pages 的 Deployments 页面。
-
-点击最新部署记录右侧的菜单，选择 Retry deployment (重试部署)。
-
-注意：绑定数据库和环境变量后，必须重部署才能生效。
-
-📖 使用手册
-👤 普通用户
-注册/登录：访问首页，点击登录/注册。
-
-编辑：直接点击文字修改，点击图标更换样式（支持 RemixIcon 代码）。
-
-传图：点击头像上传本地图片（自动压缩至 20-30KB）。
-
-分享：点击右上角“生成链接”，分享专属 URL（如 domain.com/username）。
-
-⚙️ 管理员
-使用环境变量中设置的 ADMIN_USER 账号登录。
-
-顶部工具栏会自动显示紫色的 ⚙️ 管理 按钮。
-
-点击进入后台，可查看所有用户，支持 禁用、解封、删除 操作。
-
-📂 目录结构
-Plaintext
-
-/
-├── index.html        # 前端入口 (UI、交互、业务逻辑)
-├── _redirects        # 路由重定向配置 (解决 SPA 路由问题)
-├── _headers          # HTTP 头配置 (强制 UTF-8 编码)
-└── functions/        # 后端逻辑 (Cloudflare Functions)
-    └── api/
-        ├── user.js   # 用户 API (查/改/增)
-        └── admin.js  # 管理员 API (鉴权/管理操作)
-📄 License
 MIT License.
