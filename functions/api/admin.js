@@ -1,68 +1,67 @@
 export async function onRequest(context) {
   const { request, env } = context;
-  const url = new URL(request.url);
 
-  // 1. 权限验证中间件 (简易版)
-  // 也就是：无论你想干什么，先证明你是管理员
-  const adminName = request.headers.get("X-Admin-Name");
-  const adminPass = request.headers.get("X-Admin-Pass");
+  // 1. 获取前端发来的身份信息
+  const requestUser = request.headers.get("X-Admin-Name");
+  const requestPass = request.headers.get("X-Admin-Pass");
 
-  if (!adminName || !adminPass) {
-    return new Response("Unauthorized", { status: 401 });
+  // 2. 【核心修改】直接对比环境变量
+  // 如果前端发来的名字或密码，跟我们在后台设置的不一样，直接踢飞
+  if (requestUser !== env.ADMIN_USER || requestPass !== env.ADMIN_PASS) {
+    return new Response(JSON.stringify({ error: "Unauthorized: 账号或密码错误" }), { 
+        status: 401,
+        headers: { "Content-Type": "application/json" }
+    });
   }
 
-  // 查库验证身份
-  const adminUser = await env.DB.prepare(
-    "SELECT role FROM users WHERE name = ? AND data LIKE ?"
-  ).bind(adminName, `%"${adminPass}"%`).first(); 
-  // 注意：这里偷了个懒利用 data 里的 password 字段验证，正式项目建议分开存密码
+  // --- 如果代码跑到这里，说明你是尊贵的管理员 ---
 
-  if (!adminUser || adminUser.role !== 'admin') {
-    return new Response("Forbidden: You are not admin", { status: 403 });
-  }
-
-  // --- GET 请求：获取所有用户列表 ---
+  // GET 请求：获取所有用户列表
   if (request.method === "GET") {
+    // 查库是为了拿用户列表，不是为了验权
     const users = await env.DB.prepare(
-      "SELECT name, role, status, ban_until, created_at FROM users ORDER BY created_at DESC"
+      "SELECT name, status, ban_until, created_at FROM users ORDER BY created_at DESC"
     ).all();
-    return new Response(JSON.stringify(users.results), {
+    
+    // 给数据加一个标记，告诉前端谁是管理员(虽然主要靠前端判断，这里做个辅助)
+    const results = users.results.map(u => ({
+        ...u,
+        role: (u.name === env.ADMIN_USER) ? 'admin' : 'user'
+    }));
+
+    return new Response(JSON.stringify(results), {
       headers: { "Content-Type": "application/json" }
     });
   }
 
-  // --- POST 请求：执行操作 (禁用、删除、重置) ---
+  // POST 请求：执行操作 (禁用、删除、解禁)
   if (request.method === "POST") {
     const body = await request.json();
     const { action, targetUser, duration } = body;
 
-    if (action === "delete") {
-      await env.DB.prepare("DELETE FROM users WHERE name = ?").bind(targetUser).run();
-    } 
-    
-    else if (action === "ban") {
-      // 禁用时长 (小时转毫秒)，0代表永久
-      const banTime = duration ? Date.now() + duration * 3600000 : 9999999999999;
-      await env.DB.prepare(
-        "UPDATE users SET status = 'banned', ban_until = ? WHERE name = ?"
-      ).bind(banTime, targetUser).run();
-    } 
-    
-    else if (action === "unban") {
-      await env.DB.prepare(
-        "UPDATE users SET status = 'active', ban_until = 0 WHERE name = ?"
-      ).bind(targetUser).run();
+    // 防止误操作删掉管理员自己
+    if (targetUser === env.ADMIN_USER && action === 'delete') {
+         return new Response(JSON.stringify({ error: "不能删除管理员自己" }), { status: 400 });
     }
 
-    else if (action === "reset_pass") {
-        // 重置密码逻辑比较复杂，这里演示简单重置为 "123456"
-        // 实际需要解析 JSON 修改里面的密码字段，这里作为示例暂略
-        // 建议直接删除用户让其重新注册
-    }
+    try {
+        if (action === "delete") {
+          await env.DB.prepare("DELETE FROM users WHERE name = ?").bind(targetUser).run();
+        } 
+        else if (action === "ban") {
+          const banTime = duration ? Date.now() + duration * 3600000 : 9999999999999;
+          await env.DB.prepare("UPDATE users SET status = 'banned', ban_until = ? WHERE name = ?").bind(banTime, targetUser).run();
+        } 
+        else if (action === "unban") {
+          await env.DB.prepare("UPDATE users SET status = 'active', ban_until = 0 WHERE name = ?").bind(targetUser).run();
+        }
 
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { "Content-Type": "application/json" }
-    });
+        return new Response(JSON.stringify({ success: true }), {
+          headers: { "Content-Type": "application/json" }
+        });
+    } catch (err) {
+        return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+    }
   }
 
   return new Response("Method not allowed", { status: 405 });
