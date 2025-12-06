@@ -163,29 +163,91 @@
     <div class="toast" id="toast">✅ 操作成功</div>
 
     <script>
-        // 页面入口逻辑
+        // 1. 页面加载入口
         window.onload = function() {
-            // 获取 URL 里的用户名 (例如 domain.com/tom)
-            // pathname 会拿到 "/tom"，substring(1) 去掉斜杠
+            // 获取 URL 里的 path，例如 domain.com/admin -> pathName = "admin"
             const pathName = window.location.pathname.substring(1);
 
-            // 如果路径存在且不是 index.html，则进入访客模式
+            // 如果路径存在且不为空，说明是访问别人的主页
             if (pathName && pathName !== 'index.html') {
-                enterVisitorMode(decodeURIComponent(pathName));
+                loadUserFromCloud(decodeURIComponent(pathName));
             } else {
+                // 否则是自己访问首页，检查本地是否记录了上次登录状态
                 checkLoginState();
             }
         };
 
+        // --- 云端核心逻辑 ---
+
+        // A. 从云数据库加载数据 (访客模式)
+        async function loadUserFromCloud(username) {
+            // UI 切换到访客模式
+            enterVisitorMode(username);
+
+            try {
+                // 呼叫我们刚才写的后端 API
+                const response = await fetch(`/api/user?name=${username}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    renderData(data); // 渲染数据
+                    showToast(`正在查看 ${username} 的主页`);
+                } else {
+                    alert(`用户 ${username} 还没有创建过主页哦！`);
+                }
+            } catch (e) {
+                console.error(e);
+                alert("网络连接失败");
+            }
+        }
+
+        // B. 保存数据到云数据库
+        async function saveData() {
+            if(localStorage.getItem('isLoggedIn') !== 'true') { openAuth(); return; }
+            
+            const user = localStorage.getItem('currentUser');
+            const dataObj = {
+                name: document.getElementById('user-name').innerText,
+                role: document.getElementById('user-role').innerText,
+                site: document.getElementById('user-site').innerText,
+                email: document.getElementById('user-email').innerText,
+                addr: document.getElementById('user-addr').innerText,
+                avatar: document.getElementById('user-avatar').src
+            };
+
+            showToast("正在上传到云端...");
+
+            try {
+                // 发送 POST 请求给后端
+                const response = await fetch('/api/user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        name: user, 
+                        data: dataObj 
+                    })
+                });
+
+                if (response.ok) {
+                    showToast("✅ 云端保存成功！");
+                    // 同时也更新一下本地缓存，以此为准
+                    localStorage.setItem('userData_' + user, JSON.stringify(dataObj));
+                } else {
+                    showToast("❌ 保存失败");
+                }
+            } catch (e) {
+                showToast("❌ 网络错误");
+            }
+        }
+
+        // --- 辅助功能 (和之前保持一致) ---
+
         let isLoginMode = true;
 
-        // 生成链接功能
         function copyLink() {
             const currentUser = localStorage.getItem('currentUser');
             if(!currentUser) return;
-            // 拼接短链接
             const shareUrl = window.location.origin + '/' + currentUser;
-            
             navigator.clipboard.writeText(shareUrl).then(() => {
                 showToast("🔗 链接已复制: " + shareUrl);
             }).catch(() => {
@@ -193,39 +255,25 @@
             });
         }
 
-        // --- 核心业务逻辑 ---
-
         function checkLoginState() {
             if(localStorage.getItem('isLoggedIn') === 'true') {
                 const user = localStorage.getItem('currentUser');
                 updateUI(true);
-                // 加载该用户数据
+                // 登录后，优先尝试从本地加载旧数据显示，体验更快
+                // (也可以选择这里也从云端拉取，看你需求，这里暂用本地缓存)
                 const saved = localStorage.getItem('userData_' + user);
                 if(saved) renderData(JSON.parse(saved));
             }
         }
 
         function enterVisitorMode(user) {
-            // 隐藏编辑栏，显示返回栏
             document.getElementById('editor-toolbar').style.display = 'none';
             document.getElementById('visitor-toolbar').style.display = 'block';
             document.body.classList.add('readonly-mode');
-            
-            // 禁用编辑
             document.querySelectorAll('[contenteditable]').forEach(el => el.setAttribute('contenteditable', 'false'));
-
-            const savedData = localStorage.getItem('userData_' + user);
-            if (savedData) {
-                renderData(JSON.parse(savedData));
-                showToast(`正在查看 ${user} 的主页`);
-            } else {
-                alert(`提示：演示版数据存储在本地。如果在你当前电脑没注册过 ${user}，是看不到数据的。`);
-            }
         }
 
-        function goHome() {
-            window.location.href = "/";
-        }
+        function goHome() { window.location.href = "/"; }
 
         function renderData(data) {
             document.getElementById('user-name').innerText = data.name;
@@ -236,22 +284,6 @@
             document.getElementById('user-avatar').src = data.avatar;
         }
 
-        function saveData() {
-            if(localStorage.getItem('isLoggedIn') !== 'true') { openAuth(); return; }
-            
-            const user = localStorage.getItem('currentUser');
-            const data = {
-                name: document.getElementById('user-name').innerText,
-                role: document.getElementById('user-role').innerText,
-                site: document.getElementById('user-site').innerText,
-                email: document.getElementById('user-email').innerText,
-                addr: document.getElementById('user-addr').innerText,
-                avatar: document.getElementById('user-avatar').src
-            };
-            localStorage.setItem('userData_' + user, JSON.stringify(data));
-            showToast("✅ 已保存到用户: " + user);
-        }
-
         function tryChangeAvatar() {
             if(document.body.classList.contains('readonly-mode')) return;
             if(localStorage.getItem('isLoggedIn') !== 'true') { openAuth(); return; }
@@ -259,7 +291,7 @@
             if (newUrl) document.getElementById('user-avatar').src = newUrl;
         }
 
-        // --- 认证相关 ---
+        // --- 认证 UI ---
         function openAuth() { document.getElementById('auth-overlay').classList.add('show'); document.getElementById('auth-overlay').style.display='flex';}
         function closeAuth() { document.getElementById('auth-overlay').classList.remove('show'); setTimeout(()=>{document.getElementById('auth-overlay').style.display='none'},300);}
         
@@ -269,13 +301,14 @@
             if(!u || !p) return showToast("请输入账号密码");
 
             if(isLoginMode) {
+                // 这里的登录还是简单的本地校验密码 (实际项目这里也应该走云端验证)
                 if(localStorage.getItem('pass_'+u) === p) {
                     localStorage.setItem('isLoggedIn', 'true');
                     localStorage.setItem('currentUser', u);
                     updateUI(true);
                     checkLoginState();
                     closeAuth();
-                    showToast("欢迎, " + u);
+                    showToast("欢迎回来, " + u);
                 } else { showToast("密码错误或无此账号"); }
             } else {
                 if(localStorage.getItem('pass_'+u)) return showToast("用户已存在");
@@ -308,6 +341,6 @@
             const t = document.getElementById('toast'); t.innerText = msg; t.style.opacity=1; t.style.top="50px";
             setTimeout(()=>{t.style.opacity=0;t.style.top="30px"}, 2000);
         }
-    </script>
+    </script>   
 </body>
 </html>
