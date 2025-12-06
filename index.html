@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的智能主页</title>
+    <title>我的智能主页 V12 - 终极版</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
+        /* --- CSS 样式区域 --- */
         :root {
             --bg-color: #EAF3F7;
             --card-bg: #ffffff;
@@ -28,7 +29,7 @@
 
         body {
             background-color: var(--bg-color);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, "Microsoft YaHei", sans-serif; /* 加了微软雅黑 */
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, "Microsoft YaHei", sans-serif;
             color: var(--text-main);
             display: flex;
             justify-content: center;
@@ -40,15 +41,8 @@
         }
 
         /* --- 顶部工具栏 --- */
-        .toolbar {
-            position: absolute; top: 20px; right: 20px; display: flex; gap: 12px; z-index: 100;
-            transition: 0.3s;
-        }
-        
-        /* --- 访客导航栏 --- */
-        .visitor-bar {
-            position: absolute; top: 20px; left: 20px; z-index: 100; display: none;
-        }
+        .toolbar { position: absolute; top: 20px; right: 20px; display: flex; gap: 12px; z-index: 100; transition: 0.3s; }
+        .visitor-bar { position: absolute; top: 20px; left: 20px; z-index: 100; display: none; }
 
         .tool-btn {
             background: rgba(255,255,255,0.2); border: 1px solid var(--border-color);
@@ -60,10 +54,10 @@
         .tool-btn:hover { transform: translateY(-3px); background: rgba(255,255,255,0.6); }
         body.dark-mode .tool-btn:hover { background: rgba(255,255,255,0.1); }
 
-        /* 特殊按钮颜色 */
         .btn-share { color: var(--accent); border-color: var(--accent); }
         .btn-share:hover { background: var(--accent); color: #fff; }
 
+        /* --- 卡片主体 --- */
         .container {
             background: var(--card-bg); width: 100%; max-width: 340px;
             padding: 45px 30px; border-radius: 24px; text-align: center;
@@ -73,7 +67,7 @@
         .avatar {
             width: 110px; height: 110px; border-radius: 50%; object-fit: cover;
             border: 4px solid var(--card-bg); box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            margin-bottom: 15px; transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); 
+            margin-bottom: 15px; transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
             cursor: pointer;
         }
         .avatar:hover { transform: rotate(360deg); }
@@ -85,42 +79,38 @@
         .role { color: var(--text-sub); font-size: 13px; margin-bottom: 35px; display: inline-block; font-weight: 500;}
 
         .info-list { text-align: left; margin-top: 10px; }
-        .info-item {
-            display: flex; align-items: center; padding: 14px; margin-bottom: 8px;
-            border-radius: 16px; transition: 0.2s;
-        }
+        .info-item { display: flex; align-items: center; padding: 14px; margin-bottom: 8px; border-radius: 16px; transition: 0.2s; }
+        
         body:not(.readonly-mode) .info-item:hover { background: rgba(0,0,0,0.03); }
         body.dark-mode:not(.readonly-mode) .info-item:hover { background: rgba(255,255,255,0.05); }
 
-        .info-item i { font-size: 20px; color: var(--text-sub); margin-right: 15px; transition: 0.3s; }
-        body:not(.readonly-mode) .info-item:hover i { color: var(--accent); }
-        
+        /* 图标可点击样式 */
+        body:not(.readonly-mode) .info-item i { 
+            font-size: 20px; color: var(--text-sub); margin-right: 15px; transition: 0.3s; 
+            cursor: pointer; padding: 5px; border-radius: 50%;
+        }
+        body:not(.readonly-mode) .info-item i:hover { 
+            color: var(--accent); background: rgba(58, 123, 213, 0.1);
+        }
+        /* 访客模式下图标样式 */
+        body.readonly-mode .info-item i { font-size: 20px; color: var(--text-sub); margin-right: 15px; pointer-events: none; }
+
         .info-text { font-size: 14px; color: var(--text-main); flex: 1; outline: none; }
 
-        /* 弹窗 */
-        #auth-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(5px); z-index: 999;
-            display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s;
-        }
+        /* --- 弹窗及提示 --- */
+        #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(5px); z-index: 999; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s; }
         #auth-overlay.show { display: flex; opacity: 1; }
-        .auth-box {
-            background: var(--card-bg); padding: 40px 30px; border-radius: 20px; width: 320px;
-            text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2); transform: translateY(20px); transition: 0.3s;
-        }
+        .auth-box { background: var(--card-bg); padding: 40px 30px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2); transform: translateY(20px); transition: 0.3s; }
         #auth-overlay.show .auth-box { transform: translateY(0); }
         .auth-input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid var(--border-color); border-radius: 8px; background: transparent; color: var(--text-main);}
         .auth-btn { width: 100%; padding: 10px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px;}
         .close-btn { position: absolute; top: 10px; right: 15px; cursor: pointer; font-size: 20px; color: var(--text-sub); }
-
-        .toast {
-            position: fixed; top: 30px; left: 50%; transform: translateX(-50%);
-            background: rgba(50,50,50,0.9); color: #fff; padding: 8px 20px;
-            border-radius: 50px; opacity: 0; transition: all 0.5s; pointer-events: none; z-index: 200; font-size: 13px;
-        }
+        .toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%); background: rgba(50,50,50,0.9); color: #fff; padding: 8px 20px; border-radius: 50px; opacity: 0; transition: all 0.5s; pointer-events: none; z-index: 200; font-size: 13px; }
     </style>
 </head>
 <body>
+
+    <input type="file" id="img-upload-input" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
 
     <div id="auth-overlay">
         <div class="auth-box">
@@ -136,211 +126,234 @@
     <div class="toolbar" id="editor-toolbar">
         <button class="tool-btn" id="btn-login" onclick="openAuth()"><i class="ri-user-line"></i> 登录</button>
         <button class="tool-btn" id="btn-logout" onclick="logout()" style="display:none"><i class="ri-logout-box-line"></i> 退出</button>
-        <button class="tool-btn btn-share" id="btn-share" onclick="copyLink()" style="display:none">
-            <i class="ri-share-forward-line"></i> 生成链接
-        </button>
+        <button class="tool-btn btn-share" id="btn-share" onclick="copyLink()" style="display:none"><i class="ri-share-forward-line"></i> 生成链接</button>
         <button class="tool-btn" onclick="saveData()"><i class="ri-save-2-line"></i> 保存</button>
         <button class="tool-btn" onclick="toggleMode()"><i class="ri-moon-line"></i></button>
     </div>
 
     <div class="visitor-bar" id="visitor-toolbar">
-        <button class="tool-btn" onclick="goHome()">
-            <i class="ri-arrow-left-line"></i> 返回主页
-        </button>
+        <button class="tool-btn" onclick="goHome()"><i class="ri-arrow-left-line"></i> 返回主页</button>
     </div>
 
     <div class="container">
-        <img src="https://cdn.pixabay.com/photo/2021/08/04/13/06/software-developer-6521720_1280.jpg" class="avatar" id="user-avatar" onclick="tryChangeAvatar()" alt="头像">
+        <img src="https://cdn.pixabay.com/photo/2021/08/04/13/06/software-developer-6521720_1280.jpg" class="avatar" id="user-avatar" onclick="triggerFileUpload()" alt="点击更换头像">
+        
         <h1 id="user-name" contenteditable="true" spellcheck="false">Code Master</h1>
         <div id="user-role" class="role" contenteditable="true">全栈开发练习生</div>
+        
         <div class="info-list">
-            <div class="info-item"><i class="ri-global-line"></i><div id="user-site" class="info-text" contenteditable="true">www.my-site.com</div></div>
-            <div class="info-item"><i class="ri-mail-send-line"></i><div id="user-email" class="info-text" contenteditable="true">hello@email.com</div></div>
-            <div class="info-item"><i class="ri-map-pin-line"></i><div id="user-addr" class="info-text" contenteditable="true">上海市, 浦东新区</div></div>
+            <div class="info-item">
+                <i class="ri-global-line" id="icon-site" onclick="changeIcon(this)"></i>
+                <div id="user-site" class="info-text" contenteditable="true">www.my-site.com</div>
+            </div>
+            <div class="info-item">
+                <i class="ri-mail-send-line" id="icon-email" onclick="changeIcon(this)"></i>
+                <div id="user-email" class="info-text" contenteditable="true">hello@email.com</div>
+            </div>
+            <div class="info-item">
+                <i class="ri-map-pin-line" id="icon-addr" onclick="changeIcon(this)"></i>
+                <div id="user-addr" class="info-text" contenteditable="true">上海市, 浦东新区</div>
+            </div>
         </div>
     </div>
 
     <div class="toast" id="toast">✅ 操作成功</div>
 
     <script>
-        // 1. 页面加载入口
+        // --- 程序入口 ---
         window.onload = function() {
-            // 获取 URL 里的 path，例如 domain.com/admin -> pathName = "admin"
+            // 获取 URL 路径里的用户名 (去除开头的斜杠)
             const pathName = window.location.pathname.substring(1);
-
-            // 如果路径存在且不为空，说明是访问别人的主页
+            
+            // 如果路径存在且不为 index.html，则判定为访问用户主页
             if (pathName && pathName !== 'index.html') {
                 loadUserFromCloud(decodeURIComponent(pathName));
             } else {
-                // 否则是自己访问首页，检查本地是否记录了上次登录状态
                 checkLoginState();
             }
         };
 
-        // --- 云端核心逻辑 ---
+        let isLoginMode = true;
 
-        // A. 从云数据库加载数据 (访客模式)
-        async function loadUserFromCloud(username) {
-            // UI 切换到访客模式
-            enterVisitorMode(username);
+        // --- 🔥 核心功能 1：图片智能压缩与裁剪 (节省数据库额度) ---
+        
+        function triggerFileUpload() {
+            if(document.body.classList.contains('readonly-mode')) return;
+            if(localStorage.getItem('isLoggedIn') !== 'true') { openAuth(); return; }
+            document.getElementById('img-upload-input').click();
+        }
 
-            try {
-                // 呼叫我们刚才写的后端 API
-                const response = await fetch(`/api/user?name=${username}`);
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    renderData(data); // 渲染数据
-                    showToast(`正在查看 ${username} 的主页`);
-                } else {
-                    alert(`用户 ${username} 还没有创建过主页哦！`);
-                }
-            } catch (e) {
-                console.error(e);
-                alert("网络连接失败");
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            showToast("正在压缩处理图片...");
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    // 设定目标尺寸 400x400
+                    const targetSize = 400;
+                    const canvas = document.createElement('canvas');
+                    canvas.width = targetSize;
+                    canvas.height = targetSize;
+                    const ctx = canvas.getContext('2d');
+
+                    // 智能居中裁剪算法 (Cover模式)
+                    let sx, sy, sWidth, sHeight;
+                    if (img.width > img.height) {
+                        sHeight = img.height;
+                        sWidth = img.height;
+                        sx = (img.width - img.height) / 2;
+                        sy = 0;
+                    } else {
+                        sWidth = img.width;
+                        sHeight = img.width;
+                        sx = 0;
+                        sy = (img.height - img.width) / 2;
+                    }
+
+                    // 绘制并压缩
+                    ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, targetSize, targetSize);
+                    
+                    // 导出为 JPEG, 质量 0.8
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    
+                    document.getElementById('user-avatar').src = compressedDataUrl;
+                    showToast("✅ 图片处理完成！记得点保存");
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // --- 🔥 核心功能 2：图标修改 ---
+        function changeIcon(iconElement) {
+            if(document.body.classList.contains('readonly-mode')) return;
+            if(localStorage.getItem('isLoggedIn') !== 'true') { openAuth(); return; }
+            
+            const currentClass = iconElement.className;
+            const newClass = prompt("【修改图标】\n请输入 RemixIcon class 名称\n(如: ri-wechat-line, ri-github-fill)", currentClass);
+            if (newClass && newClass.trim() !== "") {
+                iconElement.className = newClass;
             }
         }
 
-        // B. 保存数据到云数据库
+        // --- 云端数据交互 (Cloudflare D1) ---
+        async function loadUserFromCloud(username) {
+            enterVisitorMode(username);
+            try {
+                // 呼叫后端 API
+                const response = await fetch(`/api/user?name=${username}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    renderData(data); 
+                    showToast(`正在查看 ${username} 的主页`);
+                } else {
+                    // 如果云端没数据，提示用户
+                    alert(`用户 ${username} 暂无数据`);
+                }
+            } catch (e) { console.error(e); }
+        }
+
         async function saveData() {
             if(localStorage.getItem('isLoggedIn') !== 'true') { openAuth(); return; }
-            
             const user = localStorage.getItem('currentUser');
+            
+            // 收集所有数据
             const dataObj = {
                 name: document.getElementById('user-name').innerText,
                 role: document.getElementById('user-role').innerText,
-                site: document.getElementById('user-site').innerText,
-                email: document.getElementById('user-email').innerText,
-                addr: document.getElementById('user-addr').innerText,
-                avatar: document.getElementById('user-avatar').src
+                avatar: document.getElementById('user-avatar').src, 
+                
+                siteText: document.getElementById('user-site').innerText,
+                siteIcon: document.getElementById('icon-site').className,
+
+                emailText: document.getElementById('user-email').innerText,
+                emailIcon: document.getElementById('icon-email').className,
+
+                addrText: document.getElementById('user-addr').innerText,
+                addrIcon: document.getElementById('icon-addr').className
             };
 
             showToast("正在上传到云端...");
 
             try {
-                // 发送 POST 请求给后端
+                // 发送 POST 请求
                 const response = await fetch('/api/user', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        name: user, 
-                        data: dataObj 
-                    })
+                    body: JSON.stringify({ name: user, data: dataObj })
                 });
 
                 if (response.ok) {
                     showToast("✅ 云端保存成功！");
-                    // 同时也更新一下本地缓存，以此为准
+                    // 本地也存一份副本
                     localStorage.setItem('userData_' + user, JSON.stringify(dataObj));
-                } else {
-                    showToast("❌ 保存失败");
-                }
-            } catch (e) {
-                showToast("❌ 网络错误");
-            }
+                } else { showToast("❌ 保存失败"); }
+            } catch (e) { showToast("❌ 网络错误"); }
         }
 
-        // --- 辅助功能 (和之前保持一致) ---
+        function renderData(data) {
+            // 渲染数据到页面
+            document.getElementById('user-name').innerText = data.name || "Code Master";
+            document.getElementById('user-role').innerText = data.role || "Developer";
+            document.getElementById('user-avatar').src = data.avatar || "https://cdn.pixabay.com/photo/2021/08/04/13/06/software-developer-6521720_1280.jpg";
+            
+            document.getElementById('user-site').innerText = data.siteText || data.site || "www.example.com";
+            document.getElementById('icon-site').className = data.siteIcon || "ri-global-line";
 
-        let isLoginMode = true;
+            document.getElementById('user-email').innerText = data.emailText || data.email || "hello@example.com";
+            document.getElementById('icon-email').className = data.emailIcon || "ri-mail-send-line";
 
+            document.getElementById('user-addr').innerText = data.addrText || data.addr || "City, Country";
+            document.getElementById('icon-addr').className = data.addrIcon || "ri-map-pin-line";
+        }
+
+        // --- 辅助及认证逻辑 ---
         function copyLink() {
             const currentUser = localStorage.getItem('currentUser');
             if(!currentUser) return;
             const shareUrl = window.location.origin + '/' + currentUser;
-            navigator.clipboard.writeText(shareUrl).then(() => {
-                showToast("🔗 链接已复制: " + shareUrl);
-            }).catch(() => {
-                prompt("复制链接：", shareUrl);
-            });
+            navigator.clipboard.writeText(shareUrl).then(() => { showToast("🔗 链接已复制"); }).catch(() => { prompt("复制链接：", shareUrl); });
         }
-
         function checkLoginState() {
             if(localStorage.getItem('isLoggedIn') === 'true') {
                 const user = localStorage.getItem('currentUser');
                 updateUI(true);
-                // 登录后，优先尝试从本地加载旧数据显示，体验更快
-                // (也可以选择这里也从云端拉取，看你需求，这里暂用本地缓存)
                 const saved = localStorage.getItem('userData_' + user);
                 if(saved) renderData(JSON.parse(saved));
             }
         }
-
         function enterVisitorMode(user) {
             document.getElementById('editor-toolbar').style.display = 'none';
             document.getElementById('visitor-toolbar').style.display = 'block';
             document.body.classList.add('readonly-mode');
             document.querySelectorAll('[contenteditable]').forEach(el => el.setAttribute('contenteditable', 'false'));
         }
-
         function goHome() { window.location.href = "/"; }
-
-        function renderData(data) {
-            document.getElementById('user-name').innerText = data.name;
-            document.getElementById('user-role').innerText = data.role;
-            document.getElementById('user-site').innerText = data.site;
-            document.getElementById('user-email').innerText = data.email;
-            document.getElementById('user-addr').innerText = data.addr;
-            document.getElementById('user-avatar').src = data.avatar;
-        }
-
-        function tryChangeAvatar() {
-            if(document.body.classList.contains('readonly-mode')) return;
-            if(localStorage.getItem('isLoggedIn') !== 'true') { openAuth(); return; }
-            const newUrl = prompt("输入图片网址:", document.getElementById('user-avatar').src);
-            if (newUrl) document.getElementById('user-avatar').src = newUrl;
-        }
-
-        // --- 认证 UI ---
         function openAuth() { document.getElementById('auth-overlay').classList.add('show'); document.getElementById('auth-overlay').style.display='flex';}
         function closeAuth() { document.getElementById('auth-overlay').classList.remove('show'); setTimeout(()=>{document.getElementById('auth-overlay').style.display='none'},300);}
-        
         function handleAuth() {
             const u = document.getElementById('username').value;
             const p = document.getElementById('password').value;
             if(!u || !p) return showToast("请输入账号密码");
-
             if(isLoginMode) {
-                // 这里的登录还是简单的本地校验密码 (实际项目这里也应该走云端验证)
                 if(localStorage.getItem('pass_'+u) === p) {
-                    localStorage.setItem('isLoggedIn', 'true');
-                    localStorage.setItem('currentUser', u);
-                    updateUI(true);
-                    checkLoginState();
-                    closeAuth();
-                    showToast("欢迎回来, " + u);
+                    localStorage.setItem('isLoggedIn', 'true'); localStorage.setItem('currentUser', u);
+                    updateUI(true); checkLoginState(); closeAuth(); showToast("欢迎回来 " + u);
                 } else { showToast("密码错误或无此账号"); }
             } else {
                 if(localStorage.getItem('pass_'+u)) return showToast("用户已存在");
-                localStorage.setItem('pass_'+u, p);
-                showToast("注册成功，请登录");
-                switchMode();
+                localStorage.setItem('pass_'+u, p); showToast("注册成功，请登录"); switchMode();
             }
         }
-
-        function switchMode() {
-            isLoginMode = !isLoginMode;
-            document.getElementById('auth-title').innerText = isLoginMode ? "登录" : "注册";
-            document.getElementById('auth-switch').innerText = isLoginMode ? "去注册" : "去登录";
-        }
-
-        function logout() {
-            localStorage.setItem('isLoggedIn', 'false');
-            localStorage.removeItem('currentUser');
-            location.href="/";
-        }
-
-        function updateUI(isLogged) {
-            document.getElementById('btn-login').style.display = isLogged ? 'none' : 'flex';
-            document.getElementById('btn-logout').style.display = isLogged ? 'flex' : 'none';
-            document.getElementById('btn-share').style.display = isLogged ? 'flex' : 'none';
-        }
-
+        function switchMode() { isLoginMode = !isLoginMode; document.getElementById('auth-title').innerText = isLoginMode ? "登录" : "注册"; document.getElementById('auth-switch').innerText = isLoginMode ? "去注册" : "去登录"; }
+        function logout() { localStorage.setItem('isLoggedIn', 'false'); localStorage.removeItem('currentUser'); location.href="/"; }
+        function updateUI(isLogged) { document.getElementById('btn-login').style.display = isLogged ? 'none' : 'flex'; document.getElementById('btn-logout').style.display = isLogged ? 'flex' : 'none'; document.getElementById('btn-share').style.display = isLogged ? 'flex' : 'none'; }
         function toggleMode() { document.body.classList.toggle('dark-mode'); }
-        function showToast(msg) {
-            const t = document.getElementById('toast'); t.innerText = msg; t.style.opacity=1; t.style.top="50px";
-            setTimeout(()=>{t.style.opacity=0;t.style.top="30px"}, 2000);
-        }
-    </script>   
+        function showToast(msg) { const t = document.getElementById('toast'); t.innerText = msg; t.style.opacity=1; t.style.top="50px"; setTimeout(()=>{t.style.opacity=0;t.style.top="30px"}, 2000); }
+    </script>
 </body>
 </html>
