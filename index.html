@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <!-- 强制不缓存 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Web Card V40 - 流畅拖拽版</title>
+    <title>Web Card V41 - 精致布局版</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
@@ -33,11 +33,16 @@
             overscroll-behavior-y: contain;
         }
 
-        /* --- 2. 列表与条目 --- */
-        .list { display: flex; flex-direction: column; gap: 12px; text-align: left; width: 100%; position: relative; }
+        /* --- 2. 列表与条目 (🔥 间距微调) --- */
+        .list { 
+            display: flex; flex-direction: column; 
+            gap: 8px; /* 🔥 间距从 12px 缩小到 8px，更紧凑 */
+            text-align: left; width: 100%; position: relative; 
+        }
         
         .item {
-            display: flex; align-items: center; padding: 14px 16px; 
+            display: flex; align-items: center; 
+            padding: 12px 14px; /* 🔥 内边距缩小，更精致 */
             background: var(--item-bg); 
             border-radius: var(--item-radius); 
             transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
@@ -47,7 +52,7 @@
             touch-action: pan-y; 
         }
         
-        /* 🔥 拖拽激活状态 (高亮) */
+        /* 拖拽激活状态 */
         .item.sort-dragging {
             background: #fff !important;
             box-shadow: 0 10px 20px rgba(0,0,0,0.15);
@@ -57,16 +62,16 @@
             transform: scale(1.02);
         }
 
-        /* 🔥 1. 悬停效果：颜色变深 */
+        /* 悬停效果：颜色变深 */
         body:not(.touch-device) .item:hover {
             transform: translateY(-2px);
-            /* 改为深色遮罩，而不是白色遮罩 */
             background: rgba(0,0,0,0.06); 
         }
 
         /* 标题类型 */
         .item.type-text {
-            background: transparent; padding: 8px 0; border: none;
+            background: transparent; padding: 6px 0; /* 微调标题间距 */
+            border: none;
             flex-direction: column; align-items: flex-start;
             box-shadow: none !important;
         }
@@ -78,10 +83,14 @@
         .item.type-text[data-align="right"] .text-content { text-align: right; }
         .item.type-text[data-bold="true"] .text-content { font-weight: bold; color: var(--text-main); font-size: 16px; }
 
+        /* 🔥 文字编辑条 (位置微调) */
         .text-controls {
-            display: none; gap: 5px; margin-top: 5px; background: var(--card-bg);
+            display: none; gap: 5px; margin-top: 0; background: var(--card-bg);
             padding: 4px 8px; border-radius: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-            position: absolute; left: 50%; transform: translateX(-50%); top: -45px; z-index: 10; border: 1px solid rgba(0,0,0,0.05);
+            position: absolute; 
+            left: 50%; transform: translateX(-50%); 
+            top: -38px; /* 🔥 贴近文字 (原来是 -45px) */
+            z-index: 10; border: 1px solid rgba(0,0,0,0.05);
         }
         .text-controls::after {
             content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
@@ -90,18 +99,18 @@
         body:not(.read) .item.type-text:hover .text-controls { display: flex; }
 
         /* 分割线 */
-        .item.type-divider { background: transparent; padding: 12px 0; justify-content: center; cursor: default; box-shadow: none !important; }
+        .item.type-divider { background: transparent; padding: 8px 0; justify-content: center; cursor: default; box-shadow: none !important; }
         .divider-line { width: 100%; height: 0; border-top: 1px dashed var(--divider); opacity: 0.5; }
         .divider-line.solid { border-top-style: solid; opacity: 0.7; }
         
         body.read .item:not(.type-divider):not(.type-text) { cursor: pointer; }
         body.read .text-controls, body.read .item-actions, body.read .divider-del, body.read .drag-handle { display: none !important; }
 
-        /* 🔥 2. 拖拽手柄 (增大触控区) */
+        /* 拖拽手柄 */
         .drag-handle { 
             cursor: grab; color: var(--text-sub); margin-right: 5px; font-size: 20px; 
-            display: none; opacity: 0.5; flex-shrink: 0; padding: 10px 5px; /* 增大点击范围 */
-            touch-action: none; /* 禁止浏览器默认滚动 */
+            display: none; opacity: 0.5; flex-shrink: 0; padding: 10px 5px; 
+            touch-action: none; 
         }
         body:not(.read) .drag-handle { display: flex; }
         body:not(.read) .drag-handle:active { opacity: 1; color: var(--accent); cursor: grabbing; }
@@ -127,7 +136,7 @@
         .divider-del { position: absolute; right: 0; top: 50%; transform: translateY(-50%); background: var(--card-bg); color: var(--danger); padding: 5px; border-radius: 50%; cursor: pointer; display: none; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 10; }
         body:not(.read) .item.type-divider:hover .divider-del { display: flex; }
 
-        .add-group { display: none; gap: 8px; margin-top: 20px; }
+        .add-group { display: none; gap: 8px; margin-top: 15px; }
         body:not(.read) .add-group { display: flex; }
         .add-btn { flex: 1; padding: 12px; border: 1px dashed var(--divider); border-radius: 14px; color: var(--text-sub); font-size: 13px; cursor: pointer; background: transparent; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 4px; }
         .add-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(58,123,213,0.05); transform: translateY(-1px); }
@@ -219,9 +228,9 @@
         </div>
     </div></div>
 
-    <!-- 100+ 图标库弹窗 -->
+    <!-- 图标库 -->
     <div id="icon-modal"><div class="icon-box">
-        <div class="icon-header"><h3>图标库</h3><button onclick="document.getElementById('icon-modal').style.display='none'" style="border:none;background:none;font-size:24px;cursor:pointer;color:var(--text-main)">&times;</button></div>
+        <div class="icon-header"><h3>图标库 (100+)</h3><button onclick="document.getElementById('icon-modal').style.display='none'" style="border:none;background:none;font-size:24px;cursor:pointer;color:var(--text-main)">&times;</button></div>
         <input id="custom-icon" class="inp" placeholder="搜索 (如 wechat)" oninput="filterIcons(this.value)">
         <div class="icon-grid" id="lib-grid"></div>
     </div></div>
@@ -295,25 +304,22 @@
         const ADMIN_NAME = 'admin';
         const DEFAULT_AVATAR = 'https://avatars.githubusercontent.com/u/85006660?v=4';
         
+        // --- 🔥 100+ 图标库 ---
         const ALL_ICONS = [
             'ri-global-line', 'ri-home-line', 'ri-user-line', 'ri-mail-line', 'ri-phone-line',
             'ri-wechat-line', 'ri-qq-line', 'ri-github-line', 'ri-twitter-x-line', 'ri-instagram-line',
             'ri-youtube-line', 'ri-bilibili-line', 'ri-tiktok-line', 'ri-weibo-line', 'ri-zhihu-line',
             'ri-linkedin-line', 'ri-facebook-circle-line', 'ri-telegram-line', 'ri-discord-line', 'ri-whatsapp-line',
             'ri-slack-line', 'ri-messenger-line', 'ri-snapchat-line', 'ri-line-line', 'ri-reddit-line',
-            
             'ri-map-pin-line', 'ri-navigation-line', 'ri-store-line', 'ri-shopping-bag-line', 'ri-wallet-3-line',
             'ri-alipay-line', 'ri-paypal-line', 'ri-bank-card-line', 'ri-gift-line', 'ri-heart-line',
             'ri-star-line', 'ri-thumb-up-line', 'ri-message-3-line', 'ri-chat-3-line', 'ri-discuss-line',
-            
             'ri-image-line', 'ri-camera-line', 'ri-video-line', 'ri-music-2-line', 'ri-headphone-line',
             'ri-mic-line', 'ri-film-line', 'ri-netease-cloud-music-line', 'ri-spotify-line', 'ri-soundcloud-line',
             'ri-twitch-line', 'ri-netflix-line', 'ri-article-line', 'ri-book-open-line', 'ri-file-text-line',
-            
             'ri-code-line', 'ri-terminal-box-line', 'ri-bug-line', 'ri-cpu-line', 'ri-database-2-line',
             'ri-server-line', 'ri-robot-line', 'ri-openai-fill', 'ri-android-line', 'ri-apple-line',
             'ri-windows-line', 'ri-chrome-line', 'ri-stack-line', 'ri-macbook-line', 'ri-smartphone-line',
-            
             'ri-calendar-line', 'ri-time-line', 'ri-alarm-line', 'ri-map-2-line', 'ri-car-line',
             'ri-bus-line', 'ri-plane-line', 'ri-rocket-line', 'ri-sun-line', 'ri-moon-line',
             'ri-lightbulb-line', 'ri-key-2-line', 'ri-lock-line', 'ri-search-line', 'ri-settings-3-line',
@@ -344,13 +350,9 @@
 
         function renderList() {
             const el = document.getElementById('dynamic-list');
-            // 如果列表为空，清空并重新渲染
             if(el.children.length !== currentData.items.length) {
                 el.innerHTML = '';
             } else {
-                // 如果长度一样，可能是局部更新，但为了保险，这里我们还是全量更新，
-                // 因为 DOM 交换后 innerHTML 会乱。为了逻辑简单，每次重绘。
-                // (由于数据量小，性能无影响，且避免了复杂的 DOM Diff)
                 el.innerHTML = '';
             }
             
@@ -400,7 +402,6 @@
         }
 
         function getDragHandle(index) {
-            // 🔥 绑定 Touch 事件到抓手
             return `<div class="drag-handle" 
                 ontouchstart="touchDragStart(event)" 
                 onmousedown="mouseDragStart(event)">
@@ -408,12 +409,10 @@
             </div>`;
         }
 
-        // --- 核心：DOM 交换拖拽引擎 ---
         function touchDragStart(e) {
-            e.preventDefault(); // 防止滚动
-            if (navigator.vibrate) navigator.vibrate(20); // 震动反馈
+            e.preventDefault(); 
+            if (navigator.vibrate) navigator.vibrate(20); 
             initDrag(e.target.closest('.item'), e.touches[0].clientY);
-            
             document.addEventListener('touchmove', touchDragMove, { passive: false });
             document.addEventListener('touchend', dragEnd);
         }
@@ -421,7 +420,6 @@
         function mouseDragStart(e) {
             e.preventDefault();
             initDrag(e.target.closest('.item'), e.clientY);
-            
             document.addEventListener('mousemove', mouseDragMove);
             document.addEventListener('mouseup', dragEnd);
         }
@@ -433,7 +431,7 @@
         }
 
         function touchDragMove(e) {
-            e.preventDefault(); // 锁死滚动
+            e.preventDefault(); 
             const touch = e.touches[0];
             handleMove(touch.clientX, touch.clientY);
         }
@@ -448,13 +446,11 @@
             const targetEl = document.elementFromPoint(x, y);
             const targetItem = targetEl ? targetEl.closest('.item') : null;
 
-            // 如果手指在另一个条目上，且不是自己
             if (targetItem && targetItem !== dragSrcEl && container.contains(targetItem)) {
                 const items = [...container.children];
                 const curIndex = items.indexOf(dragSrcEl);
                 const targetIndex = items.indexOf(targetItem);
 
-                // 🔥 DOM 直接插队 (最流畅的做法)
                 if (curIndex < targetIndex) {
                     container.insertBefore(dragSrcEl, targetItem.nextSibling);
                 } else {
@@ -465,25 +461,18 @@
 
         function dragEnd() {
             if (dragSrcEl) dragSrcEl.classList.remove('sort-dragging');
-            
-            // 移除事件
             document.removeEventListener('touchmove', touchDragMove);
             document.removeEventListener('touchend', dragEnd);
             document.removeEventListener('mousemove', mouseDragMove);
             document.removeEventListener('mouseup', dragEnd);
 
-            // 🔥 核心：根据 DOM 新顺序，重排数据数组
             const container = document.getElementById('dynamic-list');
             const newItems = [];
             [...container.children].forEach(dom => {
-                const oldIndex = parseInt(dom.dataset.index); // 拿到旧数据的索引
+                const oldIndex = parseInt(dom.dataset.index); 
                 newItems.push(currentData.items[oldIndex]);
             });
-            
-            // 更新数据源
             currentData.items = newItems;
-            
-            // 重新渲染以修正 dataset.index (非常重要！)
             renderList();
             save(true);
             dragSrcEl = null;
