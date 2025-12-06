@@ -1,48 +1,127 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">    
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的智能主页</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    
     <style>
-        /* 这里省略 CSS，请直接复制之前 V9 版本的 CSS，完全一样 */
-        /* 为了篇幅，我这里只写这行注释，请把 V9 的 <style>...</style> 全部贴过来 */
-        :root { --bg-color: #EAF3F7; --card-bg: #ffffff; --text-main: #334155; --text-sub: #64748b; --accent: #3a7bd5; --border-color: #cbd5e1; --shadow: 0 20px 40px rgba(0, 0, 0, 0.08); }
-        body.dark-mode { --bg-color: #0f172a; --card-bg: #1e293b; --text-main: #f8fafc; --text-sub: #94a3b8; --border-color: #475569; --shadow: 0 20px 40px rgba(0, 0, 0, 0.4); }
-        body { background-color: var(--bg-color); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif; color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; transition: background 0.5s ease; }
-        .toolbar { position: absolute; top: 20px; right: 20px; display: flex; gap: 12px; z-index: 100; transition: 0.3s; }
-        .visitor-bar { position: absolute; top: 20px; left: 20px; z-index: 100; display: none; }
-        .tool-btn { background: rgba(255,255,255,0.2); border: 1px solid var(--border-color); color: var(--text-main); height: 36px; padding: 0 15px; border-radius: 20px; cursor: pointer; backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 13px; font-weight: 500; transition: all 0.3s ease; }
+        :root {
+            --bg-color: #EAF3F7;
+            --card-bg: #ffffff;
+            --text-main: #334155;
+            --text-sub: #64748b;
+            --accent: #3a7bd5;
+            --border-color: #cbd5e1;
+            --shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        body.dark-mode {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --border-color: #475569;
+            --shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, "Microsoft YaHei", sans-serif; /* 加了微软雅黑 */
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            transition: background 0.5s ease;
+        }
+
+        /* --- 顶部工具栏 --- */
+        .toolbar {
+            position: absolute; top: 20px; right: 20px; display: flex; gap: 12px; z-index: 100;
+            transition: 0.3s;
+        }
+        
+        /* --- 访客导航栏 --- */
+        .visitor-bar {
+            position: absolute; top: 20px; left: 20px; z-index: 100; display: none;
+        }
+
+        .tool-btn {
+            background: rgba(255,255,255,0.2); border: 1px solid var(--border-color);
+            color: var(--text-main); height: 36px; padding: 0 15px; border-radius: 20px;
+            cursor: pointer; backdrop-filter: blur(4px); display: flex;
+            align-items: center; justify-content: center; gap: 5px;
+            font-size: 13px; font-weight: 500; transition: all 0.3s ease;
+        }
         .tool-btn:hover { transform: translateY(-3px); background: rgba(255,255,255,0.6); }
         body.dark-mode .tool-btn:hover { background: rgba(255,255,255,0.1); }
+
+        /* 特殊按钮颜色 */
         .btn-share { color: var(--accent); border-color: var(--accent); }
         .btn-share:hover { background: var(--accent); color: #fff; }
-        .container { background: var(--card-bg); width: 100%; max-width: 340px; padding: 45px 30px; border-radius: 24px; text-align: center; box-shadow: var(--shadow); position: relative; transition: all 0.5s ease; }
-        .avatar { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 4px solid var(--card-bg); box-shadow: 0 8px 20px rgba(0,0,0,0.1); margin-bottom: 15px; transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer; }
+
+        .container {
+            background: var(--card-bg); width: 100%; max-width: 340px;
+            padding: 45px 30px; border-radius: 24px; text-align: center;
+            box-shadow: var(--shadow); position: relative; transition: all 0.5s ease;
+        }
+
+        .avatar {
+            width: 110px; height: 110px; border-radius: 50%; object-fit: cover;
+            border: 4px solid var(--card-bg); box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            margin-bottom: 15px; transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); 
+            cursor: pointer;
+        }
         .avatar:hover { transform: rotate(360deg); }
+
         [contenteditable="true"]:focus { outline: none; border-bottom: 2px solid var(--accent); background: rgba(58, 123, 213, 0.05); }
         [contenteditable="false"] { pointer-events: none; }
+
         h1 { margin: 10px 0 5px; font-size: 24px; }
         .role { color: var(--text-sub); font-size: 13px; margin-bottom: 35px; display: inline-block; font-weight: 500;}
+
         .info-list { text-align: left; margin-top: 10px; }
-        .info-item { display: flex; align-items: center; padding: 14px; margin-bottom: 8px; border-radius: 16px; transition: 0.2s; }
+        .info-item {
+            display: flex; align-items: center; padding: 14px; margin-bottom: 8px;
+            border-radius: 16px; transition: 0.2s;
+        }
         body:not(.readonly-mode) .info-item:hover { background: rgba(0,0,0,0.03); }
         body.dark-mode:not(.readonly-mode) .info-item:hover { background: rgba(255,255,255,0.05); }
+
         .info-item i { font-size: 20px; color: var(--text-sub); margin-right: 15px; transition: 0.3s; }
         body:not(.readonly-mode) .info-item:hover i { color: var(--accent); }
+        
         .info-text { font-size: 14px; color: var(--text-main); flex: 1; outline: none; }
-        #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(5px); z-index: 999; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s; }
+
+        /* 弹窗 */
+        #auth-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(5px); z-index: 999;
+            display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s;
+        }
         #auth-overlay.show { display: flex; opacity: 1; }
-        .auth-box { background: var(--card-bg); padding: 40px 30px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2); transform: translateY(20px); transition: 0.3s; }
+        .auth-box {
+            background: var(--card-bg); padding: 40px 30px; border-radius: 20px; width: 320px;
+            text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2); transform: translateY(20px); transition: 0.3s;
+        }
         #auth-overlay.show .auth-box { transform: translateY(0); }
         .auth-input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid var(--border-color); border-radius: 8px; background: transparent; color: var(--text-main);}
         .auth-btn { width: 100%; padding: 10px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px;}
         .close-btn { position: absolute; top: 10px; right: 15px; cursor: pointer; font-size: 20px; color: var(--text-sub); }
-        .toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%); background: rgba(50,50,50,0.9); color: #fff; padding: 8px 20px; border-radius: 50px; opacity: 0; transition: all 0.5s; pointer-events: none; z-index: 200; font-size: 13px; }
+
+        .toast {
+            position: fixed; top: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(50,50,50,0.9); color: #fff; padding: 8px 20px;
+            border-radius: 50px; opacity: 0; transition: all 0.5s; pointer-events: none; z-index: 200; font-size: 13px;
+        }
     </style>
 </head>
 <body>
+
     <div id="auth-overlay">
         <div class="auth-box">
             <div class="close-btn" onclick="closeAuth()">&times;</div>
@@ -57,13 +136,17 @@
     <div class="toolbar" id="editor-toolbar">
         <button class="tool-btn" id="btn-login" onclick="openAuth()"><i class="ri-user-line"></i> 登录</button>
         <button class="tool-btn" id="btn-logout" onclick="logout()" style="display:none"><i class="ri-logout-box-line"></i> 退出</button>
-        <button class="tool-btn btn-share" id="btn-share" onclick="copyLink()" style="display:none"><i class="ri-share-forward-line"></i> 生成链接</button>
+        <button class="tool-btn btn-share" id="btn-share" onclick="copyLink()" style="display:none">
+            <i class="ri-share-forward-line"></i> 生成链接
+        </button>
         <button class="tool-btn" onclick="saveData()"><i class="ri-save-2-line"></i> 保存</button>
         <button class="tool-btn" onclick="toggleMode()"><i class="ri-moon-line"></i></button>
     </div>
 
     <div class="visitor-bar" id="visitor-toolbar">
-        <button class="tool-btn" onclick="goHome()"><i class="ri-arrow-left-line"></i> 返回主页</button>
+        <button class="tool-btn" onclick="goHome()">
+            <i class="ri-arrow-left-line"></i> 返回主页
+        </button>
     </div>
 
     <div class="container">
@@ -76,18 +159,17 @@
             <div class="info-item"><i class="ri-map-pin-line"></i><div id="user-addr" class="info-text" contenteditable="true">上海市, 浦东新区</div></div>
         </div>
     </div>
+
     <div class="toast" id="toast">✅ 操作成功</div>
 
     <script>
-        // JS 逻辑：需要修改下面这几个函数，其他复用 V9
-        
+        // 页面入口逻辑
         window.onload = function() {
-            // 🌟 核心修改：读取短链接 domain.com/username
-            // window.location.pathname 会获取 "/123456"
-            // substring(1) 会去掉斜杠，变成 "123456"
+            // 获取 URL 里的用户名 (例如 domain.com/tom)
+            // pathname 会拿到 "/tom"，substring(1) 去掉斜杠
             const pathName = window.location.pathname.substring(1);
 
-            // 如果路径不为空，且不是 "index.html"，说明是用户名
+            // 如果路径存在且不是 index.html，则进入访客模式
             if (pathName && pathName !== 'index.html') {
                 enterVisitorMode(decodeURIComponent(pathName));
             } else {
@@ -95,11 +177,13 @@
             }
         };
 
+        let isLoginMode = true;
+
+        // 生成链接功能
         function copyLink() {
             const currentUser = localStorage.getItem('currentUser');
             if(!currentUser) return;
-            // 🌟 生成短链接：直接用 domain.com/用户名
-            // origin 就是你的域名 (如 https://xxx.vercel.app)
+            // 拼接短链接
             const shareUrl = window.location.origin + '/' + currentUser;
             
             navigator.clipboard.writeText(shareUrl).then(() => {
@@ -108,26 +192,122 @@
                 prompt("复制链接：", shareUrl);
             });
         }
-        
-        // 下面这些函数直接用 V9 的，保持不变
-        // ... (checkLoginState, enterVisitorMode, goHome, renderData, saveData...)
-        // 为了确保代码完整，请把 V9 的 <script> 内容全部复制过来
-        // 只替换上面 window.onload 和 copyLink 这两个函数
-        let isLoginMode = true;
-        function checkLoginState() { if(localStorage.getItem('isLoggedIn') === 'true') { const user = localStorage.getItem('currentUser'); updateUI(true); const saved = localStorage.getItem('userData_' + user); if(saved) renderData(JSON.parse(saved)); } }
-        function enterVisitorMode(user) { document.getElementById('editor-toolbar').style.display = 'none'; document.getElementById('visitor-toolbar').style.display = 'block'; document.body.classList.add('readonly-mode'); document.querySelectorAll('[contenteditable]').forEach(el => el.setAttribute('contenteditable', 'false')); const savedData = localStorage.getItem('userData_' + user); if (savedData) { renderData(JSON.parse(savedData)); showToast(`正在查看 ${user} 的主页`); } else { alert(`提示：由于没有连接云数据库，这里是演示。如果在你电脑上没注册过 ${user}，是看不到数据的。`); } }
-        function goHome() { window.location.href = "/"; }
-        function renderData(data) { document.getElementById('user-name').innerText = data.name; document.getElementById('user-role').innerText = data.role; document.getElementById('user-site').innerText = data.site; document.getElementById('user-email').innerText = data.email; document.getElementById('user-addr').innerText = data.addr; document.getElementById('user-avatar').src = data.avatar; }
-        function saveData() { if(localStorage.getItem('isLoggedIn') !== 'true') { openAuth(); return; } const user = localStorage.getItem('currentUser'); const data = { name: document.getElementById('user-name').innerText, role: document.getElementById('user-role').innerText, site: document.getElementById('user-site').innerText, email: document.getElementById('user-email').innerText, addr: document.getElementById('user-addr').innerText, avatar: document.getElementById('user-avatar').src }; localStorage.setItem('userData_' + user, JSON.stringify(data)); showToast("✅ 已保存"); }
-        function tryChangeAvatar() { if(document.body.classList.contains('readonly-mode')) return; if(localStorage.getItem('isLoggedIn') !== 'true') { openAuth(); return; } const newUrl = prompt("输入图片网址:", document.getElementById('user-avatar').src); if (newUrl) document.getElementById('user-avatar').src = newUrl; }
+
+        // --- 核心业务逻辑 ---
+
+        function checkLoginState() {
+            if(localStorage.getItem('isLoggedIn') === 'true') {
+                const user = localStorage.getItem('currentUser');
+                updateUI(true);
+                // 加载该用户数据
+                const saved = localStorage.getItem('userData_' + user);
+                if(saved) renderData(JSON.parse(saved));
+            }
+        }
+
+        function enterVisitorMode(user) {
+            // 隐藏编辑栏，显示返回栏
+            document.getElementById('editor-toolbar').style.display = 'none';
+            document.getElementById('visitor-toolbar').style.display = 'block';
+            document.body.classList.add('readonly-mode');
+            
+            // 禁用编辑
+            document.querySelectorAll('[contenteditable]').forEach(el => el.setAttribute('contenteditable', 'false'));
+
+            const savedData = localStorage.getItem('userData_' + user);
+            if (savedData) {
+                renderData(JSON.parse(savedData));
+                showToast(`正在查看 ${user} 的主页`);
+            } else {
+                alert(`提示：演示版数据存储在本地。如果在你当前电脑没注册过 ${user}，是看不到数据的。`);
+            }
+        }
+
+        function goHome() {
+            window.location.href = "/";
+        }
+
+        function renderData(data) {
+            document.getElementById('user-name').innerText = data.name;
+            document.getElementById('user-role').innerText = data.role;
+            document.getElementById('user-site').innerText = data.site;
+            document.getElementById('user-email').innerText = data.email;
+            document.getElementById('user-addr').innerText = data.addr;
+            document.getElementById('user-avatar').src = data.avatar;
+        }
+
+        function saveData() {
+            if(localStorage.getItem('isLoggedIn') !== 'true') { openAuth(); return; }
+            
+            const user = localStorage.getItem('currentUser');
+            const data = {
+                name: document.getElementById('user-name').innerText,
+                role: document.getElementById('user-role').innerText,
+                site: document.getElementById('user-site').innerText,
+                email: document.getElementById('user-email').innerText,
+                addr: document.getElementById('user-addr').innerText,
+                avatar: document.getElementById('user-avatar').src
+            };
+            localStorage.setItem('userData_' + user, JSON.stringify(data));
+            showToast("✅ 已保存到用户: " + user);
+        }
+
+        function tryChangeAvatar() {
+            if(document.body.classList.contains('readonly-mode')) return;
+            if(localStorage.getItem('isLoggedIn') !== 'true') { openAuth(); return; }
+            const newUrl = prompt("输入图片网址:", document.getElementById('user-avatar').src);
+            if (newUrl) document.getElementById('user-avatar').src = newUrl;
+        }
+
+        // --- 认证相关 ---
         function openAuth() { document.getElementById('auth-overlay').classList.add('show'); document.getElementById('auth-overlay').style.display='flex';}
         function closeAuth() { document.getElementById('auth-overlay').classList.remove('show'); setTimeout(()=>{document.getElementById('auth-overlay').style.display='none'},300);}
-        function handleAuth() { const u = document.getElementById('username').value; const p = document.getElementById('password').value; if(!u || !p) return showToast("请输入账号密码"); if(isLoginMode) { if(localStorage.getItem('pass_'+u) === p) { localStorage.setItem('isLoggedIn', 'true'); localStorage.setItem('currentUser', u); updateUI(true); checkLoginState(); closeAuth(); showToast("欢迎, " + u); } else { showToast("密码错误或无此账号"); } } else { if(localStorage.getItem('pass_'+u)) return showToast("用户已存在"); localStorage.setItem('pass_'+u, p); showToast("注册成功，请登录"); switchMode(); } }
-        function switchMode() { isLoginMode = !isLoginMode; document.getElementById('auth-title').innerText = isLoginMode ? "登录" : "注册"; document.getElementById('auth-switch').innerText = isLoginMode ? "去注册" : "去登录"; }
-        function logout() { localStorage.setItem('isLoggedIn', 'false'); localStorage.removeItem('currentUser'); location.href="/"; }
-        function updateUI(isLogged) { document.getElementById('btn-login').style.display = isLogged ? 'none' : 'flex'; document.getElementById('btn-logout').style.display = isLogged ? 'flex' : 'none'; document.getElementById('btn-share').style.display = isLogged ? 'flex' : 'none'; }
+        
+        function handleAuth() {
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            if(!u || !p) return showToast("请输入账号密码");
+
+            if(isLoginMode) {
+                if(localStorage.getItem('pass_'+u) === p) {
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('currentUser', u);
+                    updateUI(true);
+                    checkLoginState();
+                    closeAuth();
+                    showToast("欢迎, " + u);
+                } else { showToast("密码错误或无此账号"); }
+            } else {
+                if(localStorage.getItem('pass_'+u)) return showToast("用户已存在");
+                localStorage.setItem('pass_'+u, p);
+                showToast("注册成功，请登录");
+                switchMode();
+            }
+        }
+
+        function switchMode() {
+            isLoginMode = !isLoginMode;
+            document.getElementById('auth-title').innerText = isLoginMode ? "登录" : "注册";
+            document.getElementById('auth-switch').innerText = isLoginMode ? "去注册" : "去登录";
+        }
+
+        function logout() {
+            localStorage.setItem('isLoggedIn', 'false');
+            localStorage.removeItem('currentUser');
+            location.href="/";
+        }
+
+        function updateUI(isLogged) {
+            document.getElementById('btn-login').style.display = isLogged ? 'none' : 'flex';
+            document.getElementById('btn-logout').style.display = isLogged ? 'flex' : 'none';
+            document.getElementById('btn-share').style.display = isLogged ? 'flex' : 'none';
+        }
+
         function toggleMode() { document.body.classList.toggle('dark-mode'); }
-        function showToast(msg) { const t = document.getElementById('toast'); t.innerText = msg; t.style.opacity=1; t.style.top="50px"; setTimeout(()=>{t.style.opacity=0;t.style.top="30px"}, 2000); }
+        function showToast(msg) {
+            const t = document.getElementById('toast'); t.innerText = msg; t.style.opacity=1; t.style.top="50px";
+            setTimeout(()=>{t.style.opacity=0;t.style.top="30px"}, 2000);
+        }
     </script>
 </body>
 </html>
