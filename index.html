@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <!-- 强制不缓存 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Web Card V27 - 稳定终极版</title>
+    <title>Web Card V28 - 交互增强版</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
-        /* --- 1. 基础样式 (保留你喜欢的) --- */
+        /* --- 1. 基础样式 --- */
         :root {
             --bg: #EAF3F7; --card: #ffffff; --text: #334155; --sub: #64748b;
             --accent: #3a7bd5; --danger: #ff4757; --success: #2ed573;
@@ -23,15 +23,13 @@
             background: var(--bg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             color: var(--text); display: flex; justify-content: center; align-items: center;
             min-height: 100vh; margin: 0; padding: 20px;
-            /* 🔥 0.8秒 酷炫慢动作切换 */
             transition: background 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.8s;
         }
 
-        /* --- 2. 工具栏与按钮 (完全恢复 tool-btn 样式) --- */
+        /* --- 2. 工具栏 --- */
         .toolbar, .visitor-nav { position: absolute; top: 20px; z-index: 100; display: flex; gap: 10px; }
         .toolbar { right: 20px; } .visitor-nav { left: 20px; display: none; }
         
-        /* 手机适配：按钮稍微变小，但绝不隐藏文字 */
         @media (max-width: 480px) { 
             .toolbar { gap: 6px; right: 10px; top: 15px; } 
             .tool-btn { padding: 0 10px !important; font-size: 12px !important; height: 34px !important; }
@@ -45,7 +43,7 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         .tool-btn:hover { transform: translateY(-2px); background: rgba(255,255,255,0.9); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .tool-btn:active { transform: scale(0.95); } /* 按压感 */
+        .tool-btn:active { transform: scale(0.95); }
         
         body.dark .tool-btn { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.1); color: #fff; }
         
@@ -54,7 +52,7 @@
         .btn-admin { color: #8e44ad; border-color: #8e44ad; }
         .btn-admin:hover { background: #8e44ad !important; color: #fff !important; }
 
-        /* --- 3. 卡片与列表 (修复图标悬停) --- */
+        /* --- 3. 卡片与列表 (交互升级) --- */
         .card { background: var(--card); width: 100%; max-width: 360px; padding: 40px 30px; border-radius: 24px; text-align: center; box-shadow: var(--shadow); position: relative; transition: 0.5s; }
         .avatar { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 4px solid var(--card); box-shadow: 0 8px 24px rgba(0,0,0,0.12); margin-bottom: 15px; cursor: pointer; transition: 0.5s; }
         .avatar:hover { transform: rotate(360deg); }
@@ -65,19 +63,23 @@
         
         .list { text-align: left; }
         .item { display: flex; align-items: center; padding: 12px; margin-bottom: 8px; border-radius: 12px; transition: 0.2s; }
+        
+        /* 🔥 访客模式下，整行都有点击感 */
+        body.read .item:hover { background: rgba(0,0,0,0.03); transform: translateX(5px); cursor: pointer; }
+        /* 编辑模式下，依然有悬停感 */
         body:not(.read) .item:hover { background: rgba(0,0,0,0.03); }
         
-        /* 图标样式 */
         .item i { 
             font-size: 24px; color: var(--sub); margin-right: 15px; 
             width: 30px; text-align: center; transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        /* 🔥 核心修改：无论访客还是编辑，悬停都有特效 */
         .item i:hover { color: var(--accent); transform: scale(1.2) rotate(10deg); cursor: pointer; }
         
         .txt { font-size: 15px; flex: 1; outline: none; word-break: break-all; color: var(--text); }
+        /* 🔥 访客模式下文字变成链接色 */
+        body.read .txt { color: var(--text); pointer-events: none; } /* 文字本身不可点，点击事件冒泡到 .item */
 
-        /* --- 4. 弹窗与管理 (保持 V24 的好设计) --- */
+        /* --- 4. 弹窗与管理 --- */
         #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); z-index: 2000; display: none; justify-content: center; align-items: center; }
         .box { background: var(--card); width: 85%; max-width: 280px; padding: 30px 25px; border-radius: 20px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
         .inp { width: 100%; padding: 10px 12px; margin: 8px 0; border: 1px solid var(--border-color); border-radius: 10px; background: rgba(0,0,0,0.02); color: var(--text); font-size: 14px; box-sizing: border-box; outline: none; }
@@ -88,11 +90,9 @@
         .admin-card { background: var(--card); width: 95%; max-width: 650px; max-height: 80vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
         .admin-head { padding: 15px 20px; border-bottom: 1px solid rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.02); }
         .admin-body { flex: 1; overflow-y: auto; padding: 0; -webkit-overflow-scrolling: touch; }
-        
         table { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }
         th { text-align: left; padding: 12px 15px; color: var(--sub); font-weight: 600; background: rgba(0,0,0,0.02); position: sticky; top: 0; }
         td { padding: 12px 15px; border-bottom: 1px solid rgba(0,0,0,0.05); color: var(--text); vertical-align: middle; }
-        
         .act-btn { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; border: 1px solid transparent; cursor: pointer; margin-right: 5px; background: transparent; }
         .act-ban { color: var(--danger); border-color: var(--danger); } .act-ban:hover { background: var(--danger); color: white; }
         .act-unban { color: var(--success); border-color: var(--success); } .act-unban:hover { background: var(--success); color: white; }
@@ -104,12 +104,12 @@
         #save-status { position: fixed; bottom: 20px; right: 20px; font-size: 12px; color: var(--sub); opacity: 0; transition: 0.3s; pointer-events: none; }
         #loader { position: fixed; inset: 0; background: var(--bg); z-index: 5000; display: none; justify-content: center; align-items: center; flex-direction: column; }
         
-        .read .avatar, .read i { pointer-events: auto; /* 允许悬停效果 */ }
+        .read .avatar, .read i { pointer-events: auto; }
     </style>
 </head>
 <body>
 
-    <div id="toast">提示</div>
+    <div id="toast">提示信息</div>
     <div id="loader"><i class="ri-loader-4-line ri-spin" style="font-size:32px;color:var(--accent)"></i><p style="margin-top:10px;font-size:12px;color:var(--sub)">加载数据...</p></div>
 
     <input type="file" id="file" hidden accept="image/*" onchange="uploadImg(event)">
@@ -147,30 +147,35 @@
         <button class="tool-btn" onclick="mode()" style="padding:0;width:40px;justify-content:center"><i class="ri-moon-line"></i></button>
     </div>
 
-    <div id="save-status"></div>
+    <div id="save-status" style="position:fixed;bottom:20px;right:20px;font-size:12px;color:var(--sub);opacity:0;transition:0.3s"></div>
 
     <div class="card" oninput="debounceSave()">
+        <!-- 🔥 1. 修改默认头像 -->
         <img src="https://avatars.githubusercontent.com/u/85006660?v=4" class="avatar" id="user-avatar" onclick="clickAv()">
         <h1 id="user-name" contenteditable="true">Code Master</h1>
         <div id="user-role" class="role" contenteditable="true">全栈开发练习生</div>
+        
+        <!-- 🔥 2. 增加点击事件绑定 (Jump) -->
         <div class="list">
-            <div class="item">
-                <i class="ri-global-line" id="icon-site" onclick="ic(this)"></i>
+            <div class="item" onclick="jump('site')">
+                <i class="ri-global-line" id="icon-site" onclick="ic(event, this)"></i>
                 <div id="user-site" class="txt" contenteditable="true">www.my-site.com</div>
             </div>
-            <div class="item">
-                <i class="ri-mail-send-line" id="icon-email" onclick="ic(this)"></i>
+            <div class="item" onclick="jump('email')">
+                <i class="ri-mail-send-line" id="icon-email" onclick="ic(event, this)"></i>
                 <div id="user-email" class="txt" contenteditable="true">hello@email.com</div>
             </div>
-            <div class="item">
-                <i class="ri-map-pin-line" id="icon-addr" onclick="ic(this)"></i>
+            <div class="item" onclick="jump('addr')">
+                <i class="ri-map-pin-line" id="icon-addr" onclick="ic(event, this)"></i>
                 <div id="user-addr" class="txt" contenteditable="true">Shanghai</div>
             </div>
         </div>
     </div>
 
     <script>
-        const ADMIN_NAME = 'admin'; // ⚠️ 环境变量 ADMIN_USER
+        const ADMIN_NAME = 'admin'; 
+        // 🔥 1. 常量定义默认头像
+        const DEFAULT_AVATAR = 'https://avatars.githubusercontent.com/u/85006660?v=4';
 
         window.onload = () => {
             let path = window.location.pathname.replace(/\/$/, "").substring(1);
@@ -185,12 +190,45 @@
 
         let isReg = false, timer = null;
 
+        // --- 🔥 2. 核心跳转逻辑 (仅访客模式生效) ---
+        function jump(type) {
+            // 如果不是访客模式，不跳转
+            if (!document.body.classList.contains('read')) return;
+
+            let content = "";
+            if (type === 'site') content = document.getElementById('user-site').innerText;
+            if (type === 'email') content = document.getElementById('user-email').innerText;
+            if (type === 'addr') content = document.getElementById('user-addr').innerText;
+
+            if (!content || content.trim() === "") return;
+
+            if (type === 'site') {
+                // 自动补全 https
+                if (!content.startsWith('http')) content = 'https://' + content;
+                window.open(content, '_blank');
+            } else if (type === 'email') {
+                window.location.href = `mailto:${content}`;
+            } else if (type === 'addr') {
+                // 跳转 Google 地图搜索
+                window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(content)}`, '_blank');
+            }
+        }
+
+        // --- 图标点击 ---
+        function ic(e, el) { 
+            // 阻止事件冒泡 (防止触发 jump)
+            e.stopPropagation();
+            if(canEdit()) { 
+                const n=prompt("图标代码 (如 ri-home-line)",el.className); 
+                if(n){el.className=n;save(true);} 
+            } 
+        }
+
         function fill(d) {
             if(!d) return;
-            // 🔥 还原 ID 绑定，确保内容回来
             id('user-name').innerText = d.name || 'Code Master';
             id('user-role').innerText = d.role || 'Developer';
-            id('user-avatar').src = d.avatar || '';
+            id('user-avatar').src = d.avatar || DEFAULT_AVATAR; // 使用常量
             id('user-site').innerText = d.siteText || '';
             id('icon-site').className = d.siteIcon || 'ri-global-line';
             id('user-email').innerText = d.emailText || '';
@@ -204,7 +242,7 @@
             const u = localStorage.getItem('u'), p = localStorage.getItem('p');
             const st = document.getElementById('save-status');
             st.style.opacity = 1; st.innerText = '云端同步...';
-            if(!silent) toast('正在保存...', 'ri-upload-cloud-line');
+            if(!silent) toast('正在保存...');
 
             const data = {
                 name: text('user-name'), role: text('user-role'), avatar: src('user-avatar'),
@@ -223,7 +261,7 @@
                     localStorage.setItem('userData_' + u, JSON.stringify(data));
                     st.innerText = '已同步';
                     setTimeout(() => st.style.opacity = 0, 2000);
-                    if(!silent) toast('已保存', 'ri-check-line');
+                    if(!silent) toast('已保存');
                 } else { st.innerText = '同步失败'; }
             } catch(e) { st.innerText = '网络错误'; }
         }
@@ -237,15 +275,15 @@
                 toast('检查用户名...');
                 try {
                     const check = await fetch(`/api/user?name=${u}`);
-                    if(check.ok) return toast('用户名已被占用', 'ri-close-circle-line');
+                    if(check.ok) return toast('用户名已被占用');
                     localStorage.setItem('pass_'+u, p);
-                    toast('注册成功，请登录', 'ri-check-line');
+                    toast('注册成功，请登录');
                     flip();
                 } catch(e) { toast('网络错误'); }
             } else {
                 const localPass = localStorage.getItem('pass_' + u);
                 if (localPass === p) { success(u, p, null); return; }
-                toast('云端验证中...', 'ri-loader-2-line');
+                toast('云端验证中...');
                 try {
                     const res = await fetch(`/api/user?name=${u}`);
                     if(res.ok) {
@@ -254,8 +292,8 @@
                         if(cloudP === p) {
                             localStorage.setItem('userData_' + u, JSON.stringify(json.data));
                             success(u, p, json.data);
-                        } else { toast('密码错误', 'ri-lock-line'); }
-                    } else { toast('用户不存在', 'ri-user-unfollow-line'); }
+                        } else { toast('密码错误'); }
+                    } else { toast('用户不存在'); }
                 } catch(e) { toast('网络错误'); }
             }
         }
@@ -268,7 +306,7 @@
             if(data) fill(data);
             checkLog();
             closeM();
-            toast('欢迎回来', 'ri-user-smile-line');
+            toast('欢迎回来');
         }
 
         async function loadAdmin() {
@@ -292,10 +330,7 @@
                         <td style="font-size:12px;color:var(--sub)">${new Date(x.created_at).toLocaleDateString()}</td>
                         <td>
                             ${x.name !== u ? `
-                            ${!isBan ? 
-                                `<button class="act-btn act-ban" onclick="act('ban','${x.name}')">禁</button>` : 
-                                `<button class="act-btn act-unban" onclick="act('unban','${x.name}')">解</button>`
-                            }
+                            ${!isBan ? `<button class="act-btn act-ban" onclick="act('ban','${x.name}')">禁</button>` : `<button class="act-btn act-unban" onclick="act('unban','${x.name}')">解</button>`}
                             <button class="act-btn act-del" onclick="act('delete','${x.name}')">删</button>
                             ` : '-'}
                         </td>
@@ -311,7 +346,7 @@
                 method: 'POST', headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p },
                 body: JSON.stringify({ action: a, targetUser: t, duration: 24 })
             });
-            if(res.ok) { toast('操作成功', 'ri-check-line'); loadAdmin(); } else { toast('操作失败'); }
+            if(res.ok) { toast('操作成功'); loadAdmin(); } else { toast('操作失败'); }
         }
 
         const id = x => document.getElementById(x);
@@ -329,7 +364,7 @@
         function clickAv() { if(canEdit()) id('file').click(); }
         function uploadImg(e) {
             const f = e.target.files[0]; if(!f) return;
-            toast('压缩图片...', 'ri-image-edit-line');
+            toast('压缩图片...');
             const r = new FileReader(); r.onload = ev => {
                 const img = new Image(); img.onload = () => {
                     const c = document.createElement('canvas'); c.width = 400; c.height = 400;
@@ -341,14 +376,7 @@
                 }; img.src = ev.target.result;
             }; r.readAsDataURL(f);
         }
-        function ic(el) { 
-            // 编辑模式改图标
-            if(canEdit()) { 
-                const n=prompt("图标代码 (如 ri-home-line)",el.className); 
-                if(n){el.className=n;save(true);} 
-            } 
-            // 访客模式点击无反应（但有CSS特效）
-        }
+        
         function canEdit() { return !document.body.classList.contains('read') && localStorage.getItem('login')==='1'; }
         function openM() { id('modal').style.display='flex'; }
         function closeM() { id('modal').style.display='none'; }
@@ -364,7 +392,7 @@
         function goHome() { location.href="/"; }
         function share() { 
             const u = localStorage.getItem('u'); const url = location.origin + '/' + u;
-            navigator.clipboard.writeText(url).then(()=>toast('链接已复制', 'ri-link')).catch(()=>prompt("复制:", url)); 
+            navigator.clipboard.writeText(url).then(()=>toast('链接已复制')).catch(()=>prompt("复制:", url)); 
         }
         function loadCloud(user) {
             const l = document.getElementById('loader'); l.style.display = 'flex';
@@ -376,8 +404,8 @@
                 else document.body.innerHTML="<h2 style='color:#666;text-align:center;margin-top:100px'>用户不存在或已封禁</h2>";
             }).catch(()=>document.body.innerHTML="<h2>网络错误</h2>");
         }
-        function toast(t, i='ri-info-i') { 
-            const el = document.getElementById('toast'); el.innerHTML = `<i class="${i}"></i> <span>${t}</span>`;
+        function toast(t) { 
+            const el = document.getElementById('toast'); el.innerHTML = `<span>${t}</span>`;
             el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2000); 
         }
     </script>
