@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- 强制不缓存 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Web Card V28 - 交互增强版</title>
+    <title>Web Card V29 - 动态列表版</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
-        /* --- 1. 基础样式 --- */
+        /* --- 1. 基础变量 --- */
         :root {
             --bg: #EAF3F7; --card: #ffffff; --text: #334155; --sub: #64748b;
             --accent: #3a7bd5; --danger: #ff4757; --success: #2ed573;
@@ -22,69 +21,116 @@
         body {
             background: var(--bg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             color: var(--text); display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; margin: 0; padding: 20px;
-            transition: background 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.8s;
+            min-height: 100vh; margin: 0; padding: 20px; transition: background 0.5s;
         }
 
-        /* --- 2. 工具栏 --- */
-        .toolbar, .visitor-nav { position: absolute; top: 20px; z-index: 100; display: flex; gap: 10px; }
-        .toolbar { right: 20px; } .visitor-nav { left: 20px; display: none; }
+        /* --- 2. 卡片与头像 (尺寸升级) --- */
+        .card { background: var(--card); width: 100%; max-width: 380px; padding: 45px 30px; border-radius: 28px; text-align: center; box-shadow: var(--shadow); position: relative; transition: 0.3s; }
         
-        @media (max-width: 480px) { 
-            .toolbar { gap: 6px; right: 10px; top: 15px; } 
-            .tool-btn { padding: 0 10px !important; font-size: 12px !important; height: 34px !important; }
+        .avatar {
+            /* 🔥 改动1：尺寸加大 */
+            width: 130px; height: 130px; 
+            border-radius: 50%; object-fit: cover; border: 5px solid var(--card);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); margin-bottom: 20px;
+            cursor: pointer; transition: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
+        .avatar:hover { transform: rotate(360deg) scale(1.05); }
+        
+        h1 { margin: 10px 0 5px; font-size: 26px; font-weight: 700; letter-spacing: -0.5px; }
+        .role { color: var(--sub); font-size: 14px; margin-bottom: 30px; font-weight: 500; }
+        [contenteditable]:focus { outline: none; border-bottom: 2px solid var(--accent); background: rgba(58,123,213,0.05); border-radius: 4px; padding: 0 4px; }
 
-        .tool-btn {
-            background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.05);
-            color: var(--text); padding: 0 16px; height: 40px; border-radius: 20px;
-            cursor: pointer; backdrop-filter: blur(5px); display: flex; align-items: center; gap: 6px;
-            font-size: 13px; font-weight: 600; transition: 0.1s; user-select: none;
+        /* --- 3. 动态列表 (核心升级) --- */
+        .list { text-align: left; display: flex; flex-direction: column; gap: 10px; }
+        
+        .item {
+            display: flex; align-items: center; padding: 14px 16px; 
+            background: rgba(0,0,0,0.02); border-radius: 16px; border: 1px solid transparent;
+            transition: all 0.2s; position: relative;
+        }
+        
+        /* 访客模式：整行可点，有悬浮感 */
+        body.read .item { cursor: pointer; }
+        body.read .item:hover { background: rgba(0,0,0,0.05); transform: scale(1.02); }
+        body.dark.read .item:hover { background: rgba(255,255,255,0.1); }
+
+        /* 编辑模式：显示操作按钮 */
+        body:not(.read) .item { padding-right: 80px; } /* 留出按钮空间 */
+        
+        .item-icon { font-size: 24px; color: var(--sub); margin-right: 15px; width: 24px; text-align: center; transition: 0.2s; }
+        body:not(.read) .item-icon { cursor: pointer; }
+        body:not(.read) .item-icon:hover { color: var(--accent); transform: scale(1.2); }
+        
+        .item-content { flex: 1; overflow: hidden; }
+        .item-title { font-size: 15px; font-weight: 600; color: var(--text); outline: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .item-link-preview { font-size: 11px; color: var(--sub); margin-top: 2px; opacity: 0.6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        /* 编辑操作栏 (仅编辑模式显示) */
+        .item-actions {
+            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+            display: none; gap: 5px;
+        }
+        body:not(.read) .item-actions { display: flex; }
+        
+        .act-icon {
+            width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.8); color: var(--sub); cursor: pointer; transition: 0.2s;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        .tool-btn:hover { transform: translateY(-2px); background: rgba(255,255,255,0.9); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .tool-btn:active { transform: scale(0.95); }
+        .act-icon:hover { color: var(--accent); transform: scale(1.1); }
+        .act-del:hover { color: var(--danger); }
+
+        /* 添加按钮 */
+        .add-btn {
+            margin-top: 10px; width: 100%; padding: 12px; border: 2px dashed var(--border-color);
+            border-radius: 16px; color: var(--sub); font-size: 14px; cursor: pointer;
+            background: transparent; transition: 0.2s; display: none;
+        }
+        .add-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(58,123,213,0.05); }
+        body:not(.read) .add-btn { display: block; }
+
+        /* --- 4. 图标库弹窗 (新增) --- */
+        #icon-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 4000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
+        .icon-box {
+            background: var(--card); width: 90%; max-width: 400px; max-height: 80vh;
+            border-radius: 24px; padding: 20px; display: flex; flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+        .icon-grid {
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+            overflow-y: auto; padding: 10px 0; margin-top: 15px;
+        }
+        .lib-icon {
+            aspect-ratio: 1; display: flex; justify-content: center; align-items: center;
+            font-size: 24px; color: var(--sub); border-radius: 12px; cursor: pointer;
+            background: rgba(0,0,0,0.03); transition: 0.2s;
+        }
+        .lib-icon:hover { background: var(--accent); color: white; transform: scale(1.1); }
         
-        body.dark .tool-btn { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.1); color: #fff; }
-        
+        /* --- 其他原有样式 (保留) --- */
+        .toolbar, .visitor-nav { position: absolute; top: 20px; z-index: 100; display: flex; gap: 10px; }
+        .toolbar { right: 20px; } .visitor-nav { left: 20px; display: none; }
+        .btn { background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.05); color: var(--text); padding: 0 15px; height: 38px; border-radius: 20px; cursor: pointer; backdrop-filter: blur(5px); display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; transition: all 0.1s; user-select: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .btn:hover { transform: translateY(-2px); background: rgba(255,255,255,0.9); }
+        .btn:active { transform: scale(0.95); }
+        body.dark .btn { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.1); color: #fff; }
         .btn-red { color: var(--danger); border-color: var(--danger); }
         .btn-red:hover { background: var(--danger) !important; color: #fff !important; }
         .btn-admin { color: #8e44ad; border-color: #8e44ad; }
         .btn-admin:hover { background: #8e44ad !important; color: #fff !important; }
+        
+        @media (max-width: 480px) { .btn span { display: none; } .btn { padding: 0 10px; } .toolbar { right: 15px; } .icon-grid { grid-template-columns: repeat(4, 1fr); } }
 
-        /* --- 3. 卡片与列表 (交互升级) --- */
-        .card { background: var(--card); width: 100%; max-width: 360px; padding: 40px 30px; border-radius: 24px; text-align: center; box-shadow: var(--shadow); position: relative; transition: 0.5s; }
-        .avatar { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 4px solid var(--card); box-shadow: 0 8px 24px rgba(0,0,0,0.12); margin-bottom: 15px; cursor: pointer; transition: 0.5s; }
-        .avatar:hover { transform: rotate(360deg); }
-        
-        [contenteditable]:focus { outline: none; border-bottom: 2px solid var(--accent); background: rgba(58,123,213,0.05); }
-        h1 { margin: 10px 0 5px; font-size: 24px; font-weight: bold; }
-        .role { color: var(--sub); font-size: 14px; margin-bottom: 30px; }
-        
-        .list { text-align: left; }
-        .item { display: flex; align-items: center; padding: 12px; margin-bottom: 8px; border-radius: 12px; transition: 0.2s; }
-        
-        /* 🔥 访客模式下，整行都有点击感 */
-        body.read .item:hover { background: rgba(0,0,0,0.03); transform: translateX(5px); cursor: pointer; }
-        /* 编辑模式下，依然有悬停感 */
-        body:not(.read) .item:hover { background: rgba(0,0,0,0.03); }
-        
-        .item i { 
-            font-size: 24px; color: var(--sub); margin-right: 15px; 
-            width: 30px; text-align: center; transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .item i:hover { color: var(--accent); transform: scale(1.2) rotate(10deg); cursor: pointer; }
-        
-        .txt { font-size: 15px; flex: 1; outline: none; word-break: break-all; color: var(--text); }
-        /* 🔥 访客模式下文字变成链接色 */
-        body.read .txt { color: var(--text); pointer-events: none; } /* 文字本身不可点，点击事件冒泡到 .item */
-
-        /* --- 4. 弹窗与管理 --- */
+        /* 登录与提示 */
         #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); z-index: 2000; display: none; justify-content: center; align-items: center; }
         .box { background: var(--card); width: 85%; max-width: 280px; padding: 30px 25px; border-radius: 20px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
         .inp { width: 100%; padding: 10px 12px; margin: 8px 0; border: 1px solid var(--border-color); border-radius: 10px; background: rgba(0,0,0,0.02); color: var(--text); font-size: 14px; box-sizing: border-box; outline: none; }
         .inp:focus { border-color: var(--accent); background: var(--card); }
         .btn-sub { width: 100%; padding: 10px; background: var(--accent); color: #fff; border: none; border-radius: 10px; cursor: pointer; margin-top: 10px; font-weight: bold; }
+        #toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-20px); background: rgba(0,0,0,0.85); color: #fff; padding: 8px 20px; border-radius: 30px; font-size: 13px; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 10000; backdrop-filter: blur(4px); }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        #save-status { position: fixed; bottom: 20px; right: 20px; font-size: 12px; color: var(--sub); opacity: 0; transition: 0.3s; pointer-events: none; }
+        #loader { position: fixed; inset: 0; background: var(--bg); z-index: 5000; display: none; justify-content: center; align-items: center; flex-direction: column; }
         
         #admin { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 3000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
         .admin-card { background: var(--card); width: 95%; max-width: 650px; max-height: 80vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
@@ -97,14 +143,8 @@
         .act-ban { color: var(--danger); border-color: var(--danger); } .act-ban:hover { background: var(--danger); color: white; }
         .act-unban { color: var(--success); border-color: var(--success); } .act-unban:hover { background: var(--success); color: white; }
         .act-del { color: var(--sub); border-color: var(--border-color); } .act-del:hover { background: var(--sub); color: white; }
-
-        /* Toast & Loader */
-        #toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-20px); background: rgba(0,0,0,0.8); color: #fff; padding: 8px 20px; border-radius: 30px; font-size: 13px; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 9999; backdrop-filter: blur(4px); display: flex; align-items: center; gap: 6px; }
-        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-        #save-status { position: fixed; bottom: 20px; right: 20px; font-size: 12px; color: var(--sub); opacity: 0; transition: 0.3s; pointer-events: none; }
-        #loader { position: fixed; inset: 0; background: var(--bg); z-index: 5000; display: none; justify-content: center; align-items: center; flex-direction: column; }
         
-        .read .avatar, .read i { pointer-events: auto; }
+        .read .avatar, .read .item-icon { pointer-events: auto; }
     </style>
 </head>
 <body>
@@ -126,58 +166,80 @@
         </div>
     </div></div>
 
+    <!-- 图标库弹窗 -->
+    <div id="icon-modal"><div class="icon-box">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+            <h3>选择图标</h3>
+            <button onclick="document.getElementById('icon-modal').style.display='none'" style="border:none;background:none;font-size:24px;cursor:pointer">&times;</button>
+        </div>
+        <input id="custom-icon" class="inp" placeholder="或输入代码 (如 ri-home-line)" onchange="selectIcon(this.value)">
+        <div class="icon-grid" id="lib-grid"></div>
+    </div></div>
+
     <!-- 管理面板 -->
     <div id="admin"><div class="admin-card">
         <div class="admin-head"><h3 style="margin:0;font-size:16px">用户管理</h3><button onclick="toggleAdmin(0)" style="border:none;background:none;font-size:20px;cursor:pointer;color:var(--text)">&times;</button></div>
         <div class="admin-body"><table id="tbl"><thead><tr><th>用户</th><th>角色</th><th>状态</th><th>注册时间</th><th>操作</th></tr></thead><tbody></tbody></table></div>
     </div></div>
 
-    <!-- 编辑工具栏 -->
+    <!-- 工具栏 -->
     <div class="toolbar" id="tb-edit">
-        <button class="tool-btn" id="btn-login" onclick="openM()"><i class="ri-user-3-line"></i> <span>登录</span></button>
-        <button class="tool-btn btn-admin" id="btn-admin" onclick="loadAdmin()" style="display:none"><i class="ri-command-line"></i> <span>管理</span></button>
+        <button class="btn" id="btn-login" onclick="openM()"><i class="ri-user-3-line"></i> <span>登录</span></button>
+        <button class="btn btn-admin" id="btn-admin" onclick="loadAdmin()" style="display:none"><i class="ri-command-line"></i> <span>管理</span></button>
         <button class="tool-btn btn-red" id="btn-out" onclick="logout()" style="display:none"><i class="ri-logout-box-r-line"></i> <span>退出</span></button>
-        <button class="tool-btn" id="btn-share" onclick="share()" style="display:none"><i class="ri-share-forward-line"></i> <span>链接</span></button>
+        <button class="btn" id="btn-share" onclick="share()" style="display:none"><i class="ri-share-forward-line"></i> <span>链接</span></button>
         <button class="tool-btn" onclick="mode()" style="padding:0;width:40px;justify-content:center"><i class="ri-moon-line"></i></button>
     </div>
 
-    <!-- 访客工具栏 -->
     <div class="visitor-nav" id="tb-read">
         <button class="tool-btn" onclick="goHome()"><i class="ri-arrow-left-s-line"></i> <span>返回</span></button>
         <button class="tool-btn" onclick="mode()" style="padding:0;width:40px;justify-content:center"><i class="ri-moon-line"></i></button>
     </div>
 
-    <div id="save-status" style="position:fixed;bottom:20px;right:20px;font-size:12px;color:var(--sub);opacity:0;transition:0.3s"></div>
+    <div id="save-status"></div>
 
+    <!-- 卡片 -->
     <div class="card" oninput="debounceSave()">
-        <!-- 🔥 1. 修改默认头像 -->
+        <!-- 默认头像 GitHub -->
         <img src="https://avatars.githubusercontent.com/u/85006660?v=4" class="avatar" id="user-avatar" onclick="clickAv()">
         <h1 id="user-name" contenteditable="true">Code Master</h1>
         <div id="user-role" class="role" contenteditable="true">全栈开发练习生</div>
         
-        <!-- 🔥 2. 增加点击事件绑定 (Jump) -->
-        <div class="list">
-            <div class="item" onclick="jump('site')">
-                <i class="ri-global-line" id="icon-site" onclick="ic(event, this)"></i>
-                <div id="user-site" class="txt" contenteditable="true">www.my-site.com</div>
-            </div>
-            <div class="item" onclick="jump('email')">
-                <i class="ri-mail-send-line" id="icon-email" onclick="ic(event, this)"></i>
-                <div id="user-email" class="txt" contenteditable="true">hello@email.com</div>
-            </div>
-            <div class="item" onclick="jump('addr')">
-                <i class="ri-map-pin-line" id="icon-addr" onclick="ic(event, this)"></i>
-                <div id="user-addr" class="txt" contenteditable="true">Shanghai</div>
-            </div>
+        <!-- 动态列表容器 -->
+        <div class="list" id="dynamic-list">
+            <!-- JS 渲染 -->
         </div>
+        
+        <button class="add-btn" onclick="addItem()">+ 添加条目</button>
     </div>
 
     <script>
         const ADMIN_NAME = 'admin'; 
-        // 🔥 1. 常量定义默认头像
         const DEFAULT_AVATAR = 'https://avatars.githubusercontent.com/u/85006660?v=4';
+        
+        // 常用图标库
+        const ICON_LIB = [
+            'ri-global-line', 'ri-mail-send-line', 'ri-map-pin-line', 'ri-phone-line',
+            'ri-wechat-line', 'ri-qq-line', 'ri-bilibili-line', 'ri-github-line',
+            'ri-twitter-x-line', 'ri-instagram-line', 'ri-youtube-line', 'ri-tiktok-line',
+            'ri-netease-cloud-music-line', 'ri-zhihu-line', 'ri-weibo-line', 'ri-discord-line',
+            'ri-telegram-line', 'ri-whatsapp-line', 'ri-facebook-circle-line', 'ri-linkedin-line',
+            'ri-shopping-bag-3-line', 'ri-store-2-line', 'ri-user-smile-line', 'ri-heart-3-line',
+            'ri-star-line', 'ri-image-line', 'ri-music-2-line', 'ri-video-line',
+            'ri-file-text-line', 'ri-download-cloud-2-line'
+        ];
+
+        // 默认数据结构
+        let currentData = {
+            items: [
+                { icon: 'ri-global-line', text: '我的网站', url: 'https://example.com' },
+                { icon: 'ri-mail-send-line', text: '联系邮箱', url: 'mailto:hi@test.com' },
+                { icon: 'ri-map-pin-line', text: '所在城市', url: 'Shanghai' }
+            ]
+        };
 
         window.onload = () => {
+            initIconLib();
             let path = window.location.pathname.replace(/\/$/, "").substring(1);
             setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 3000);
             if (path && path !== 'index.html') {
@@ -185,70 +247,140 @@
             } else {
                 checkLog();
                 document.getElementById('loader').style.display = 'none';
+                renderList(); // 渲染默认列表
             }
         };
 
-        let isReg = false, timer = null;
+        // --- 核心：动态列表渲染 ---
+        function renderList() {
+            const container = document.getElementById('dynamic-list');
+            container.innerHTML = '';
+            
+            currentData.items.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'item';
+                // 访客模式点击整行跳转
+                div.onclick = (e) => handleItemClick(e, index);
+                
+                div.innerHTML = `
+                    <i class="${item.icon} item-icon" onclick="openIconLib(${index}, event)"></i>
+                    <div class="item-content">
+                        <div class="item-title" contenteditable="${!isRead()}" oninput="updateItem(${index}, 'text', this.innerText)">${item.text}</div>
+                        ${!isRead() ? `<div class="item-link-preview">${item.url || '未设置链接'}</div>` : ''}
+                    </div>
+                    <div class="item-actions">
+                        <div class="act-icon" onclick="editUrl(${index}, event)"><i class="ri-link"></i></div>
+                        <div class="act-icon act-del" onclick="delItem(${index}, event)"><i class="ri-delete-bin-line"></i></div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
 
-        // --- 🔥 2. 核心跳转逻辑 (仅访客模式生效) ---
-        function jump(type) {
-            // 如果不是访客模式，不跳转
-            if (!document.body.classList.contains('read')) return;
+        // --- 列表操作 ---
+        function isRead() { return document.body.classList.contains('read'); }
 
-            let content = "";
-            if (type === 'site') content = document.getElementById('user-site').innerText;
-            if (type === 'email') content = document.getElementById('user-email').innerText;
-            if (type === 'addr') content = document.getElementById('user-addr').innerText;
+        function addItem() {
+            if(isRead()) return;
+            currentData.items.push({ icon: 'ri-star-line', text: '新条目', url: '' });
+            renderList();
+            save(true);
+        }
 
-            if (!content || content.trim() === "") return;
+        function delItem(index, e) {
+            e.stopPropagation();
+            if(!confirm('删除此条目?')) return;
+            currentData.items.splice(index, 1);
+            renderList();
+            save(true);
+        }
 
-            if (type === 'site') {
-                // 自动补全 https
-                if (!content.startsWith('http')) content = 'https://' + content;
-                window.open(content, '_blank');
-            } else if (type === 'email') {
-                window.location.href = `mailto:${content}`;
-            } else if (type === 'addr') {
-                // 跳转 Google 地图搜索
-                window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(content)}`, '_blank');
+        function updateItem(index, key, val) {
+            currentData.items[index][key] = val;
+            debounceSave();
+        }
+
+        function editUrl(index, e) {
+            e.stopPropagation();
+            const url = prompt("请输入跳转链接 (如 https://... 或 mailto:...)", currentData.items[index].url);
+            if(url !== null) {
+                currentData.items[index].url = url;
+                renderList(); // 刷新显示
+                save(true);
             }
         }
 
-        // --- 图标点击 ---
-        function ic(e, el) { 
-            // 阻止事件冒泡 (防止触发 jump)
-            e.stopPropagation();
-            if(canEdit()) { 
-                const n=prompt("图标代码 (如 ri-home-line)",el.className); 
-                if(n){el.className=n;save(true);} 
-            } 
+        function handleItemClick(e, index) {
+            if(!isRead()) return; // 编辑模式不跳转
+            const url = currentData.items[index].url;
+            if(!url) return;
+            
+            if(url.startsWith('http')) window.open(url, '_blank');
+            else if(url.startsWith('mailto')) window.location.href = url;
+            else window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(url)}`, '_blank');
         }
 
+        // --- 图标库逻辑 ---
+        let editingIconIndex = -1;
+        function initIconLib() {
+            const grid = document.getElementById('lib-grid');
+            grid.innerHTML = ICON_LIB.map(icon => `
+                <div class="lib-icon" onclick="selectIcon('${icon}')">
+                    <i class="${icon}"></i>
+                </div>
+            `).join('');
+        }
+
+        function openIconLib(index, e) {
+            if(isRead()) return;
+            e.stopPropagation();
+            editingIconIndex = index;
+            document.getElementById('icon-modal').style.display = 'flex';
+        }
+
+        function selectIcon(iconClass) {
+            if(!iconClass) return;
+            if(editingIconIndex !== -1) {
+                currentData.items[editingIconIndex].icon = iconClass;
+                renderList();
+                save(true);
+            }
+            document.getElementById('icon-modal').style.display = 'none';
+        }
+
+        // --- 核心：保存与加载 (适配新结构) ---
         function fill(d) {
             if(!d) return;
             id('user-name').innerText = d.name || 'Code Master';
             id('user-role').innerText = d.role || 'Developer';
-            id('user-avatar').src = d.avatar || DEFAULT_AVATAR; // 使用常量
-            id('user-site').innerText = d.siteText || '';
-            id('icon-site').className = d.siteIcon || 'ri-global-line';
-            id('user-email').innerText = d.emailText || '';
-            id('icon-email').className = d.emailIcon || 'ri-mail-send-line';
-            id('user-addr').innerText = d.addrText || '';
-            id('icon-addr').className = d.addrIcon || 'ri-map-pin-line';
+            id('user-avatar').src = d.avatar || DEFAULT_AVATAR;
+            
+            // 兼容旧数据 (如果用户以前存的是 t1/t2 这种散乱数据，尝试转换，或直接使用新 items)
+            if(d.items && Array.isArray(d.items)) {
+                currentData.items = d.items;
+            } else {
+                // 简单的旧数据迁移
+                currentData.items = [];
+                if(d.siteText) currentData.items.push({ icon: d.siteIcon||'ri-global-line', text: d.siteText, url: d.siteText });
+                if(d.emailText) currentData.items.push({ icon: d.emailIcon||'ri-mail-send-line', text: d.emailText, url: 'mailto:'+d.emailText });
+                if(d.addrText) currentData.items.push({ icon: d.addrIcon||'ri-map-pin-line', text: d.addrText, url: d.addrText });
+            }
+            renderList();
         }
 
         async function save(silent = false) {
             if (localStorage.getItem('login') !== '1') return;
             const u = localStorage.getItem('u'), p = localStorage.getItem('p');
             const st = document.getElementById('save-status');
+            
             st.style.opacity = 1; st.innerText = '云端同步...';
             if(!silent) toast('正在保存...');
 
             const data = {
-                name: text('user-name'), role: text('user-role'), avatar: src('user-avatar'),
-                siteText: text('user-site'), siteIcon: cls('icon-site'),
-                emailText: text('user-email'), emailIcon: cls('icon-email'),
-                addrText: text('user-addr'), addrIcon: cls('icon-addr'),
+                name: text('user-name'), 
+                role: text('user-role'), 
+                avatar: src('user-avatar'),
+                items: currentData.items, // 保存整个数组
                 _secret_pass: p 
             };
 
@@ -266,24 +398,26 @@
             } catch(e) { st.innerText = '网络错误'; }
         }
 
+        // --- 认证与管理 (保持稳定版逻辑) ---
+        let isReg = false, timer = null;
+        const id = x => document.getElementById(x);
+        const text = x => id(x).innerText; const src = x => id(x).src; const val = x => id(x).value;
+        function debounceSave() { clearTimeout(timer); timer = setTimeout(() => save(true), 1500); }
+
         async function auth() {
             const u = val('u'), p = val('p');
             if(!u || !p) return toast('请填写完整');
-            
             if(isReg) {
-                if(localStorage.getItem('pass_'+u)) return toast('本地已存在，请直接登录');
-                toast('检查用户名...');
+                if(localStorage.getItem('pass_'+u)) return toast('本地已存在');
                 try {
                     const check = await fetch(`/api/user?name=${u}`);
-                    if(check.ok) return toast('用户名已被占用');
+                    if(check.ok) return toast('用户已存在');
                     localStorage.setItem('pass_'+u, p);
-                    toast('注册成功，请登录');
-                    flip();
+                    toast('注册成功'); flip();
                 } catch(e) { toast('网络错误'); }
             } else {
                 const localPass = localStorage.getItem('pass_' + u);
                 if (localPass === p) { success(u, p, null); return; }
-                toast('云端验证中...');
                 try {
                     const res = await fetch(`/api/user?name=${u}`);
                     if(res.ok) {
@@ -299,59 +433,12 @@
         }
 
         function success(u, p, data) {
-            localStorage.setItem('login', '1');
-            localStorage.setItem('u', u);
-            localStorage.setItem('p', p);
+            localStorage.setItem('login', '1'); localStorage.setItem('u', u); localStorage.setItem('p', p);
             localStorage.setItem('pass_' + u, p); 
             if(data) fill(data);
-            checkLog();
-            closeM();
-            toast('欢迎回来');
+            checkLog(); closeM(); toast('欢迎回来');
         }
 
-        async function loadAdmin() {
-            toggleAdmin(1);
-            const tbody = document.querySelector('tbody');
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--sub)">加载数据...</td></tr>';
-            const u = localStorage.getItem('u'), p = localStorage.getItem('p');
-            try {
-                const res = await fetch('/api/admin', { headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p } });
-                if(res.status===401) return toast('无权访问');
-                const list = await res.json();
-                
-                tbody.innerHTML = list.map(x => {
-                    const isBan = x.status === 'banned';
-                    const isAdmin = x.role === 'admin';
-                    return `
-                    <tr>
-                        <td><b>${x.name}</b> ${isAdmin ? '<span style="color:#f1c40f">★</span>' : ''}</td>
-                        <td>${x.role||'user'}</td>
-                        <td>${isBan ? '<span style="color:var(--danger)">封禁</span>' : '<span style="color:var(--success)">正常</span>'}</td>
-                        <td style="font-size:12px;color:var(--sub)">${new Date(x.created_at).toLocaleDateString()}</td>
-                        <td>
-                            ${x.name !== u ? `
-                            ${!isBan ? `<button class="act-btn act-ban" onclick="act('ban','${x.name}')">禁</button>` : `<button class="act-btn act-unban" onclick="act('unban','${x.name}')">解</button>`}
-                            <button class="act-btn act-del" onclick="act('delete','${x.name}')">删</button>
-                            ` : '-'}
-                        </td>
-                    </tr>`;
-                }).join('');
-            } catch(e) { tbody.innerHTML = '<tr><td colspan="5">加载失败</td></tr>'; }
-        }
-
-        async function act(a, t) {
-            if(!confirm('确定执行此操作?')) return;
-            const u = localStorage.getItem('u'), p = localStorage.getItem('p');
-            const res = await fetch('/api/admin', {
-                method: 'POST', headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p },
-                body: JSON.stringify({ action: a, targetUser: t, duration: 24 })
-            });
-            if(res.ok) { toast('操作成功'); loadAdmin(); } else { toast('操作失败'); }
-        }
-
-        const id = x => document.getElementById(x);
-        const text = x => id(x).innerText; const src = x => id(x).src; const cls = x => id(x).className; const val = x => id(x).value;
-        function debounceSave() { clearTimeout(timer); timer = setTimeout(() => save(true), 1500); }
         function checkLog() {
             const isLog = localStorage.getItem('login') === '1';
             const u = localStorage.getItem('u');
@@ -361,6 +448,42 @@
             if(isLog && u === ADMIN_NAME) id('btn-admin').style.display = 'flex';
             if(isLog) { const c = localStorage.getItem('userData_'+u); if(c) fill(JSON.parse(c)); }
         }
+
+        async function loadCloud(user) {
+            const l = document.getElementById('loader'); l.style.display = 'flex';
+            document.getElementById('tb-edit').style.display='none'; document.getElementById('tb-read').style.display='flex';
+            document.body.classList.add('read');
+            document.querySelectorAll('[contenteditable]').forEach(e => e.setAttribute('contenteditable', 'false'));
+            try {
+                const res = await fetch(`/api/user?name=${user}`);
+                if (res.ok) {
+                    const json = await res.json();
+                    if(json.status!=='banned') { fill(json.data); l.style.display='none'; }
+                    else document.body.innerHTML="<h2 style='color:red;text-align:center;margin-top:100px'>已封禁</h2>";
+                } else document.body.innerHTML="<h2 style='text-align:center;margin-top:100px'>用户不存在</h2>";
+            } catch (e) { l.innerHTML = "<h3>网络错误</h3>"; }
+        }
+
+        // --- 管理员 & 工具 ---
+        async function loadAdmin() {
+            toggleAdmin(1);
+            const tbody = document.querySelector('tbody');
+            tbody.innerHTML = '<tr><td colspan="5">加载中...</td></tr>';
+            const u = localStorage.getItem('u'), p = localStorage.getItem('p');
+            try {
+                const res = await fetch('/api/admin', { headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p } });
+                if(res.status===401) return toast('无权访问');
+                const list = await res.json();
+                tbody.innerHTML = list.map(x => `<tr><td>${x.name}</td><td>${x.role||'user'}</td><td>${x.status==='banned'?'封':'正'}</td><td>${new Date(x.created_at).toLocaleDateString()}</td><td>${x.name!==u?`<button class="act-btn act-ban" onclick="act('ban','${x.name}')">禁</button><button class="act-btn act-del" onclick="act('delete','${x.name}')">删</button>`:'-'}</td></tr>`).join('');
+            } catch(e){ tbody.innerHTML = '<tr><td>失败</td></tr>'; }
+        }
+        async function act(a, t) {
+            if(!confirm('确定?')) return;
+            const u = localStorage.getItem('u'), p = localStorage.getItem('p');
+            await fetch('/api/admin', { method: 'POST', headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p }, body: JSON.stringify({ action: a, targetUser: t, duration: 24 }) });
+            loadAdmin();
+        }
+        function toggleAdmin(s) { id('admin').style.display = s ? 'flex' : 'none'; }
         function clickAv() { if(canEdit()) id('file').click(); }
         function uploadImg(e) {
             const f = e.target.files[0]; if(!f) return;
@@ -369,45 +492,20 @@
                 const img = new Image(); img.onload = () => {
                     const c = document.createElement('canvas'); c.width = 400; c.height = 400;
                     const ctx = c.getContext('2d'); let sx,sy,sw,sh;
-                    if(img.width>img.height){sh=img.height;sw=img.height;sx=(img.width-img.height)/2;sy=0;}
-                    else{sw=img.width;sh=img.width;sx=0;sy=(img.height-img.width)/2;}
-                    ctx.drawImage(img,sx,sy,sw,sh,0,0,400,400);
-                    id('user-avatar').src = c.toDataURL('image/jpeg',0.8); save(true);
+                    if(img.width>img.height){sh=img.height;sw=img.height;sx=(img.width-img.height)/2;sy=0;} else{sw=img.width;sh=img.width;sx=0;sy=(img.height-img.width)/2;}
+                    ctx.drawImage(img,sx,sy,sw,sh,0,0,400,400); id('user-avatar').src = c.toDataURL('image/jpeg',0.8); save(true);
                 }; img.src = ev.target.result;
             }; r.readAsDataURL(f);
         }
-        
         function canEdit() { return !document.body.classList.contains('read') && localStorage.getItem('login')==='1'; }
         function openM() { id('modal').style.display='flex'; }
         function closeM() { id('modal').style.display='none'; }
-        function flip() { 
-            isReg = !isReg; 
-            id('m-title').innerText=isReg?"注册账号":"用户登录"; 
-            document.getElementById('btn-submit').innerText=isReg?"立即注册":"立即登录";
-            id('m-tip').innerText=isReg?"去登录":"注册新账号"; 
-        }
-        function logout() { localStorage.setItem('login','0'); localStorage.removeItem('u'); location.href="/"; }
-        function toggleAdmin(s) { id('admin').style.display = s ? 'flex' : 'none'; }
+        function flip() { isReg=!isReg; id('m-title').innerText=isReg?"注册":"登录"; document.querySelector('.btn-sub').innerText=isReg?"注册":"登录"; id('m-tip').innerText=isReg?"去登录":"去注册"; }
+        function logout() { localStorage.setItem('login','0'); location.href="/"; }
         function mode() { document.body.classList.toggle('dark'); }
         function goHome() { location.href="/"; }
-        function share() { 
-            const u = localStorage.getItem('u'); const url = location.origin + '/' + u;
-            navigator.clipboard.writeText(url).then(()=>toast('链接已复制')).catch(()=>prompt("复制:", url)); 
-        }
-        function loadCloud(user) {
-            const l = document.getElementById('loader'); l.style.display = 'flex';
-            document.getElementById('tb-edit').style.display='none'; document.getElementById('tb-read').style.display='flex';
-            document.body.classList.add('read');
-            document.querySelectorAll('[contenteditable]').forEach(e => e.setAttribute('contenteditable', 'false'));
-            fetch(`/api/user?name=${user}`).then(r=>r.ok?r.json():null).then(json=>{
-                if(json && json.status!=='banned') { fill(json.data); l.style.display='none'; }
-                else document.body.innerHTML="<h2 style='color:#666;text-align:center;margin-top:100px'>用户不存在或已封禁</h2>";
-            }).catch(()=>document.body.innerHTML="<h2>网络错误</h2>");
-        }
-        function toast(t) { 
-            const el = document.getElementById('toast'); el.innerHTML = `<span>${t}</span>`;
-            el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2000); 
-        }
+        function share() { const u=localStorage.getItem('u'); const url=location.origin+'/'+u; navigator.clipboard.writeText(url).then(()=>toast('已复制')).catch(()=>prompt("复制",url)); }
+        function toast(t) { const el = document.getElementById('toast'); el.innerHTML = `<span>${t}</span>`; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2000); }
     </script>
 </body>
 </html>
