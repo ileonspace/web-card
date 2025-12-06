@@ -4,172 +4,185 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Web Card V23</title>
+    <title>Web Card V24 - 完美修复版</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
-        /* --- 1. 全局配色 & 字体 (科技感微调) --- */
+        /* --- 1. 核心配色 (保持你喜欢的原版 V22) --- */
         :root {
-            --bg: #f0f2f5; --card: #ffffff; --text: #1d1d1f; --sub: #86868b;
-            --accent: #0071e3; --danger: #ff3b30; --success: #34c759;
-            --border: #d2d2d7; --shadow: 0 4px 20px rgba(0,0,0,0.05);
+            --bg: #EAF3F7; --card: #ffffff; --text: #334155; --sub: #64748b;
+            --accent: #3a7bd5; --danger: #ff4757; --success: #2ed573;
+            --shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
         }
         body.dark {
-            --bg: #000000; --card: #1c1c1e; --text: #f5f5f7; --sub: #86868b;
-            --border: #424245; --shadow: 0 4px 20px rgba(0,0,0,0.3);
+            --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --sub: #94a3b8;
+            --shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
         body {
-            background: var(--bg); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+            background: var(--bg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             color: var(--text); display: flex; justify-content: center; align-items: center;
             min-height: 100vh; margin: 0; padding: 20px; transition: background 0.3s;
         }
 
-        /* --- 2. 登录/注册弹窗 (修复交互与美观) --- */
-        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(10px); z-index: 2000; display: none; justify-content: center; align-items: center; opacity: 0; transition: 0.3s; }
-        #modal.active { opacity: 1; }
+        /* --- 2. 按钮优化 (增加按压感 + 修复消失问题) --- */
+        .toolbar, .visitor-nav { position: absolute; top: 20px; z-index: 100; display: flex; gap: 10px; }
+        .toolbar { right: 20px; } .visitor-nav { left: 20px; display: none; }
         
-        .auth-box {
-            background: var(--card); width: 85%; max-width: 320px; padding: 30px;
-            border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            text-align: center; border: 1px solid var(--border);
+        .btn {
+            background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.05);
+            color: var(--text); padding: 0 15px; height: 38px; border-radius: 20px;
+            cursor: pointer; backdrop-filter: blur(5px); display: flex; align-items: center; gap: 6px;
+            font-size: 13px; font-weight: 600; transition: all 0.1s; user-select: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        .auth-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; color: var(--text); }
+        .btn:hover { transform: translateY(-2px); background: rgba(255,255,255,0.9); }
+        /* 🔥 按压效果 */
+        .btn:active { transform: scale(0.95) translateY(0); }
+        
+        body.dark .btn { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.1); color: #fff; }
+        
+        /* 红色退出按钮 */
+        .btn-red { color: var(--danger); border-color: var(--danger); }
+        .btn-red:hover { background: var(--danger) !important; color: #fff !important; }
+        
+        /* 管理按钮 */
+        .btn-admin { color: #8e44ad; border-color: #8e44ad; }
+        .btn-admin:hover { background: #8e44ad !important; color: #fff !important; }
+
+        /* --- 3. 登录界面 (精致化 + 手机适配) --- */
+        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); z-index: 2000; display: none; justify-content: center; align-items: center; }
+        
+        .box {
+            background: var(--card); width: 85%; max-width: 280px; padding: 30px 25px;
+            border-radius: 20px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            /* 手机适配关键：防止溢出 */
+            box-sizing: border-box; 
+        }
+        .box h3 { margin: 0 0 20px 0; color: var(--text); font-size: 18px; }
         
         .inp {
-            width: 100%; padding: 12px 15px; margin-bottom: 12px; 
-            background: rgba(128,128,128,0.05); border: 1px solid transparent;
-            border-radius: 12px; font-size: 14px; color: var(--text); outline: none;
-            transition: 0.2s; box-sizing: border-box;
+            width: 100%; padding: 10px 12px; margin-bottom: 12px; 
+            border: 1px solid var(--border-color); border-radius: 10px; 
+            background: rgba(0,0,0,0.03); color: var(--text); font-size: 14px;
+            box-sizing: border-box; outline: none; transition: 0.3s;
         }
-        .inp:focus { background: var(--card); border-color: var(--accent); box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
+        .inp:focus { background: var(--card); border-color: var(--accent); box-shadow: 0 0 0 3px rgba(58,123,213,0.1); }
         
-        .btn-main {
-            width: 100%; padding: 12px; background: var(--accent); color: white;
-            border: none; border-radius: 12px; font-size: 14px; font-weight: 600;
-            cursor: pointer; transition: 0.2s; margin-top: 10px;
+        .btn-sub {
+            width: 100%; padding: 10px; background: var(--accent); color: #fff; border: none; 
+            border-radius: 10px; cursor: pointer; margin-top: 10px; font-weight: bold; font-size: 14px;
         }
-        .btn-main:active { transform: scale(0.96); }
-        
-        .auth-link { font-size: 12px; color: var(--sub); margin-top: 20px; cursor: pointer; display: inline-block;}
-        .auth-link:hover { color: var(--accent); text-decoration: underline; }
+        .btn-sub:active { transform: scale(0.98); }
 
-        /* --- 3. 管理面板 (科技风重构) --- */
-        #admin { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 3000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-        .admin-win { 
-            background: var(--card); width: 95%; max-width: 700px; height: 80vh; 
-            border-radius: 18px; display: flex; flex-direction: column; overflow: hidden;
-            border: 1px solid var(--border); box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        /* --- 4. 管理面板 (科技图标风) --- */
+        #admin { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 3000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
+        
+        .admin-card {
+            background: var(--card); width: 95%; max-width: 650px; max-height: 85vh;
+            border-radius: 16px; display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
         }
-        .admin-head { 
-            padding: 15px 20px; border-bottom: 1px solid var(--border); 
-            display: flex; justify-content: space-between; align-items: center; background: rgba(128,128,128,0.03);
+        .admin-head {
+            padding: 15px 20px; border-bottom: 1px solid rgba(0,0,0,0.1);
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.02);
         }
         .admin-body { flex: 1; overflow-y: auto; padding: 0; -webkit-overflow-scrolling: touch; }
         
-        /* 列表式表格，更适合移动端 */
-        .user-row {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 20px; border-bottom: 1px solid var(--border); transition: 0.2s;
-        }
-        .user-row:hover { background: rgba(128,128,128,0.03); }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap; }
+        th { text-align: left; padding: 12px 15px; color: var(--sub); font-weight: 600; background: rgba(0,0,0,0.02); position: sticky; top: 0; }
+        td { padding: 12px 15px; border-bottom: 1px solid rgba(0,0,0,0.05); color: var(--text); vertical-align: middle; }
         
-        .u-info { display: flex; flex-direction: column; gap: 2px; }
-        .u-name { font-weight: 600; font-size: 14px; color: var(--text); }
-        .u-meta { font-size: 11px; color: var(--sub); display: flex; align-items: center; gap: 6px; }
-        
-        /* 状态点 */
-        .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-        .dot.ok { background: var(--success); box-shadow: 0 0 8px var(--success); }
-        .dot.ban { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
-        
-        /* 操作图标按钮 */
-        .act-group { display: flex; gap: 10px; }
+        /* 🔥 图标化操作按钮 */
         .act-btn {
-            width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border);
-            background: transparent; color: var(--sub); cursor: pointer;
-            display: flex; justify-content: center; align-items: center; transition: 0.2s;
+            width: 28px; height: 28px; border-radius: 6px; border: 1px solid transparent;
+            background: transparent; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+            margin-right: 5px; transition: 0.2s; font-size: 14px;
         }
-        .act-btn:hover { background: rgba(128,128,128,0.1); color: var(--text); }
-        .act-ban:hover { border-color: orange; color: orange; background: rgba(255,165,0,0.1); }
-        .act-unban:hover { border-color: var(--success); color: var(--success); background: rgba(52,199,89,0.1); }
-        .act-del:hover { border-color: var(--danger); color: var(--danger); background: rgba(255,59,48,0.1); }
+        .act-btn:hover { background: rgba(0,0,0,0.05); }
+        .act-ban { color: orange; } .act-ban:hover { background: rgba(255,165,0,0.1); }
+        .act-unban { color: var(--success); } .act-unban:hover { background: rgba(46,213,115,0.1); }
+        .act-del { color: var(--danger); } .act-del:hover { background: rgba(255,59,48,0.1); }
 
-        /* --- 4. 界面主体 (保持精致) --- */
-        .card { background: var(--card); width: 100%; max-width: 360px; padding: 40px 30px; border-radius: 24px; text-align: center; box-shadow: var(--shadow); position: relative; }
-        .avatar { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 4px solid var(--card); box-shadow: 0 10px 30px rgba(0,0,0,0.15); margin-bottom: 20px; cursor: pointer; transition: 0.5s; }
-        .avatar:hover { transform: scale(1.05) rotate(5deg); }
-        
-        [contenteditable]:focus { outline: none; border-bottom: 2px solid var(--accent); background: rgba(0,113,227,0.05); border-radius: 4px; padding: 0 4px; }
-        h1 { margin: 5px 0; font-size: 24px; font-weight: 700; }
-        .role { color: var(--sub); font-size: 13px; margin-bottom: 30px; }
-        .item { display: flex; align-items: center; padding: 12px; margin-bottom: 8px; border-radius: 12px; text-align: left; }
-        body:not(.read) .item:hover { background: rgba(128,128,128,0.05); }
-        .item i { font-size: 20px; color: var(--sub); margin-right: 15px; cursor: pointer; transition: 0.2s; }
-        body:not(.read) .item i:hover { color: var(--accent); }
-        .txt { font-size: 14px; flex: 1; outline: none; word-break: break-all; }
-
-        /* --- 工具栏 --- */
-        .toolbar, .visitor-nav { position: absolute; top: 20px; z-index: 100; display: flex; gap: 10px; }
-        .toolbar { right: 20px; } .visitor-nav { left: 20px; display: none; }
-        .tool-btn { 
-            background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.05);
-            color: var(--text); height: 36px; padding: 0 12px; border-radius: 18px;
-            cursor: pointer; backdrop-filter: blur(10px); display: flex; align-items: center; gap: 5px;
-            font-size: 13px; font-weight: 500; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        /* --- 5. 提示条优化 (顶部居中) --- */
+        #toast {
+            position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-20px);
+            background: rgba(0,0,0,0.85); color: #fff; padding: 8px 20px;
+            border-radius: 50px; font-size: 13px; font-weight: 500;
+            opacity: 0; pointer-events: none; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 10000; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(4px);
         }
-        body.dark .tool-btn { background: rgba(30,30,30,0.6); border-color: rgba(255,255,255,0.1); }
-        .tool-btn:active { transform: scale(0.95); } /* 按压效果 */
-        
-        .btn-admin { color: #bf5af2; } .btn-admin:hover { background: rgba(191,90,242,0.1); }
-        .btn-logout { color: var(--danger); } .btn-logout:hover { background: rgba(255,59,48,0.1); }
-
-        /* Toast & Loader */
-        #toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-20px); background: rgba(0,0,0,0.8); color: #fff; padding: 8px 16px; border-radius: 30px; font-size: 13px; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 9999; backdrop-filter: blur(4px); display: flex; align-items: center; gap: 6px; }
         #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-        #loader { position: fixed; inset: 0; background: var(--bg); z-index: 5000; display: none; justify-content: center; align-items: center; flex-direction: column;}
+
+        /* --- 卡片 & 其他 (保持原样) --- */
+        .card { background: var(--card); width: 100%; max-width: 360px; padding: 40px 30px; border-radius: 24px; text-align: center; box-shadow: var(--shadow); position: relative; }
+        .avatar { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 4px solid var(--card); box-shadow: 0 8px 24px rgba(0,0,0,0.12); margin-bottom: 15px; cursor: pointer; transition: 0.5s; }
+        .avatar:hover { transform: rotate(360deg); }
+        [contenteditable]:focus { outline: none; border-bottom: 2px solid var(--accent); background: rgba(58,123,213,0.05); }
+        h1 { margin: 10px 0; font-size: 24px; } .role { color: var(--sub); font-size: 13px; margin-bottom: 30px; }
+        .list { text-align: left; } .item { display: flex; align-items: center; padding: 12px; margin-bottom: 8px; border-radius: 12px; }
+        body:not(.read) .item:hover { background: rgba(0,0,0,0.03); }
+        .item i { font-size: 20px; color: var(--sub); margin-right: 15px; cursor: pointer; }
+        .txt { font-size: 14px; flex: 1; outline: none; word-break: break-all; }
+        
+        #save-status { position: fixed; bottom: 20px; right: 20px; font-size: 12px; color: var(--sub); opacity: 0; transition: 0.3s; pointer-events: none; }
+        #loader { position: fixed; inset: 0; background: var(--bg); z-index: 5000; display: none; justify-content: center; align-items: center; flex-direction: column; }
+        .read .avatar, .read i { pointer-events: none; }
+        
+        /* 移动端适配 */
+        @media (max-width: 480px) {
+            .btn span { display: none; } /* 手机端隐藏按钮文字，只显示图标 */
+            .btn { padding: 0 10px; }
+            .toolbar { gap: 8px; right: 15px; }
+        }
     </style>
 </head>
 <body>
 
-    <div id="toast"></div>
-    <div id="loader"><i class="ri-loader-4-line ri-spin" style="font-size:32px;color:var(--accent)"></i></div>
+    <div id="toast"><i class="ri-info-i"></i> <span>提示</span></div>
+    
+    <div id="loader"><i class="ri-loader-4-line ri-spin" style="font-size:32px;color:var(--accent)"></i><p style="margin-top:10px;font-size:12px;color:var(--sub)">加载数据...</p></div>
 
     <input type="file" id="file" hidden accept="image/*" onchange="uploadImg(event)">
 
-    <div id="modal"><div class="auth-box">
-        <div class="auth-title" id="m-title">用户登录</div>
-        <input id="u" class="inp" placeholder="用户名" autocomplete="off">
-        <input id="p" type="password" class="inp" placeholder="密码">
-        <button class="btn-main" id="btn-submit" onclick="auth()">立即登录</button>
-        <div style="margin-top:15px; display:flex; justify-content:space-between; align-items:center">
-            <span class="auth-link" onclick="closeM()">取消</span>
-            <span class="auth-link" onclick="flip()" id="m-switch" style="color:var(--accent)">没有账号？去注册</span>
+    <div id="modal"><div class="box">
+        <h3 id="m-title" style="margin:0 0 15px 0">用户登录</h3>
+        <input id="u" class="inp" placeholder="请输入用户名" autocomplete="off">
+        <input id="p" type="password" class="inp" placeholder="请输入密码">
+        <button class="btn-sub" onclick="auth()">立即登录</button>
+        <div style="margin-top:15px;display:flex;justify-content:space-between;font-size:12px;color:var(--sub)">
+            <span onclick="flip()" id="m-tip" style="cursor:pointer;color:var(--accent)">注册新账号</span>
+            <span onclick="closeM()" style="cursor:pointer">取消</span>
         </div>
     </div></div>
 
-    <div id="admin"><div class="admin-win">
+    <div id="admin"><div class="admin-card">
         <div class="admin-head">
-            <h3 style="margin:0;font-size:16px"><i class="ri-dashboard-3-line"></i> 控制台</h3>
-            <button onclick="toggleAdmin(0)" style="border:none;background:none;font-size:20px;color:var(--sub);cursor:pointer">&times;</button>
+            <h3 style="margin:0;font-size:16px"><i class="ri-dashboard-line"></i> 控制台</h3>
+            <button onclick="toggleAdmin(0)" style="border:none;background:none;font-size:20px;cursor:pointer;color:var(--text)">&times;</button>
         </div>
-        <div class="admin-body" id="admin-list">
-            </div>
+        <div class="admin-body">
+            <table id="tbl">
+                <thead><tr><th>用户</th><th>角色</th><th>状态</th><th>注册时间</th><th>操作</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </div></div>
 
     <div class="toolbar" id="tb-edit">
-        <button class="tool-btn" id="btn-login" onclick="openM()"><i class="ri-user-3-line"></i> 登录</button>
-        <button class="tool-btn btn-admin" id="btn-admin" onclick="loadAdmin()" style="display:none"><i class="ri-command-line"></i> 管理</button>
-        <button class="tool-btn btn-logout" id="btn-logout" onclick="logout()" style="display:none"><i class="ri-logout-box-r-line"></i></button>
-        <button class="tool-btn" id="btn-share" onclick="share()" style="display:none"><i class="ri-share-forward-line"></i></button>
-        <button class="tool-btn" onclick="mode()"><i class="ri-contrast-2-line"></i></button>
+        <button class="btn" id="btn-login" onclick="openM()"><i class="ri-user-3-line"></i> <span>登录</span></button>
+        <button class="btn btn-admin" id="btn-admin" onclick="loadAdmin()" style="display:none"><i class="ri-command-line"></i> <span>管理</span></button>
+        <button class="btn btn-red" id="btn-out" onclick="logout()" style="display:none"><i class="ri-logout-box-r-line"></i> <span>退出</span></button>
+        <button class="btn" id="btn-share" onclick="share()" style="display:none"><i class="ri-share-forward-line"></i> <span>链接</span></button>
+        <button class="btn" onclick="mode()"><i class="ri-contrast-2-line"></i></button>
     </div>
 
     <div class="visitor-nav" id="tb-read">
-        <button class="tool-btn" onclick="goHome()"><i class="ri-arrow-left-s-line"></i> 返回</button>
-        <button class="tool-btn" onclick="mode()"><i class="ri-contrast-2-line"></i></button>
+        <button class="btn" onclick="goHome()"><i class="ri-arrow-left-s-line"></i> <span>返回</span></button>
+        <button class="btn" onclick="mode()"><i class="ri-contrast-2-line"></i></button>
     </div>
 
-    <div id="save-status" style="position:fixed;bottom:20px;right:20px;font-size:12px;color:var(--sub);opacity:0;transition:0.3s"></div>
+    <div id="save-status"></div>
 
     <div class="card" oninput="debounceSave()">
         <img src="https://cdn.pixabay.com/photo/2021/08/04/13/06/software-developer-6521720_1280.jpg" class="avatar" id="av" onclick="clickAv()">
@@ -183,11 +196,12 @@
     </div>
 
     <script>
-        const ADMIN_NAME = 'admin'; // ⚠️ 必须与环境变量一致
+        // ⚠️ 必须与环境变量 ADMIN_USER 一致
+        const ADMIN_NAME = 'admin'; 
 
         window.onload = () => {
             let path = window.location.pathname.replace(/\/$/, "").substring(1);
-            // 安全超时：3秒加载不出就显示界面
+            // 安全超时强制显示，防止白屏
             setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 3000);
 
             if (path && path !== 'index.html') {
@@ -200,59 +214,36 @@
 
         let isReg = false, timer = null;
 
-        // --- 1. 登录/注册 UI 逻辑修复 ---
-        function openM() { 
-            const m = document.getElementById('modal');
-            m.style.display = 'flex';
-            setTimeout(() => m.classList.add('active'), 10);
-        }
-        function closeM() { 
-            const m = document.getElementById('modal');
-            m.classList.remove('active');
-            setTimeout(() => m.style.display = 'none', 300);
-        }
-        function flip() { 
-            isReg = !isReg; 
-            // 界面文字切换
-            document.getElementById('m-title').innerText = isReg ? "注册新账号" : "用户登录";
-            document.getElementById('btn-submit').innerText = isReg ? "立即注册" : "立即登录";
-            document.getElementById('m-switch').innerText = isReg ? "已有账号？去登录" : "没有账号？去注册";
-        }
-
-        // --- 2. 认证逻辑 (V20 稳定版核心) ---
+        // --- 登录逻辑 (使用你之前验证过的逻辑) ---
         async function auth() {
             const u = val('u'), p = val('p');
             if(!u || !p) return toast('请填写完整', 'ri-error-warning-line');
             
             if(isReg) {
-                // 注册
                 if(localStorage.getItem('pass_'+u)) return toast('本地已存在，请直接登录');
-                toast('检查用户名...', 'ri-loader-4-line');
+                toast('检查用户名...');
                 try {
                     const check = await fetch(`/api/user?name=${u}`);
                     if(check.ok) return toast('用户名已被占用', 'ri-close-circle-line');
                     localStorage.setItem('pass_'+u, p);
                     toast('注册成功，请登录', 'ri-check-line');
-                    flip(); // 自动切回登录界面
+                    flip();
                 } catch(e) { toast('网络错误'); }
             } else {
-                // 登录
                 const localPass = localStorage.getItem('pass_' + u);
-                // 本地快速验证
                 if (localPass === p) { success(u, p, null); return; }
 
-                // 云端验证 (兼容旧密码)
-                toast('云端验证中...', 'ri-cloud-line');
+                toast('云端验证中...', 'ri-loader-2-line');
                 try {
                     const res = await fetch(`/api/user?name=${u}`);
                     if(res.ok) {
                         const json = await res.json();
+                        // 兼容新旧密码字段
                         const cloudP = json.data ? (json.data._secret_pass || json.data._p) : null;
-                        
                         if(cloudP === p) {
                             localStorage.setItem('userData_' + u, JSON.stringify(json.data));
                             success(u, p, json.data);
-                        } else { toast('密码错误', 'ri-lock-2-line'); }
+                        } else { toast('密码错误', 'ri-lock-line'); }
                     } else { toast('用户不存在', 'ri-user-unfollow-line'); }
                 } catch(e) { toast('网络错误'); }
             }
@@ -269,69 +260,15 @@
             toast('欢迎回来', 'ri-user-smile-line');
         }
 
-        // --- 3. 管理面板 (科技风 UI 生成) ---
-        async function loadAdmin() {
-            toggleAdmin(1);
-            const list = document.getElementById('admin-list');
-            list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--sub)">加载数据中...</div>';
-            
-            const u = localStorage.getItem('u'), p = localStorage.getItem('p');
-            try {
-                const res = await fetch('/api/admin', { headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p } });
-                if(res.status===401) return toast('无权访问', 'ri-shield-key-line');
-                const users = await res.json();
-                
-                // 生成漂亮的列表
-                list.innerHTML = users.map(x => {
-                    const isBan = x.status === 'banned';
-                    const isAdmin = x.role === 'admin';
-                    const statusDot = isBan ? 'ban' : 'ok';
-                    const statusText = isBan ? '已封禁' : '正常';
-                    
-                    return `
-                    <div class="user-row">
-                        <div class="u-info">
-                            <span class="u-name">${x.name} ${isAdmin ? '<i class="ri-vip-crown-fill" style="color:#ffcc00"></i>' : ''}</span>
-                            <span class="u-meta">
-                                <span class="dot ${statusDot}"></span> ${statusText} · ${new Date(x.created_at).toLocaleDateString()}
-                            </span>
-                        </div>
-                        <div class="act-group">
-                            ${x.name !== u ? `
-                                ${!isBan ? `<button class="act-btn act-ban" onclick="act('ban','${x.name}')"><i class="ri-prohibited-line"></i></button>` 
-                                : `<button class="act-btn act-unban" onclick="act('unban','${x.name}')"><i class="ri-checkbox-circle-line"></i></button>`}
-                                <button class="act-btn act-del" onclick="act('delete','${x.name}')"><i class="ri-delete-bin-line"></i></button>
-                            ` : ''}
-                        </div>
-                    </div>
-                    `;
-                }).join('');
-            } catch(e) { list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--danger)">加载失败</div>'; }
-        }
-
-        async function act(a, t) {
-            if(!confirm('确定执行此操作?')) return;
-            const u = localStorage.getItem('u'), p = localStorage.getItem('p');
-            const res = await fetch('/api/admin', {
-                method: 'POST', headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p },
-                body: JSON.stringify({ action: a, targetUser: t, duration: 24 })
-            });
-            if(res.ok) { toast('操作成功', 'ri-check-line'); loadAdmin(); } else { toast('操作失败'); }
-        }
-
-        function toggleAdmin(s) { 
-            const el = document.getElementById('admin');
-            el.style.display = s ? 'flex' : 'none'; 
-        }
-
-        // --- 4. 保存 & 基础逻辑 ---
+        // --- 保存 ---
         async function save(silent = false) {
             if (localStorage.getItem('login') !== '1') return;
             const u = localStorage.getItem('u'), p = localStorage.getItem('p');
             const st = document.getElementById('save-status');
             
-            st.style.opacity = 1; st.innerText = '云端同步中...';
-            
+            st.style.opacity = 1; st.innerText = '云端同步...';
+            if(!silent) toast('正在保存...', 'ri-upload-cloud-line');
+
             const data = {
                 name: text('name'), role: text('role'), av: src('av'),
                 t1: text('t1'), i1: cls('i1'),
@@ -349,37 +286,62 @@
                     localStorage.setItem('userData_' + u, JSON.stringify(data));
                     st.innerText = '已同步';
                     setTimeout(() => st.style.opacity = 0, 2000);
-                    if(!silent) toast('已保存', 'ri-save-line');
+                    if(!silent) toast('已保存', 'ri-check-line');
                 } else { st.innerText = '同步失败'; }
             } catch(e) { st.innerText = '网络错误'; }
         }
 
-        // --- 加载访客 ---
-        async function loadCloud(user) {
-            const l = document.getElementById('loader');
-            l.style.display = 'flex';
-            document.getElementById('tb-edit').style.display = 'none';
-            document.getElementById('tb-read').style.display = 'flex';
-            document.body.classList.add('read');
-            document.querySelectorAll('[contenteditable]').forEach(e => e.setAttribute('contenteditable', 'false'));
-
+        // --- 管理面板逻辑 (科技风图标生成) ---
+        async function loadAdmin() {
+            toggleAdmin(1);
+            const tbody = document.querySelector('tbody');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--sub)">加载数据...</td></tr>';
+            const u = localStorage.getItem('u'), p = localStorage.getItem('p');
             try {
-                const res = await fetch(`/api/user?name=${user}`);
-                if (res.ok) {
-                    const json = await res.json();
-                    if(json.status === 'banned') {
-                        document.body.innerHTML = "<h2 style='color:var(--danger)'>🚫 账号已封禁</h2>";
-                    } else {
-                        fill(json.data);
-                        l.style.display = 'none';
-                    }
-                } else {
-                    document.body.innerHTML = "<h3>🤷‍♂️ 用户不存在</h3>";
-                }
-            } catch (e) { l.innerHTML = "<h3>❌ 网络连接失败</h3>"; }
+                const res = await fetch('/api/admin', { headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p } });
+                if(res.status===401) return toast('无权访问');
+                const list = await res.json();
+                
+                // 🔥 生成图标表格
+                tbody.innerHTML = list.map(x => {
+                    const isBan = x.status === 'banned';
+                    const isAdmin = x.role === 'admin';
+                    // 状态图标
+                    const statusIcon = isBan 
+                        ? `<i class="ri-prohibited-line" style="color:var(--danger)"></i>` 
+                        : `<i class="ri-checkbox-circle-fill" style="color:var(--success)"></i>`;
+                    
+                    return `
+                    <tr>
+                        <td><b>${x.name}</b> ${isAdmin ? '<i class="ri-vip-crown-fill" style="color:#f1c40f"></i>' : ''}</td>
+                        <td>${x.role||'user'}</td>
+                        <td style="text-align:center">${statusIcon}</td>
+                        <td style="font-size:12px;color:var(--sub)">${new Date(x.created_at).toLocaleDateString()}</td>
+                        <td>
+                            ${x.name !== u ? `
+                            ${!isBan ? 
+                                `<button class="act-btn act-ban" onclick="act('ban','${x.name}')" title="禁用"><i class="ri-indeterminate-circle-line"></i></button>` : 
+                                `<button class="act-btn act-unban" onclick="act('unban','${x.name}')" title="解禁"><i class="ri-checkbox-circle-line"></i></button>`
+                            }
+                            <button class="act-btn act-del" onclick="act('delete','${x.name}')" title="删除"><i class="ri-delete-bin-line"></i></button>
+                            ` : '-'}
+                        </td>
+                    </tr>`;
+                }).join('');
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="5">加载失败</td></tr>'; }
         }
 
-        // --- 工具函数 ---
+        async function act(a, t) {
+            if(!confirm('确定执行此操作?')) return;
+            const u = localStorage.getItem('u'), p = localStorage.getItem('p');
+            const res = await fetch('/api/admin', {
+                method: 'POST', headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p },
+                body: JSON.stringify({ action: a, targetUser: t, duration: 24 })
+            });
+            if(res.ok) { toast('操作成功', 'ri-check-line'); loadAdmin(); } else { toast('操作失败'); }
+        }
+
+        // --- 基础工具 ---
         function debounceSave() { clearTimeout(timer); timer = setTimeout(() => save(true), 1500); }
         function fill(d) {
             if(!d) return;
@@ -389,6 +351,7 @@
         }
         const id = x => document.getElementById(x);
         const text = x => id(x).innerText; const src = x => id(x).src; const cls = x => id(x).className; const val = x => id(x).value;
+        
         function checkLog() {
             const isLog = localStorage.getItem('login') === '1';
             const u = localStorage.getItem('u');
@@ -401,7 +364,7 @@
         function clickAv() { if(canEdit()) id('file').click(); }
         function uploadImg(e) {
             const f = e.target.files[0]; if(!f) return;
-            toast('压缩图片中...', 'ri-image-edit-line');
+            toast('压缩图片...', 'ri-image-edit-line');
             const r = new FileReader(); r.onload = ev => {
                 const img = new Image(); img.onload = () => {
                     const c = document.createElement('canvas'); c.width = 400; c.height = 400;
@@ -415,12 +378,31 @@
         }
         function ic(el) { if(canEdit()) { const n=prompt("图标代码 (如 ri-home-line)",el.className); if(n){el.className=n;save(true);} } }
         function canEdit() { return !document.body.classList.contains('read') && localStorage.getItem('login')==='1'; }
+        function openM() { id('modal').style.display='flex'; }
+        function closeM() { id('modal').style.display='none'; }
+        function flip() { 
+            isReg = !isReg; 
+            id('m-title').innerText=isReg?"注册账号":"用户登录"; 
+            document.querySelector('.btn-sub').innerText=isReg?"立即注册":"立即登录";
+            id('m-tip').innerText=isReg?"去登录":"注册新账号"; 
+        }
         function logout() { localStorage.setItem('login','0'); localStorage.removeItem('u'); location.href="/"; }
+        function toggleAdmin(s) { id('admin').style.display = s ? 'flex' : 'none'; }
         function mode() { document.body.classList.toggle('dark'); }
         function goHome() { location.href="/"; }
         function share() { 
             const u = localStorage.getItem('u'); const url = location.origin + '/' + u;
-            navigator.clipboard.writeText(url).then(()=>toast('链接已复制', 'ri-link')).catch(()=>prompt("复制:", url)); 
+            navigator.clipboard.writeText(url).then(()=>toast('链接已复制', 'ri-links-line')).catch(()=>prompt("复制:", url)); 
+        }
+        function loadCloud(user) {
+            const l = document.getElementById('loader'); l.style.display = 'flex';
+            document.getElementById('tb-edit').style.display='none'; document.getElementById('tb-read').style.display='flex';
+            document.body.classList.add('read');
+            document.querySelectorAll('[contenteditable]').forEach(e => e.setAttribute('contenteditable', 'false'));
+            fetch(`/api/user?name=${user}`).then(r=>r.ok?r.json():null).then(json=>{
+                if(json && json.status!=='banned') { fill(json.data); l.style.display='none'; }
+                else document.body.innerHTML="<h2 style='color:#666'>用户不存在或已封禁</h2>";
+            }).catch(()=>document.body.innerHTML="<h2>网络错误</h2>");
         }
         function toast(t, i='ri-info-i') { 
             const el = document.getElementById('toast'); el.innerHTML = `<i class="${i}"></i> <span>${t}</span>`;
