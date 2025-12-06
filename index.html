@@ -3,46 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的智能主页 V12 - 终极版</title>
+    <title>我的智能主页 V13 - 自动保存版</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
-        /* --- CSS 样式区域 --- */
+        /* --- CSS 样式 --- */
         :root {
-            --bg-color: #EAF3F7;
-            --card-bg: #ffffff;
-            --text-main: #334155;
-            --text-sub: #64748b;
-            --accent: #3a7bd5;
-            --border-color: #cbd5e1;
-            --shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            --bg-color: #EAF3F7; --card-bg: #ffffff; --text-main: #334155; --text-sub: #64748b;
+            --accent: #3a7bd5; --border-color: #cbd5e1; --shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            --danger: #ff4757; /* 红色警示色 */
         }
-
         body.dark-mode {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-main: #f8fafc;
-            --text-sub: #94a3b8;
-            --border-color: #475569;
-            --shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            --bg-color: #0f172a; --card-bg: #1e293b; --text-main: #f8fafc; --text-sub: #94a3b8;
+            --border-color: #475569; --shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
-
         body {
             background-color: var(--bg-color);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, "Microsoft YaHei", sans-serif;
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            transition: background 0.5s ease;
+            color: var(--text-main); display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; margin: 0; padding: 20px; transition: background 0.5s ease;
         }
 
-        /* --- 顶部工具栏 --- */
-        .toolbar { position: absolute; top: 20px; right: 20px; display: flex; gap: 12px; z-index: 100; transition: 0.3s; }
-        .visitor-bar { position: absolute; top: 20px; left: 20px; z-index: 100; display: none; }
+        /* 工具栏通用样式 */
+        .toolbar, .visitor-bar {
+            position: absolute; top: 20px; z-index: 100; display: flex; gap: 12px; transition: 0.3s;
+        }
+        .toolbar { right: 20px; }
+        .visitor-bar { left: 20px; display: none; } /* 默认隐藏 */
 
         .tool-btn {
             background: rgba(255,255,255,0.2); border: 1px solid var(--border-color);
@@ -54,21 +41,29 @@
         .tool-btn:hover { transform: translateY(-3px); background: rgba(255,255,255,0.6); }
         body.dark-mode .tool-btn:hover { background: rgba(255,255,255,0.1); }
 
+        /* 🔥 改动3：红色退出按钮样式 */
+        .btn-logout { border-color: var(--danger); color: var(--danger); }
+        .btn-logout:hover { background: var(--danger) !important; color: white !important; border-color: var(--danger); }
+
         .btn-share { color: var(--accent); border-color: var(--accent); }
         .btn-share:hover { background: var(--accent); color: #fff; }
 
-        /* --- 卡片主体 --- */
+        /* 保存状态指示器 (右下角) */
+        #save-status {
+            position: fixed; bottom: 20px; right: 20px; font-size: 12px; color: var(--text-sub);
+            opacity: 0; transition: opacity 0.3s; pointer-events: none;
+        }
+
+        /* 卡片主体 */
         .container {
             background: var(--card-bg); width: 100%; max-width: 340px;
             padding: 45px 30px; border-radius: 24px; text-align: center;
             box-shadow: var(--shadow); position: relative; transition: all 0.5s ease;
         }
-
         .avatar {
             width: 110px; height: 110px; border-radius: 50%; object-fit: cover;
             border: 4px solid var(--card-bg); box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            margin-bottom: 15px; transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-            cursor: pointer;
+            margin-bottom: 15px; transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer;
         }
         .avatar:hover { transform: rotate(360deg); }
 
@@ -80,24 +75,18 @@
 
         .info-list { text-align: left; margin-top: 10px; }
         .info-item { display: flex; align-items: center; padding: 14px; margin-bottom: 8px; border-radius: 16px; transition: 0.2s; }
-        
         body:not(.readonly-mode) .info-item:hover { background: rgba(0,0,0,0.03); }
         body.dark-mode:not(.readonly-mode) .info-item:hover { background: rgba(255,255,255,0.05); }
 
-        /* 图标可点击样式 */
         body:not(.readonly-mode) .info-item i { 
             font-size: 20px; color: var(--text-sub); margin-right: 15px; transition: 0.3s; 
             cursor: pointer; padding: 5px; border-radius: 50%;
         }
-        body:not(.readonly-mode) .info-item i:hover { 
-            color: var(--accent); background: rgba(58, 123, 213, 0.1);
-        }
-        /* 访客模式下图标样式 */
+        body:not(.readonly-mode) .info-item i:hover { color: var(--accent); background: rgba(58, 123, 213, 0.1); }
         body.readonly-mode .info-item i { font-size: 20px; color: var(--text-sub); margin-right: 15px; pointer-events: none; }
-
         .info-text { font-size: 14px; color: var(--text-main); flex: 1; outline: none; }
 
-        /* --- 弹窗及提示 --- */
+        /* 弹窗及 Toast */
         #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(5px); z-index: 999; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s; }
         #auth-overlay.show { display: flex; opacity: 1; }
         .auth-box { background: var(--card-bg); padding: 40px 30px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2); transform: translateY(20px); transition: 0.3s; }
@@ -125,17 +114,20 @@
 
     <div class="toolbar" id="editor-toolbar">
         <button class="tool-btn" id="btn-login" onclick="openAuth()"><i class="ri-user-line"></i> 登录</button>
-        <button class="tool-btn" id="btn-logout" onclick="logout()" style="display:none"><i class="ri-logout-box-line"></i> 退出</button>
+        <button class="tool-btn btn-logout" id="btn-logout" onclick="logout()" style="display:none"><i class="ri-logout-box-line"></i> 退出</button>
         <button class="tool-btn btn-share" id="btn-share" onclick="copyLink()" style="display:none"><i class="ri-share-forward-line"></i> 生成链接</button>
-        <button class="tool-btn" onclick="saveData()"><i class="ri-save-2-line"></i> 保存</button>
+        
         <button class="tool-btn" onclick="toggleMode()"><i class="ri-moon-line"></i></button>
     </div>
 
     <div class="visitor-bar" id="visitor-toolbar">
         <button class="tool-btn" onclick="goHome()"><i class="ri-arrow-left-line"></i> 返回主页</button>
+        <button class="tool-btn" onclick="toggleMode()"><i class="ri-contrast-line"></i></button>
     </div>
 
-    <div class="container">
+    <div id="save-status"><i class="ri-loader-4-line ri-spin"></i> 正在自动保存...</div>
+
+    <div class="container" oninput="triggerAutoSave()">
         <img src="https://cdn.pixabay.com/photo/2021/08/04/13/06/software-developer-6521720_1280.jpg" class="avatar" id="user-avatar" onclick="triggerFileUpload()" alt="点击更换头像">
         
         <h1 id="user-name" contenteditable="true" spellcheck="false">Code Master</h1>
@@ -160,12 +152,8 @@
     <div class="toast" id="toast">✅ 操作成功</div>
 
     <script>
-        // --- 程序入口 ---
         window.onload = function() {
-            // 获取 URL 路径里的用户名 (去除开头的斜杠)
             const pathName = window.location.pathname.substring(1);
-            
-            // 如果路径存在且不为 index.html，则判定为访问用户主页
             if (pathName && pathName !== 'index.html') {
                 loadUserFromCloud(decodeURIComponent(pathName));
             } else {
@@ -174,9 +162,29 @@
         };
 
         let isLoginMode = true;
+        let autoSaveTimer = null; // 用于防抖动
 
-        // --- 🔥 核心功能 1：图片智能压缩与裁剪 (节省数据库额度) ---
-        
+        // --- 🔥 核心改动：自动保存逻辑 (防抖) ---
+        function triggerAutoSave() {
+            // 如果是访客模式，或者没登录，就不触发保存
+            if(document.body.classList.contains('readonly-mode')) return;
+            if(localStorage.getItem('isLoggedIn') !== 'true') return;
+
+            // 显示右下角的状态
+            const status = document.getElementById('save-status');
+            status.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> 修改中...';
+            status.style.opacity = 1;
+
+            // 清除上一次的计时器（防止打一个字存一次）
+            if (autoSaveTimer) clearTimeout(autoSaveTimer);
+
+            // 设置新的计时器：如果 1秒钟 内没有新动作，就执行保存
+            autoSaveTimer = setTimeout(() => {
+                saveData(true); // true 表示静默保存，不要弹大黑框
+            }, 1500);
+        }
+
+        // --- 图片处理 ---
         function triggerFileUpload() {
             if(document.body.classList.contains('readonly-mode')) return;
             if(localStorage.getItem('isLoggedIn') !== 'true') { openAuth(); return; }
@@ -186,101 +194,88 @@
         function handleFileSelect(event) {
             const file = event.target.files[0];
             if (!file) return;
-
-            showToast("正在压缩处理图片...");
-
+            showToast("正在处理图片...");
             const reader = new FileReader();
             reader.onload = function(e) {
                 const img = new Image();
                 img.onload = function() {
-                    // 设定目标尺寸 400x400
                     const targetSize = 400;
                     const canvas = document.createElement('canvas');
-                    canvas.width = targetSize;
-                    canvas.height = targetSize;
+                    canvas.width = targetSize; canvas.height = targetSize;
                     const ctx = canvas.getContext('2d');
-
-                    // 智能居中裁剪算法 (Cover模式)
                     let sx, sy, sWidth, sHeight;
                     if (img.width > img.height) {
-                        sHeight = img.height;
-                        sWidth = img.height;
-                        sx = (img.width - img.height) / 2;
-                        sy = 0;
+                        sHeight = img.height; sWidth = img.height; sx = (img.width - img.height) / 2; sy = 0;
                     } else {
-                        sWidth = img.width;
-                        sHeight = img.width;
-                        sx = 0;
-                        sy = (img.height - img.width) / 2;
+                        sWidth = img.width; sHeight = img.width; sx = 0; sy = (img.height - img.width) / 2;
                     }
-
-                    // 绘制并压缩
                     ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, targetSize, targetSize);
-                    
-                    // 导出为 JPEG, 质量 0.8
                     const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
                     
                     document.getElementById('user-avatar').src = compressedDataUrl;
-                    showToast("✅ 图片处理完成！记得点保存");
+                    
+                    // 🔥 图片处理完，立刻触发保存
+                    saveData(false); 
                 };
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
         }
 
-        // --- 🔥 核心功能 2：图标修改 ---
+        // --- 图标修改 ---
         function changeIcon(iconElement) {
             if(document.body.classList.contains('readonly-mode')) return;
             if(localStorage.getItem('isLoggedIn') !== 'true') { openAuth(); return; }
             
             const currentClass = iconElement.className;
-            const newClass = prompt("【修改图标】\n请输入 RemixIcon class 名称\n(如: ri-wechat-line, ri-github-fill)", currentClass);
+            const newClass = prompt("输入图标代码 (如 ri-wechat-line):", currentClass);
             if (newClass && newClass.trim() !== "") {
                 iconElement.className = newClass;
+                // 🔥 图标修改完，立刻触发保存
+                triggerAutoSave();
             }
         }
 
-        // --- 云端数据交互 (Cloudflare D1) ---
+        // --- 云端数据逻辑 ---
         async function loadUserFromCloud(username) {
             enterVisitorMode(username);
             try {
-                // 呼叫后端 API
                 const response = await fetch(`/api/user?name=${username}`);
                 if (response.ok) {
                     const data = await response.json();
                     renderData(data); 
                     showToast(`正在查看 ${username} 的主页`);
                 } else {
-                    // 如果云端没数据，提示用户
                     alert(`用户 ${username} 暂无数据`);
                 }
             } catch (e) { console.error(e); }
         }
 
-        async function saveData() {
-            if(localStorage.getItem('isLoggedIn') !== 'true') { openAuth(); return; }
+        // isSilent = true 代表静默保存（右下角小提示），false 代表大提示
+        async function saveData(isSilent = false) {
+            if(localStorage.getItem('isLoggedIn') !== 'true') return;
             const user = localStorage.getItem('currentUser');
             
-            // 收集所有数据
             const dataObj = {
                 name: document.getElementById('user-name').innerText,
                 role: document.getElementById('user-role').innerText,
                 avatar: document.getElementById('user-avatar').src, 
-                
                 siteText: document.getElementById('user-site').innerText,
                 siteIcon: document.getElementById('icon-site').className,
-
                 emailText: document.getElementById('user-email').innerText,
                 emailIcon: document.getElementById('icon-email').className,
-
                 addrText: document.getElementById('user-addr').innerText,
                 addrIcon: document.getElementById('icon-addr').className
             };
 
-            showToast("正在上传到云端...");
+            // 更新状态提示
+            const status = document.getElementById('save-status');
+            status.innerHTML = '<i class="ri-upload-cloud-2-line"></i> 同步云端...';
+            status.style.opacity = 1;
+            
+            if(!isSilent) showToast("正在保存...");
 
             try {
-                // 发送 POST 请求
                 const response = await fetch('/api/user', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -288,30 +283,32 @@
                 });
 
                 if (response.ok) {
-                    showToast("✅ 云端保存成功！");
-                    // 本地也存一份副本
                     localStorage.setItem('userData_' + user, JSON.stringify(dataObj));
-                } else { showToast("❌ 保存失败"); }
-            } catch (e) { showToast("❌ 网络错误"); }
+                    
+                    // 保存成功，显示“已保存”然后消失
+                    status.innerHTML = '<i class="ri-check-line"></i> 已自动保存';
+                    setTimeout(() => { status.style.opacity = 0; }, 2000);
+                    
+                    if(!isSilent) showToast("✅ 保存成功");
+                } else { 
+                    status.innerHTML = '❌ 保存失败';
+                }
+            } catch (e) { status.innerHTML = '❌ 网络错误'; }
         }
 
         function renderData(data) {
-            // 渲染数据到页面
             document.getElementById('user-name').innerText = data.name || "Code Master";
             document.getElementById('user-role').innerText = data.role || "Developer";
             document.getElementById('user-avatar').src = data.avatar || "https://cdn.pixabay.com/photo/2021/08/04/13/06/software-developer-6521720_1280.jpg";
-            
             document.getElementById('user-site').innerText = data.siteText || data.site || "www.example.com";
             document.getElementById('icon-site').className = data.siteIcon || "ri-global-line";
-
             document.getElementById('user-email').innerText = data.emailText || data.email || "hello@example.com";
             document.getElementById('icon-email').className = data.emailIcon || "ri-mail-send-line";
-
             document.getElementById('user-addr').innerText = data.addrText || data.addr || "City, Country";
             document.getElementById('icon-addr').className = data.addrIcon || "ri-map-pin-line";
         }
 
-        // --- 辅助及认证逻辑 ---
+        // --- 辅助逻辑 ---
         function copyLink() {
             const currentUser = localStorage.getItem('currentUser');
             if(!currentUser) return;
@@ -329,6 +326,8 @@
         function enterVisitorMode(user) {
             document.getElementById('editor-toolbar').style.display = 'none';
             document.getElementById('visitor-toolbar').style.display = 'block';
+            // 🔥 改动：访客导航栏设为 flex 布局
+            document.getElementById('visitor-toolbar').style.display = 'flex';
             document.body.classList.add('readonly-mode');
             document.querySelectorAll('[contenteditable]').forEach(el => el.setAttribute('contenteditable', 'false'));
         }
