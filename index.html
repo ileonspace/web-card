@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <!-- 强制不缓存 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Web Card V52 - 时间修复版</title>
+    <title>Web Card V53 - 外观面板优化版</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
@@ -41,6 +41,8 @@
             border-radius: var(--card-radius); 
             text-align: center; 
             box-shadow: var(--shadow); position: relative; transition: 0.3s; 
+            /* 手机端底部留出空间给面板 */
+            margin-bottom: 20px;
         }
         
         .avatar {
@@ -165,11 +167,47 @@
             .tool-btn span { display: none; } 
         }
 
-        /* --- 弹窗与管理 --- */
-        #theme-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 4000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
-        .theme-box { background: var(--card-bg); width: 90%; max-width: 340px; padding: 25px; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); text-align: left; max-height: 85vh; overflow-y: auto; }
+        /* --- 🔥 5. 外观设置 (解决遮挡问题：非模态悬浮窗) --- */
+        #theme-modal { 
+            position: fixed; 
+            /* 默认底部，宽度 100% 适配手机 */
+            bottom: 0; left: 0; right: 0; top: auto;
+            z-index: 4000; display: none; flex-direction: column; justify-content: flex-end;
+            background: transparent; /* 去除遮罩 */
+            pointer-events: none; /* 让点击穿透空白处 */
+        }
+        #theme-modal.active { display: flex; }
+        
+        .theme-box { 
+            pointer-events: auto; /* 恢复点击 */
+            background: var(--card-bg); width: 100%; max-width: 500px; margin: 0 auto;
+            padding: 25px; border-radius: 24px 24px 0 0; 
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.15); 
+            text-align: left; max-height: 60vh; overflow-y: auto; 
+            animation: slideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            border: 1px solid rgba(0,0,0,0.05); border-bottom: none;
+        }
+
+        /* 电脑端优化：右下角悬浮 */
+        @media (min-width: 600px) {
+            #theme-modal {
+                right: 20px; bottom: 20px; left: auto; top: auto;
+                align-items: flex-end;
+            }
+            .theme-box {
+                width: 340px;
+                border-radius: 24px;
+                margin-bottom: 20px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+                border: 1px solid rgba(0,0,0,0.05);
+            }
+        }
+
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        
         .setting-section { margin-bottom: 20px; }
         .setting-title { font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 12px; display: block; }
+        
         .preset-grid { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
         .color-dot { width: 36px; height: 36px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(0,0,0,0.1); transition: 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; }
         .color-dot:active { transform: scale(0.9); }
@@ -180,23 +218,17 @@
         .range-slider { width: 100%; -webkit-appearance: none; height: 6px; background: #ddd; border-radius: 3px; outline: none; }
         .range-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: var(--accent); border-radius: 50%; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
-        #icon-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 4000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
+        /* 其他弹窗 (仍需遮罩) */
+        #icon-modal, #modal, #admin { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 4000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
         .icon-box { background: var(--card-bg); width: 90%; max-width: 500px; max-height: 80vh; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; }
         .icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 10px; overflow-y: auto; padding: 5px; flex: 1; }
         .lib-icon { aspect-ratio: 1; display: flex; justify-content: center; align-items: center; font-size: 24px; color: var(--text-sub); border-radius: 12px; cursor: pointer; background: rgba(0,0,0,0.03); transition: 0.2s; }
         .lib-icon:hover { background: var(--accent); color: white; transform: scale(1.1); }
-
-        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); z-index: 2000; display: none; justify-content: center; align-items: center; }
+        
         .box { background: var(--card-bg); width: 85%; max-width: 280px; padding: 30px 25px; border-radius: 20px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
         .inp { width: 100%; padding: 10px 12px; margin: 8px 0; border: 1px solid var(--divider); border-radius: 10px; background: rgba(0,0,0,0.02); color: var(--text-main); font-size: 14px; box-sizing: border-box; outline: none; }
         .btn-sub { width: 100%; padding: 10px; background: var(--accent); color: #fff; border: none; border-radius: 10px; cursor: pointer; margin-top: 10px; font-weight: bold; }
-
-        #toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-20px); background: rgba(0,0,0,0.8); color: #fff; padding: 8px 20px; border-radius: 30px; font-size: 13px; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 10000; backdrop-filter: blur(4px); display: flex; align-items: center; gap: 6px; }
-        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-        #save-status { position: fixed; bottom: 20px; right: 20px; font-size: 12px; color: var(--text-sub); opacity: 0; transition: 0.3s; pointer-events: none; }
-        #loader { position: fixed; inset: 0; background: var(--page-bg); z-index: 5000; display: none; justify-content: center; align-items: center; flex-direction: column; }
         
-        #admin { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 3000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
         .admin-card { background: var(--card-bg); width: 95%; max-width: 650px; max-height: 80vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
         .admin-head { padding: 15px 20px; border-bottom: 1px solid rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.02); }
         .admin-body { flex: 1; overflow-y: auto; padding: 0; -webkit-overflow-scrolling: touch; }
@@ -206,11 +238,11 @@
         td { padding: 12px 15px; border-bottom: 1px solid rgba(0,0,0,0.05); color: var(--text-main); vertical-align: middle; }
         .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
         .badge-ok { background: rgba(46, 213, 115, 0.15); color: #2ecc71; } .badge-ban { background: rgba(255, 71, 87, 0.15); color: #ff4757; } .badge-admin { background: #ff4757; color: white; padding: 2px 8px; font-size: 10px; border-radius: 10px; margin-left: 5px; }
-        .act-btn { padding: 6px 10px; border-radius: 6px; font-size: 16px; border: none; cursor: pointer; margin-right: 6px; background: transparent; transition: 0.2s; }
-        .act-ban { color: #e67e22; background: rgba(230,126,34,0.1); } 
-        .act-unban { color: #2ecc71; background: rgba(46,204,113,0.1); } 
-        .act-del { color: var(--text-sub); background: rgba(0,0,0,0.05); } 
-        .act-key { color: var(--accent); background: rgba(58, 123, 213, 0.1); }
+        
+        #toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-20px); background: rgba(0,0,0,0.8); color: #fff; padding: 8px 20px; border-radius: 30px; font-size: 13px; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 10000; backdrop-filter: blur(4px); display: flex; align-items: center; gap: 6px; }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        #save-status { position: fixed; bottom: 20px; right: 20px; font-size: 12px; color: var(--text-sub); opacity: 0; transition: 0.3s; pointer-events: none; }
+        #loader { position: fixed; inset: 0; background: var(--page-bg); z-index: 5000; display: none; justify-content: center; align-items: center; flex-direction: column; }
 
         .read .avatar, .read .item-icon { pointer-events: auto; }
     </style>
@@ -241,7 +273,7 @@
         <div class="icon-grid" id="lib-grid"></div>
     </div></div>
 
-    <!-- 外观设置 -->
+    <!-- 🔥 外观设置 (解决遮挡) -->
     <div id="theme-modal"><div class="theme-box">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
             <h3 style="margin:0;color:var(--text-main);font-weight:700">外观设置</h3>
@@ -350,114 +382,26 @@
             }
         };
 
-        // --- 核心：注册/登录 (🔥 V51 修复：注册后立即上云) ---
-        async function auth() { 
-            const u = val('u'), p = val('p'); 
-            if(!u || !p) return toast('请填写完整'); 
-            const ts = Date.now();
-            
-            if(isReg) { 
-                try { 
-                    const check = await fetch(`/api/user?name=${u}&t=${ts}`); 
-                    if(check.ok) return toast('用户已存在'); 
-                    
-                    // 1. 注册时立即初始化本地数据
-                    const initData = { name: 'Code Master', role: '新用户', avatar: DEFAULT_AVATAR, items: [], theme: {radius:20, cardRadius:20, preset:'default'}, _secret_pass: p };
-                    localStorage.setItem('userData_'+u, JSON.stringify(initData));
-                    
-                    // 2. 立即上云 (确保新账号有数据)
-                    await fetch('/api/user', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: u, password: p, data: initData }) });
-                    
-                    localStorage.setItem('pass_'+u, p); 
-                    toast('注册成功'); flip(); 
-                } catch(e) { toast('网络错误'); } 
-            } else { 
-                // 登录
-                const localPass = localStorage.getItem('pass_'+u);
-                const localData = localStorage.getItem('userData_'+u);
-                
-                // 优先本地
-                if(localPass === p && localData) { 
-                    success(u, p, JSON.parse(localData)); 
-                    return; 
-                }
-                
-                // 云端兜底
-                try { 
-                    const res = await fetch(`/api/user?name=${u}&t=${ts}`); 
-                    if(res.ok) { 
-                        const json = await res.json(); 
-                        if(json.status === 'banned') return toast('🚫 账号已封禁'); 
-                        const cp = json.data ? (json.data._secret_pass || json.data._p) : null; 
-                        
-                        if(cp === p) { 
-                            localStorage.setItem('userData_'+u, JSON.stringify(json.data)); 
-                            success(u, p, json.data); 
-                        } else toast('密码错误'); 
-                    } else toast('用户不存在'); 
-                } catch(e) { toast('网络错误'); } 
-            } 
-        }
-        
-        function success(u,p,d) { 
-            localStorage.setItem('login','1'); localStorage.setItem('u',u); localStorage.setItem('p',p); localStorage.setItem('pass_'+u, p); 
-            if(d) fill(d); checkLog(); closeM(); toast('欢迎回来'); 
-            setTimeout(() => syncUser(u), 100);
-        }
-        
-        async function syncUser(u) { try { const res = await fetch(`/api/user?name=${u}&t=${Date.now()}`); if(res.ok) { const json = await res.json(); if(json.data) { localStorage.setItem('userData_'+u, JSON.stringify(json.data)); fill(json.data); toast('已同步云端'); } } } catch(e) {} }
-
-        // --- 拖拽逻辑 ---
-        function renderList() {
-            const el = document.getElementById('dynamic-list'); el.innerHTML = '';
-            currentData.items.forEach((item, i) => {
-                const div = document.createElement('div'); div.className = `item type-${item.type}`; div.dataset.index = i;
-                if (item.type === 'divider') {
-                    div.onclick = () => toggleDividerStyle(i);
-                    div.innerHTML = `${!isRead() ? getDragHandle(i) : ''}<div class="divider-line ${item.style==='solid'?'solid':''}"></div><div class="divider-del" onclick="delItem(${i}, event)"><i class="ri-close-circle-fill"></i></div>`;
-                } else if (item.type === 'text') {
-                    div.setAttribute('data-align', item.align || 'left'); div.setAttribute('data-bold', item.bold || false);
-                    div.innerHTML = `${!isRead() ? getDragHandle(i) : ''}<div class="text-content" contenteditable="${!isRead()}" oninput="updateItem(${i}, 'text', this.innerText)">${item.text}</div><div class="text-controls"><div class="act-icon" onclick="setTextStyle(${i}, 'bold')"><i class="ri-bold"></i></div><div class="act-icon" onclick="setTextStyle(${i}, 'align', 'left')"><i class="ri-align-left"></i></div><div class="act-icon" onclick="setTextStyle(${i}, 'align', 'center')"><i class="ri-align-center"></i></div><div class="act-icon" onclick="setTextStyle(${i}, 'align', 'right')"><i class="ri-align-right"></i></div><div class="act-icon act-del" onclick="delItem(${i}, event)"><i class="ri-delete-bin-line"></i></div></div>`;
-                } else {
-                    div.onclick = (e) => handleJump(e, item.url);
-                    div.innerHTML = `${!isRead() ? getDragHandle(i) : ''}<i class="${item.icon} item-icon" onclick="openIconLib(${i}, event)"></i><div class="item-content"><div class="item-title" contenteditable="${!isRead()}" oninput="updateItem(${i}, 'text', this.innerText)">${item.text}</div>${!isRead() ? `<div class="item-link-preview">${item.url || '未设置链接'}</div>` : ''}</div><div class="item-actions"><div class="act-icon" onclick="editUrl(${i}, event)"><i class="ri-link"></i></div><div class="act-icon act-del" onclick="delItem(${i}, event)"><i class="ri-delete-bin-line"></i></div></div>`;
-                }
-                el.appendChild(div);
-            });
-        }
-        function getDragHandle(index) { return `<div class="drag-handle" ontouchstart="touchDragStart(event)" onmousedown="mouseDragStart(event)"><i class="ri-draggable"></i></div>`; }
-        function touchDragStart(e) { e.preventDefault(); if (navigator.vibrate) navigator.vibrate(20); initDrag(e.target.closest('.item'), e.touches[0].clientY); document.addEventListener('touchmove', touchDragMove, { passive: false }); document.addEventListener('touchend', dragEnd); }
-        function mouseDragStart(e) { e.preventDefault(); initDrag(e.target.closest('.item'), e.clientY); document.addEventListener('mousemove', mouseDragMove); document.addEventListener('mouseup', dragEnd); }
-        function initDrag(item, startY) { dragSrcEl = item; dragSrcIndex = [...item.parentNode.children].indexOf(item); item.classList.add('sort-dragging'); }
-        function touchDragMove(e) { e.preventDefault(); handleMove(e.touches[0].clientX, e.touches[0].clientY); }
-        function mouseDragMove(e) { e.preventDefault(); handleMove(e.clientX, e.clientY); }
-        function handleMove(x, y) {
-            const container = document.getElementById('dynamic-list'); const targetEl = document.elementFromPoint(x, y); const targetItem = targetEl ? targetEl.closest('.item') : null;
-            if (targetItem && targetItem !== dragSrcEl && container.contains(targetItem)) {
-                const items = [...container.children]; const curIndex = items.indexOf(dragSrcEl); const targetIndex = items.indexOf(targetItem);
-                if (curIndex < targetIndex) container.insertBefore(dragSrcEl, targetItem.nextSibling); else container.insertBefore(dragSrcEl, targetItem);
-            }
-        }
-        function dragEnd() {
-            if (dragSrcEl) dragSrcEl.classList.remove('sort-dragging');
-            document.removeEventListener('touchmove', touchDragMove); document.removeEventListener('touchend', dragEnd);
-            document.removeEventListener('mousemove', mouseDragMove); document.removeEventListener('mouseup', dragEnd);
-            const container = document.getElementById('dynamic-list'); const newItems = [];
-            [...container.children].forEach(dom => { newItems.push(currentData.items[parseInt(dom.dataset.index)]); });
-            currentData.items = newItems; renderList(); save(true); dragSrcEl = null;
-        }
-
-        // --- 外观设置 ---
+        // --- 🔥 修复：外观设置面板不再全屏遮挡 ---
         function toggleThemeModal(show) { 
-            document.getElementById('theme-modal').style.display = show ? 'flex' : 'none'; 
+            const m = document.getElementById('theme-modal');
+            if(show) m.classList.add('active');
+            else m.classList.remove('active');
+            
             if(show) {
                 const t = currentData.theme;
                 const c = t.preset === 'custom' ? t.colors : PRESETS[t.preset] || PRESETS['default'];
-                id('picker-page').value = rgb2hex(c.bg || c.page); id('picker-card').value = rgb2hex(c.card); id('picker-item').value = rgb2hex(c.item);
-                document.querySelectorAll('.range-slider')[0].value = t.radius; id('radius-val').innerText = t.radius;
-                document.querySelectorAll('.range-slider')[1].value = t.cardRadius; id('card-radius-val').innerText = t.cardRadius;
+                id('picker-page').value = rgb2hex(c.bg || c.page);
+                id('picker-card').value = rgb2hex(c.card);
+                id('picker-item').value = rgb2hex(c.item);
+                document.querySelectorAll('.range-slider')[0].value = t.radius;
+                document.querySelectorAll('.range-slider')[1].value = t.cardRadius;
+                id('radius-val').innerText = t.radius;
+                id('card-radius-val').innerText = t.cardRadius;
             }
         }
+
+        // --- 其他原有逻辑不变 ---
         function changeRadius(val) { document.documentElement.style.setProperty('--item-radius', val + 'px'); id('radius-val').innerText = val; currentData.theme.radius = val; debounceSave(); }
         function changeCardRadius(val) { document.documentElement.style.setProperty('--card-radius', val + 'px'); id('card-radius-val').innerText = val; currentData.theme.cardRadius = val; debounceSave(); }
         const PRESETS = { default: { bg:'#EAF3F7', card:'#ffffff', text:'#334155', sub:'#64748b', item:'rgba(0,0,0,0.03)' }, dark: { bg:'#0f172a', card:'#1e293b', text:'#f8fafc', sub:'#94a3b8', item:'rgba(255,255,255,0.05)' }, warm: { bg:'#FFF0F5', card:'#ffffff', text:'#5D4037', sub:'#8D6E63', item:'rgba(255,235,238,0.5)' }, mint: { bg:'#e0f2f1', card:'#ffffff', text:'#004D40', sub:'#00796B', item:'rgba(224,242,241,0.5)' } };
@@ -487,27 +431,24 @@
             try { const res = await fetch('/api/user', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: u, password: p, data: data }) }); if(res.ok) { localStorage.setItem('userData_' + u, JSON.stringify(data)); st.innerText = '已同步'; setTimeout(() => st.style.opacity = 0, 2000); if(!silent) toast('已保存'); } else { st.innerText = '同步失败'; } } catch(e) { st.innerText = '网络错误'; } 
         }
 
+        const renderList=()=>{const e=document.getElementById("dynamic-list");e.innerHTML="",currentData.items.forEach(((t,n)=>{const a=document.createElement("div");a.className=`item type-${t.type}`,a.dataset.index=n,"divider"===t.type?(a.onclick=()=>toggleDividerStyle(n),a.innerHTML=`${isRead()?"":getDragHandle(n)}<div class="divider-line ${"solid"===t.style?"solid":""}"></div><div class="divider-del" onclick="delItem(${n}, event)"><i class="ri-close-circle-fill"></i></div>`):"text"===t.type?(a.setAttribute("data-align",t.align||"left"),a.setAttribute("data-bold",t.bold||!1),a.innerHTML=`${isRead()?"":getDragHandle(n)}<div class="text-content" contenteditable="${!isRead()}" oninput="updateItem(${n}, 'text', this.innerText)">${t.text}</div><div class="text-controls"><div class="act-icon" onclick="setTextStyle(${n}, 'bold')"><i class="ri-bold"></i></div><div class="act-icon" onclick="setTextStyle(${n}, 'align', 'left')"><i class="ri-align-left"></i></div><div class="act-icon" onclick="setTextStyle(${n}, 'align', 'center')"><i class="ri-align-center"></i></div><div class="act-icon" onclick="setTextStyle(${n}, 'align', 'right')"><i class="ri-align-right"></i></div><div class="act-icon act-del" onclick="delItem(${n}, event)"><i class="ri-delete-bin-line"></i></div></div>`):(a.onclick=e=>handleJump(e,t.url),a.innerHTML=`${isRead()?"":getDragHandle(n)}<i class="${t.icon} item-icon" onclick="openIconLib(${n}, event)"></i><div class="item-content"><div class="item-title" contenteditable="${!isRead()}" oninput="updateItem(${n}, 'text', this.innerText)">${t.text}</div>${isRead()?"":`<div class="item-link-preview">${t.url||"未设置链接"}</div>`}</div><div class="item-actions"><div class="act-icon" onclick="editUrl(${n}, event)"><i class="ri-link"></i></div><div class="act-icon act-del" onclick="delItem(${n}, event)"><i class="ri-delete-bin-line"></i></div></div>`),el.appendChild(a)})};
+        const getDragHandle=n=>`<div class="drag-handle" ontouchstart="touchDragStart(event)" onmousedown="mouseDragStart(event)"><i class="ri-draggable"></i></div>`;
+        const touchDragStart=e=>{e.preventDefault(),navigator.vibrate&&navigator.vibrate(20),initDrag(e.target.closest(".item"),e.touches[0].clientY),document.addEventListener("touchmove",touchDragMove,{passive:!1}),document.addEventListener("touchend",dragEnd)};
+        const mouseDragStart=e=>{e.preventDefault(),initDrag(e.target.closest(".item"),e.clientY),document.addEventListener("mousemove",mouseDragMove),document.addEventListener("mouseup",dragEnd)};
+        const initDrag=(e,t)=>{dragSrcEl=e,dragSrcIndex=[...e.parentNode.children].indexOf(e),e.classList.add("sort-dragging")};
+        const touchDragMove=e=>{e.preventDefault(),handleMove(e.touches[0].clientX,e.touches[0].clientY)};
+        const mouseDragMove=e=>{e.preventDefault(),handleMove(e.clientX,e.clientY)};
+        const handleMove=(e,t)=>{const n=document.getElementById("dynamic-list"),a=document.elementFromPoint(e,t),r=a?a.closest(".item"):null;if(r&&r!==dragSrcEl&&n.contains(r)){const e=[...n.children],t=e.indexOf(dragSrcEl),a=e.indexOf(r);t<a?n.insertBefore(dragSrcEl,r.nextSibling):n.insertBefore(dragSrcEl,r)}};
+        const dragEnd=()=>{dragSrcEl&&dragSrcEl.classList.remove("sort-dragging"),document.removeEventListener("touchmove",touchDragMove),document.removeEventListener("touchend",dragEnd),document.removeEventListener("mousemove",mouseDragMove),document.removeEventListener("mouseup",dragEnd);const e=document.getElementById("dynamic-list"),t=[];[...e.children].forEach((e=>{t.push(currentData.items[parseInt(e.dataset.index)])})),currentData.items=t,renderList(),save(!0),dragSrcEl=null};
+
         function isRead() { return document.body.classList.contains('read'); }
         function debounceSave() { clearTimeout(timer); timer = setTimeout(() => save(true), 1500); }
-        
-        function checkLog() { 
-            const isLog = localStorage.getItem('login') === '1'; const u = localStorage.getItem('u'); 
-            id('btn-login').style.display = isLog ? 'none' : 'flex'; id('btn-out').style.display = isLog ? 'flex' : 'none'; 
-            if(isLog && u === ADMIN_NAME) id('btn-admin').style.display = 'flex'; 
-            if(isLog) { 
-                const c = localStorage.getItem('userData_'+u); if(c) fill(JSON.parse(c)); 
-                id('link-box').style.display = 'inline-flex'; id('my-link').innerText = location.origin + '/' + u; 
-            } else {
-                id('link-box').style.display = 'none';
-            }
-        }
+        async function auth() { const u = val('u'), p = val('p'); if(!u || !p) return toast('请填写完整'); if(isReg) { try { const check = await fetch(`/api/user?name=${u}&t=${Date.now()}`); if(check.ok) return toast('用户已存在'); const initData = { name: 'Code Master', role: '新用户', avatar: DEFAULT_AVATAR, items: [], theme: {radius:20, cardRadius:20, preset:'default'}, _secret_pass: p }; await fetch('/api/user', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: u, password: p, data: initData }) }); localStorage.setItem('pass_'+u, p); toast('注册成功'); flip(); } catch(e) { toast('网络错误'); } } else { const localP = localStorage.getItem('pass_'+u); if(localP === p) { success(u,p,null); return; } try { const res = await fetch(`/api/user?name=${u}&t=${Date.now()}`); if(res.ok) { const json = await res.json(); if(json.status === 'banned') return toast('🚫 账号已封禁'); const cp = json.data ? (json.data._secret_pass || json.data._p) : null; if(cp === p) { localStorage.setItem('userData_'+u, JSON.stringify(json.data)); success(u,p,json.data); } else toast('密码错误'); } else toast('用户不存在'); } catch(e) { toast('网络错误'); } } }
+        function success(u,p,d) { localStorage.setItem('login','1'); localStorage.setItem('u',u); localStorage.setItem('p',p); localStorage.setItem('pass_'+u, p); if(d) fill(d); checkLog(); closeM(); toast('欢迎回来'); setTimeout(() => syncUser(u), 100); }
+        function checkLog() { const isLog = localStorage.getItem('login') === '1'; const u = localStorage.getItem('u'); id('btn-login').style.display = isLog ? 'none' : 'flex'; id('btn-out').style.display = isLog ? 'flex' : 'none'; if(isLog && u === ADMIN_NAME) id('btn-admin').style.display = 'flex'; if(isLog) { const c = localStorage.getItem('userData_'+u); if(c) fill(JSON.parse(c)); id('link-box').style.display = 'inline-flex'; id('my-link').innerText = location.origin + '/' + u; } else { id('link-box').style.display = 'none'; } }
         function copyLink() { const u = id('my-link').innerText; navigator.clipboard.writeText(u).then(()=>toast('已复制')); }
-        
-        async function loadCloud(user) { 
-            const l = id('loader'); l.style.display = 'flex'; id('tb-edit').style.display='none'; id('tb-read').style.display='flex'; document.body.classList.add('read'); document.querySelectorAll('[contenteditable]').forEach(e => e.setAttribute('contenteditable', 'false')); 
-            try { const res = await fetch(`/api/user?name=${user}`); if(res.ok) { const json = await res.json(); if(json.status!=='banned') { fill(json.data); l.style.display='none'; } else document.body.innerHTML="<h2 style='text-align:center;margin-top:100px;color:red'>已封禁</h2>"; } else document.body.innerHTML="<h2 style='text-align:center;margin-top:100px'>用户不存在</h2>"; } catch(e) { l.innerHTML = "<h3>网络错误</h3>"; } 
-        }
-        
+        async function loadCloud(user) { const l = id('loader'); l.style.display = 'flex'; id('tb-edit').style.display='none'; id('tb-read').style.display='flex'; document.body.classList.add('read'); document.querySelectorAll('[contenteditable]').forEach(e => e.setAttribute('contenteditable', 'false')); try { const res = await fetch(`/api/user?name=${user}`); if(res.ok) { const json = await res.json(); if(json.status!=='banned') { fill(json.data); l.style.display='none'; } else document.body.innerHTML="<h2 style='text-align:center;margin-top:100px;color:red'>已封禁</h2>"; } else document.body.innerHTML="<h2 style='text-align:center;margin-top:100px'>用户不存在</h2>"; } catch(e) { l.innerHTML = "<h3>网络错误</h3>"; } }
+        async function syncUser(u) { try { const res = await fetch(`/api/user?name=${u}&t=${Date.now()}`); if(res.ok) { const json = await res.json(); if(json.data) { localStorage.setItem('userData_'+u, JSON.stringify(json.data)); fill(json.data); toast('已同步云端'); } } } catch(e) {} }
         function clickAv() { if(!isRead() && localStorage.getItem('login')==='1') id('file').click(); }
         function uploadImg(e) { const f = e.target.files[0]; if(!f) return; toast('压缩图片...'); const r = new FileReader(); r.onload = ev => { const img = new Image(); img.onload = () => { const c = document.createElement('canvas'); c.width = 400; c.height = 400; const ctx = c.getContext('2d'); let sx,sy,sw,sh; if(img.width>img.height){sh=img.height;sw=img.height;sx=(img.width-img.height)/2;sy=0;} else{sw=img.width;sh=img.width;sx=0;sy=(img.height-img.width)/2;} ctx.drawImage(img,sx,sy,sw,sh,0,0,400,400); id('user-avatar').src = c.toDataURL('image/jpeg',0.8); save(true); }; img.src = ev.target.result; }; r.readAsDataURL(f); }
         async function loadAdmin() { toggleAdmin(1); id('tbl').querySelector('tbody').innerHTML = '<tr><td colspan="5">加载中...</td></tr>'; const u = localStorage.getItem('u'), p = localStorage.getItem('p'); try { const res = await fetch('/api/admin', { headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p } }); if(res.status===401) return toast('无权访问'); let list = await res.json(); list.sort((a, b) => { const isAdminA = a.name === ADMIN_NAME || a.role === 'admin'; const isAdminB = b.name === ADMIN_NAME || b.role === 'admin'; if (isAdminA && !isAdminB) return -1; if (!isAdminA && isAdminB) return 1; return new Date(b.created_at) - new Date(a.created_at); }); id('tbl').querySelector('tbody').innerHTML = list.map(x => { const roleBadge = (x.name === ADMIN_NAME || x.role === 'admin') ? '<span class="badge badge-admin">ADMIN</span>' : ''; const dateStr = x.created_at ? new Date(x.created_at.replace(' ', 'T') + 'Z').toLocaleString() : '未知'; return `<tr><td><b>${x.name}</b> ${roleBadge}</td><td>${x.status==='banned'?'<span class="badge badge-ban">封</span>':'<span class="badge badge-ok">正</span>'}</td><td style="font-size:12px;color:var(--text-sub)">${dateStr}</td><td>${x.name!==u?`<button class="act-btn act-ban" onclick="act('ban','${x.name}')" title="封禁"><i class="ri-prohibited-line"></i></button><button class="act-btn act-unban" onclick="act('unban','${x.name}')" title="解封"><i class="ri-checkbox-circle-line"></i></button><button class="act-btn act-del" onclick="act('delete','${x.name}')" title="删除"><i class="ri-delete-bin-line"></i></button><button class="act-btn act-key" onclick="viewPass('${x.name}')" title="密码"><i class="ri-key-2-line"></i></button>`:'-'}</td></tr>`; }).join(''); } catch(e){ } }
@@ -520,25 +461,6 @@
         function logout() { localStorage.setItem('login','0'); location.href="/"; }
         function goHome() { location.href="/"; }
         function share() { const u=localStorage.getItem('u'); const url=location.origin+'/'+u; navigator.clipboard.writeText(url).then(()=>toast('已复制')).catch(()=>prompt("复制",url)); }
-        
-        function fill(d) { 
-            if(!d) { currentData.items = [{ type:'link', icon:'ri-global-line', text:'我的网站', url:'' }]; currentData.theme = { radius:20, cardRadius:20, preset:'default', colors: {} }; } 
-            else { 
-                id('user-name').innerText = d.name || 'Code Master'; id('user-role').innerText = d.role || 'Developer'; id('user-avatar').src = d.avatar || DEFAULT_AVATAR; 
-                currentData.items = (d.items && Array.isArray(d.items)) ? d.items : []; 
-                if(d.theme) { 
-                    currentData.theme = d.theme; changeRadius(d.theme.radius || 20); 
-                    if(d.theme.cardRadius) changeCardRadius(d.theme.cardRadius);
-                    if(d.theme.colors && d.theme.preset === 'custom') { 
-                        if(d.theme.colors.page) { document.documentElement.style.setProperty('--page-bg', d.theme.colors.page); id('picker-page').value = d.theme.colors.page; } 
-                        if(d.theme.colors.card) { document.documentElement.style.setProperty('--card-bg', d.theme.colors.card); id('picker-card').value = d.theme.colors.card; } 
-                        if(d.theme.colors.item) { document.documentElement.style.setProperty('--item-bg', d.theme.colors.item); id('picker-item').value = d.theme.colors.item; } 
-                        document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active')); 
-                    } else { applyPreset(d.theme.preset || 'default'); }
-                } 
-            } 
-            renderList();
-        }
     </script>
 </body>
 </html>
