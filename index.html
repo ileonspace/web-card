@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <!-- 强制不缓存 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Web Card V52 - 最终修复版</title>
+    <title>Web Card V53 - 体验优化版</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
-        /* --- 1. 基础变量 --- */
+        /* --- 1. 基础变量 (保持 V50 外观) --- */
         :root {
             --page-bg: #EAF3F7; 
             --card-bg: #ffffff;
@@ -52,6 +52,7 @@
         }
         .avatar:hover { transform: rotate(360deg) scale(1.05); }
         
+        /* 标题不加粗 */
         h1 { margin: 5px 0; font-size: 24px; font-weight: 500; letter-spacing: -0.5px; }
         .role { color: var(--text-sub); font-size: 13px; margin-bottom: 10px; }
 
@@ -87,6 +88,7 @@
             background: rgba(0,0,0,0.06); 
         }
 
+        /* 标题类型 (无动效) */
         .item.type-text { background: transparent; padding: 6px 0; border: none; flex-direction: column; align-items: flex-start; box-shadow: none !important; }
         .item.type-text:hover { transform: none !important; background: transparent !important; }
         
@@ -99,6 +101,7 @@
         .text-controls::after { content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); border-width: 5px 5px 0; border-style: solid; border-color: var(--card-bg) transparent transparent; }
         body:not(.read) .item.type-text:hover .text-controls { display: flex; }
 
+        /* 分割线 (无动效) */
         .item.type-divider { background: transparent; padding: 8px 0; justify-content: center; cursor: default; box-shadow: none !important; }
         .item.type-divider:hover { transform: none !important; background: transparent !important; }
         .divider-line { width: 100%; height: 0; border-top: 1px dashed var(--divider); opacity: 0.5; }
@@ -352,50 +355,51 @@
             }
         };
 
-        // --- 🔥 修复：登录逻辑 (移除本地优先，强制云端验证) ---
+        // --- 核心：注册/登录/同步 ---
         async function auth() { 
             const u = val('u'), p = val('p'); 
             if(!u || !p) return toast('请填写完整'); 
             const ts = Date.now();
             
             if(isReg) { 
-                // 注册逻辑保持不变 (查重 -> 上云 -> 本地)
                 try { 
                     const check = await fetch(`/api/user?name=${u}&t=${ts}`); 
                     if(check.ok) return toast('用户已存在'); 
                     
+                    // 1. 注册时立即初始化本地数据
                     const initData = { name: 'Code Master', role: '新用户', avatar: DEFAULT_AVATAR, items: [], theme: {radius:20, cardRadius:20, preset:'default'}, _secret_pass: p };
+                    localStorage.setItem('userData_'+u, JSON.stringify(initData));
+                    
+                    // 2. 立即上云
                     await fetch('/api/user', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: u, password: p, data: initData }) });
                     
-                    localStorage.setItem('userData_'+u, JSON.stringify(initData)); // 补充：注册成功立即写本地，防止刷新丢状态
                     localStorage.setItem('pass_'+u, p); 
                     toast('注册成功'); flip(); 
                 } catch(e) { toast('网络错误'); } 
             } else { 
-                // 🔥 登录逻辑：直接查云端，不信任本地
-                toast('正在验证...');
+                // 登录
+                const localPass = localStorage.getItem('pass_'+u);
+                const localData = localStorage.getItem('userData_'+u);
+                
+                // 优先本地
+                if(localPass === p && localData) { 
+                    success(u, p, JSON.parse(localData)); 
+                    return; 
+                }
+                
+                // 云端兜底
                 try { 
                     const res = await fetch(`/api/user?name=${u}&t=${ts}`); 
                     if(res.ok) { 
                         const json = await res.json(); 
                         if(json.status === 'banned') return toast('🚫 账号已封禁'); 
-                        
                         const cp = json.data ? (json.data._secret_pass || json.data._p) : null; 
                         
                         if(cp === p) { 
-                            // 验证成功：覆盖本地缓存
                             localStorage.setItem('userData_'+u, JSON.stringify(json.data)); 
                             success(u, p, json.data); 
                         } else toast('密码错误'); 
-                    } else {
-                        // 404 Not Found (说明账号已删)
-                        // 🔥 关键：清理本地残留，允许重新注册
-                        if(localStorage.getItem('pass_'+u)) {
-                            localStorage.removeItem('pass_'+u);
-                            localStorage.removeItem('userData_'+u);
-                        }
-                        toast('用户不存在 (或已删除)'); 
-                    }
+                    } else toast('用户不存在'); 
                 } catch(e) { toast('网络错误'); } 
             } 
         }
@@ -403,10 +407,12 @@
         function success(u,p,d) { 
             localStorage.setItem('login','1'); localStorage.setItem('u',u); localStorage.setItem('p',p); localStorage.setItem('pass_'+u, p); 
             if(d) fill(d); checkLog(); closeM(); toast('欢迎回来'); 
+            // 🔥 修复：登录成功后静默同步，不弹窗
             setTimeout(() => syncUser(u), 100);
         }
         
-        async function syncUser(u) { try { const res = await fetch(`/api/user?name=${u}&t=${Date.now()}`); if(res.ok) { const json = await res.json(); if(json.data) { localStorage.setItem('userData_'+u, JSON.stringify(json.data)); fill(json.data); toast('已同步云端'); } } } catch(e) {} }
+        // 🔥 静默同步：不弹 Toast
+        async function syncUser(u) { try { const res = await fetch(`/api/user?name=${u}&t=${Date.now()}`); if(res.ok) { const json = await res.json(); if(json.data) { localStorage.setItem('userData_'+u, JSON.stringify(json.data)); fill(json.data); } } } catch(e) {} }
 
         // --- 拖拽逻辑 ---
         function renderList() {
