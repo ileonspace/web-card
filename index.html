@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- 强制不缓存 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Web Card V44 - 登录修复版</title>
+    <title>Web Card V45</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
-        /* --- 1. 基础变量 (🔥 确认背景色 #EAF3F7) --- */
+        /* --- 1. 基础变量 --- */
         :root {
-            --page-bg: #EAF3F7; /* 默认背景 */
+            --page-bg: #EAF3F7; 
             --card-bg: #ffffff;
             --text-main: #334155;
             --text-sub: #64748b;
@@ -41,19 +40,21 @@
             box-shadow: var(--shadow); position: relative; transition: 0.3s; 
         }
         
+        /* 🔥 改动2：Logo 动画优化 (去旋转) */
         .avatar {
             width: 120px; height: 120px; 
             border-radius: 50%; object-fit: cover; 
             border: 4px solid var(--card-bg); 
             box-shadow: 0 8px 25px rgba(0,0,0,0.1); 
-            margin-bottom: 15px; cursor: pointer; transition: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            margin-bottom: 15px; cursor: pointer; 
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        .avatar:hover { transform: rotate(360deg) scale(1.05); }
+        /* 仅放大，不旋转 */
+        .avatar:hover { transform: scale(1.05); box-shadow: 0 12px 30px rgba(0,0,0,0.15); }
         
         h1 { margin: 5px 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
         .role { color: var(--text-sub); font-size: 13px; margin-bottom: 10px; }
 
-        /* 嵌入式链接条 */
         .link-area {
             background: rgba(58, 123, 213, 0.08); color: var(--accent);
             padding: 8px 12px; border-radius: 8px; font-size: 12px;
@@ -69,39 +70,64 @@
         /* --- 3. 列表与条目 --- */
         .list { display: flex; flex-direction: column; gap: 10px; text-align: left; width: 100%; position: relative; }
         
+        /* 通用条目样式 (所有类型统一) */
         .item {
             display: flex; align-items: center; padding: 12px 14px; 
             background: var(--item-bg); border-radius: var(--item-radius); 
             transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
             position: relative; border: 1px solid transparent;
-            max-width: 100%; box-sizing: border-box; user-select: none; touch-action: pan-y; 
+            width: 100%; box-sizing: border-box; user-select: none; touch-action: pan-y; 
+            min-height: 50px; /* 保证高度统一 */
         }
         
         .item.sort-dragging { background: #fff !important; box-shadow: 0 10px 20px rgba(0,0,0,0.15); border-color: var(--accent); z-index: 100; opacity: 0.95; transform: scale(1.02); }
         body:not(.touch-device) .item:hover { transform: translateY(-2px); background: rgba(0,0,0,0.06); }
 
-        .item.type-text { background: transparent; padding: 6px 0; border: none; flex-direction: column; align-items: flex-start; box-shadow: none !important; }
-        .item.type-text .text-content { width: 100%; font-size: 14px; color: var(--text-sub); outline: none; padding: 4px; border-radius: 4px; }
+        /* 🔥 改动1：修复文字条目样式 (统一化 + 修复溢出) */
+        .item.type-text {
+            /* 移除之前的 transparent 和 border:none，恢复统一背景 */
+            background: var(--item-bg); 
+            padding: 12px 14px;
+            border: 1px solid transparent;
+            flex-direction: row; /* 水平排列，和普通条目一致 */
+            box-shadow: none; /* 保持平整 */
+        }
+        
+        .item.type-text .text-content { 
+            flex: 1; /* 占满剩余空间 */
+            font-size: 15px; /* 字体稍微加大一点 */
+            color: var(--text-main); 
+            outline: none; padding: 0 5px; 
+            border-radius: 4px;
+            word-break: break-word; /* 防止长文字溢出 */
+            line-height: 1.4;
+            min-width: 0; /* Flexbox 溢出修复 */
+        }
+        
+        /* 文字对齐 */
         .item.type-text[data-align="center"] .text-content { text-align: center; }
         .item.type-text[data-align="right"] .text-content { text-align: right; }
-        .item.type-text[data-bold="true"] .text-content { font-weight: bold; color: var(--text-main); font-size: 16px; }
+        .item.type-text[data-bold="true"] .text-content { font-weight: bold; }
 
-        .text-controls { display: none; gap: 5px; margin-top: 0; background: var(--card-bg); padding: 4px 8px; border-radius: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); position: absolute; left: 50%; transform: translateX(-50%); top: -38px; z-index: 10; border: 1px solid rgba(0,0,0,0.05); }
+        /* 文字条目操作栏 (点击显示) */
+        .text-controls { display: none; gap: 5px; margin-top: 0; background: var(--card-bg); padding: 4px 8px; border-radius: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); position: absolute; left: 50%; transform: translateX(-50%); top: -45px; z-index: 10; border: 1px solid rgba(0,0,0,0.05); }
         .text-controls::after { content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); border-width: 5px 5px 0; border-style: solid; border-color: var(--card-bg) transparent transparent; }
         body:not(.read) .item.type-text:hover .text-controls { display: flex; }
+        /* 聚焦时也显示 */
+        body:not(.read) .item.type-text:focus-within .text-controls { display: flex; }
 
-        .item.type-divider { background: transparent; padding: 8px 0; justify-content: center; cursor: default; box-shadow: none !important; }
+        .item.type-divider { background: transparent; padding: 8px 0; justify-content: center; cursor: default; box-shadow: none !important; min-height: auto; }
         .divider-line { width: 100%; height: 0; border-top: 1px dashed var(--divider); opacity: 0.5; }
         .divider-line.solid { border-top-style: solid; opacity: 0.7; }
         
-        body.read .item:not(.type-divider):not(.type-text) { cursor: pointer; }
+        body.read .item:not(.type-divider) { cursor: pointer; }
         body.read .text-controls, body.read .item-actions, body.read .divider-del, body.read .drag-handle { display: none !important; }
 
-        .drag-handle { cursor: grab; color: var(--text-sub); margin-right: 5px; font-size: 20px; display: none; opacity: 0.5; flex-shrink: 0; padding: 10px 5px; touch-action: none; }
+        .drag-handle { cursor: grab; color: var(--text-sub); margin-right: 8px; font-size: 20px; display: none; opacity: 0.5; flex-shrink: 0; padding: 5px; touch-action: none; }
         body:not(.read) .drag-handle { display: flex; }
         body:not(.read) .drag-handle:active { opacity: 1; color: var(--accent); cursor: grabbing; }
 
-        .item-icon { font-size: 24px; color: var(--text-sub); margin-right: 15px; min-width: 24px; text-align: center; flex-shrink: 0; transition: 0.3s; }
+        .item-icon { font-size: 24px; color: var(--text-sub); margin-right: 12px; min-width: 24px; text-align: center; flex-shrink: 0; transition: 0.3s; }
         body:not(.read) .item-icon { cursor: pointer; }
         .item:hover .item-icon { color: var(--accent); transform: scale(1.1); }
         
@@ -149,14 +175,13 @@
             .toolbar { gap: 10px; right: 15px; top: 15px; } 
             .tool-btn { 
                 padding: 0; width: 40px; height: 40px; justify-content: center; 
-                border-radius: 50%; font-size: 18px; /* 图标放大 */
+                border-radius: 50%; font-size: 18px; 
                 background: #fff; border: 1px solid rgba(0,0,0,0.1);
                 box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             }
             .tool-btn span { display: none; } 
         }
 
-        /* --- 弹窗与管理 --- */
         #theme-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 4000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
         .theme-box { background: var(--card-bg); width: 90%; max-width: 340px; padding: 25px; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); text-align: left; max-height: 85vh; overflow-y: auto; }
         .setting-section { margin-bottom: 20px; }
@@ -208,7 +233,7 @@
 <body>
 
     <div id="toast">提示</div>
-    <div id="loader"><i class="ri-loader-4-line ri-spin" style="font-size:32px;color:var(--accent)"></i><p style="margin-top:10px;font-size:12px;color:var(--text-sub)">数据同步中...</p></div>
+    <div id="loader"><i class="ri-loader-4-line ri-spin" style="font-size:32px;color:var(--accent)"></i><p style="margin-top:10px;font-size:12px;color:var(--text-sub)">加载数据...</p></div>
 
     <input type="file" id="file" hidden accept="image/*" onchange="uploadImg(event)">
 
