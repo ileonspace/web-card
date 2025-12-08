@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- 强制不缓存 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Web Card V53 - 体验优化版</title>
+    <title>Web Card V54 - 数据看板版</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- 🔥 引入图表库 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
-        /* --- 1. 基础变量 (保持 V50 外观) --- */
+        /* --- 1. 基础变量 --- */
         :root {
             --page-bg: #EAF3F7; 
             --card-bg: #ffffff;
@@ -18,7 +19,6 @@
             --item-bg: rgba(0,0,0,0.03);
             --item-radius: 20px; 
             --card-radius: 20px;
-            
             --accent: #3a7bd5; 
             --danger: #ff4757; 
             --success: #2ed573;
@@ -37,41 +37,32 @@
         /* --- 2. 卡片布局 --- */
         .card { 
             background: var(--card-bg); width: 100%; max-width: 380px; 
-            padding: 35px 25px 40px 25px; 
-            border-radius: var(--card-radius); 
-            text-align: center; 
-            box-shadow: var(--shadow); position: relative; transition: 0.3s; 
+            padding: 35px 25px 40px 25px; border-radius: var(--card-radius); 
+            text-align: center; box-shadow: var(--shadow); position: relative; transition: 0.3s; 
+            margin-bottom: 20px; /* 留出底部空间 */
         }
-        
         .avatar {
-            width: 120px; height: 120px; 
-            border-radius: 50%; object-fit: cover; 
-            border: 4px solid var(--card-bg); 
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1); 
+            width: 120px; height: 120px; border-radius: 50%; object-fit: cover; 
+            border: 4px solid var(--card-bg); box-shadow: 0 8px 25px rgba(0,0,0,0.1); 
             margin-bottom: 15px; cursor: pointer; transition: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         .avatar:hover { transform: rotate(360deg) scale(1.05); }
-        
-        /* 标题不加粗 */
         h1 { margin: 5px 0; font-size: 24px; font-weight: 500; letter-spacing: -0.5px; }
         .role { color: var(--text-sub); font-size: 13px; margin-bottom: 10px; }
 
-        /* 嵌入式链接条 */
         .link-area {
             background: rgba(58, 123, 213, 0.08); color: var(--accent);
             padding: 10px 14px; border-radius: 12px; font-size: 13px;
             display: inline-flex; align-items: center; gap: 8px;
             margin-bottom: 25px; cursor: pointer; transition: 0.2s;
-            border: 1px dashed rgba(58, 123, 213, 0.3);
-            max-width: 100%; overflow: hidden;
+            border: 1px dashed rgba(58, 123, 213, 0.3); max-width: 100%; overflow: hidden;
         }
         .link-area:hover { background: rgba(58, 123, 213, 0.15); transform: translateY(-1px); }
         .link-area span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
         body.read .link-area { display: none !important; }
 
-        /* --- 3. 列表与条目 --- */
+        /* --- 3. 列表 --- */
         .list { display: flex; flex-direction: column; gap: 10px; text-align: left; width: 100%; position: relative; }
-        
         .item {
             display: flex; align-items: center; padding: 12px 14px; 
             background: var(--item-bg); border-radius: var(--item-radius); 
@@ -79,19 +70,11 @@
             position: relative; border: 1px solid transparent;
             max-width: 100%; box-sizing: border-box; user-select: none; touch-action: pan-y; 
         }
-        
         .item.sort-dragging { background: #fff !important; box-shadow: 0 10px 20px rgba(0,0,0,0.15); border-color: var(--accent); z-index: 100; opacity: 0.95; transform: scale(1.02); }
-        
-        /* 仅链接条目有悬停动效 */
-        body:not(.touch-device) .item:not(.type-text):not(.type-divider):hover { 
-            transform: translateY(-2px); 
-            background: rgba(0,0,0,0.06); 
-        }
+        body:not(.touch-device) .item:not(.type-text):not(.type-divider):hover { transform: translateY(-2px); background: rgba(0,0,0,0.06); }
 
-        /* 标题类型 (无动效) */
         .item.type-text { background: transparent; padding: 6px 0; border: none; flex-direction: column; align-items: flex-start; box-shadow: none !important; }
         .item.type-text:hover { transform: none !important; background: transparent !important; }
-        
         .item.type-text .text-content { width: 100%; font-size: 14px; color: var(--text-sub); outline: none; padding: 4px; border-radius: 4px; }
         .item.type-text[data-align="center"] .text-content { text-align: center; }
         .item.type-text[data-align="right"] .text-content { text-align: right; }
@@ -101,7 +84,6 @@
         .text-controls::after { content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); border-width: 5px 5px 0; border-style: solid; border-color: var(--card-bg) transparent transparent; }
         body:not(.read) .item.type-text:hover .text-controls { display: flex; }
 
-        /* 分割线 (无动效) */
         .item.type-divider { background: transparent; padding: 8px 0; justify-content: center; cursor: default; box-shadow: none !important; }
         .item.type-divider:hover { transform: none !important; background: transparent !important; }
         .divider-line { width: 100%; height: 0; border-top: 1px dashed var(--divider); opacity: 0.5; }
@@ -116,7 +98,6 @@
 
         .item-icon { font-size: 24px; color: var(--text-sub); margin-right: 15px; min-width: 24px; text-align: center; flex-shrink: 0; transition: 0.3s; }
         body:not(.read) .item-icon { cursor: pointer; }
-        /* 图标悬停变橙色 */
         body:not(.touch-device) .item:not(.type-text):not(.type-divider):hover .item-icon { color: #ff9f43; transform: scale(1.1); }
         
         .item-content { flex: 1; overflow: hidden; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
@@ -137,40 +118,52 @@
         .add-btn { flex: 1; padding: 12px; border: 1px dashed var(--divider); border-radius: 14px; color: var(--text-sub); font-size: 13px; cursor: pointer; background: transparent; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 4px; }
         .add-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(58,123,213,0.05); transform: translateY(-1px); }
         .add-btn:active { transform: scale(0.98); }
-
         [contenteditable]:focus { outline: none; border-bottom: 2px solid var(--accent); background: rgba(58,123,213,0.05); }
 
         /* --- 4. 按钮 --- */
         .toolbar, .visitor-nav { position: absolute; top: 20px; z-index: 100; display: flex; gap: 10px; }
         .toolbar { right: 20px; } .visitor-nav { left: 20px; display: none; }
-        
-        .tool-btn { 
-            background: rgba(255,255,255,0.7); border: 1px solid rgba(0,0,0,0.08); 
-            color: var(--text-main); padding: 0 16px; height: 42px; border-radius: 21px; 
-            cursor: pointer; backdrop-filter: blur(8px); display: flex; align-items: center; gap: 6px; 
-            font-size: 13px; font-weight: 600; transition: 0.2s; user-select: none; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
+        .tool-btn { background: rgba(255,255,255,0.7); border: 1px solid rgba(0,0,0,0.08); color: var(--text-main); padding: 0 16px; height: 42px; border-radius: 21px; cursor: pointer; backdrop-filter: blur(8px); display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; transition: 0.2s; user-select: none; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .tool-btn:hover { transform: translateY(-2px); background: #fff; box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
         .tool-btn:active { transform: scale(0.95); }
+        .btn-red { color: var(--danger); border-color: rgba(255, 71, 87, 0.2); } .btn-red:hover { background: var(--danger) !important; color: #fff !important; }
+        .btn-admin { color: #8e44ad; border-color: rgba(142, 68, 173, 0.2); } .btn-admin:hover { background: #8e44ad !important; color: #fff !important; }
+        @media (max-width: 480px) { .toolbar { gap: 10px; right: 15px; top: 15px; } .tool-btn { padding: 0; width: 40px; height: 40px; justify-content: center; border-radius: 50%; font-size: 18px; background: #fff; border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 4px 8px rgba(0,0,0,0.1); } .tool-btn span { display: none; } }
+
+        /* --- 5. 管理面板 (🔥 含统计图表支持) --- */
+        #admin { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 3000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
+        /* 加宽加高以容纳图表 */
+        .admin-card { background: var(--card-bg); width: 95%; max-width: 800px; max-height: 90vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
+        .admin-head { padding: 15px 20px; border-bottom: 1px solid rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.02); }
+        .admin-body { flex: 1; overflow-y: auto; padding: 0; -webkit-overflow-scrolling: touch; }
         
-        .btn-red { color: var(--danger); border-color: rgba(255, 71, 87, 0.2); } 
-        .btn-red:hover { background: var(--danger) !important; color: #fff !important; }
-        .btn-admin { color: #8e44ad; border-color: rgba(142, 68, 173, 0.2); } 
-        .btn-admin:hover { background: #8e44ad !important; color: #fff !important; }
+        /* 🔥 统计 Tab 栏 */
+        .admin-tabs { display: flex; padding: 0 20px; border-bottom: 1px solid rgba(0,0,0,0.05); background: rgba(0,0,0,0.01); }
+        .admin-tab { padding: 12px 15px; font-size: 13px; font-weight: 600; color: var(--text-sub); cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; }
+        .admin-tab:hover { color: var(--accent); }
+        .admin-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-        @media (max-width: 480px) { 
-            .toolbar { gap: 10px; right: 15px; top: 15px; } 
-            .tool-btn { 
-                padding: 0; width: 40px; height: 40px; justify-content: center; 
-                border-radius: 50%; font-size: 18px; 
-                background: #fff; border: 1px solid rgba(0,0,0,0.1);
-                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            }
-            .tool-btn span { display: none; } 
-        }
+        .admin-view { display: none; padding: 20px; }
+        .admin-view.active { display: block; }
 
-        /* --- 弹窗与管理 --- */
+        /* 🔥 统计卡片样式 */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: rgba(0,0,0,0.02); border-radius: 12px; padding: 15px; text-align: center; border: 1px solid rgba(0,0,0,0.05); }
+        .stat-num { font-size: 24px; font-weight: 800; color: var(--text-main); display: block; margin-bottom: 5px; }
+        .stat-label { font-size: 12px; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
+        .chart-container { position: relative; height: 250px; width: 100%; margin-bottom: 20px; }
+        .chart-title { font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 10px; display: block; }
+
+        .table-wrapper { flex: 1; overflow: auto; padding: 0; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }
+        th { text-align: left; padding: 12px 15px; color: var(--text-sub); font-weight: 600; background: rgba(0,0,0,0.02); position: sticky; top: 0; }
+        td { padding: 12px 15px; border-bottom: 1px solid rgba(0,0,0,0.05); color: var(--text-main); vertical-align: middle; }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+        .badge-ok { background: rgba(46, 213, 115, 0.15); color: #2ecc71; } .badge-ban { background: rgba(255, 71, 87, 0.15); color: #ff4757; } .badge-admin { background: #ff4757; color: white; padding: 2px 8px; font-size: 10px; border-radius: 10px; margin-left: 5px; }
+        .act-btn { padding: 6px 10px; border-radius: 6px; font-size: 16px; border: none; cursor: pointer; margin-right: 6px; background: transparent; transition: 0.2s; }
+        .act-ban { color: #e67e22; background: rgba(230,126,34,0.1); } .act-unban { color: #2ecc71; background: rgba(46,204,113,0.1); } .act-del { color: var(--text-sub); background: rgba(0,0,0,0.05); } .act-key { color: var(--accent); background: rgba(58, 123, 213, 0.1); }
+
+        /* --- 其他弹窗 --- */
         #theme-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 4000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
         .theme-box { background: var(--card-bg); width: 90%; max-width: 340px; padding: 25px; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); text-align: left; max-height: 85vh; overflow-y: auto; }
         .setting-section { margin-bottom: 20px; }
@@ -200,22 +193,6 @@
         #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
         #save-status { position: fixed; bottom: 20px; right: 20px; font-size: 12px; color: var(--text-sub); opacity: 0; transition: 0.3s; pointer-events: none; }
         #loader { position: fixed; inset: 0; background: var(--page-bg); z-index: 5000; display: none; justify-content: center; align-items: center; flex-direction: column; }
-        
-        #admin { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 3000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
-        .admin-card { background: var(--card-bg); width: 95%; max-width: 650px; max-height: 80vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
-        .admin-head { padding: 15px 20px; border-bottom: 1px solid rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.02); }
-        .admin-body { flex: 1; overflow-y: auto; padding: 0; -webkit-overflow-scrolling: touch; }
-        .table-wrapper { flex: 1; overflow: auto; padding: 0; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }
-        th { text-align: left; padding: 12px 15px; color: var(--text-sub); font-weight: 600; background: rgba(0,0,0,0.02); position: sticky; top: 0; }
-        td { padding: 12px 15px; border-bottom: 1px solid rgba(0,0,0,0.05); color: var(--text-main); vertical-align: middle; }
-        .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
-        .badge-ok { background: rgba(46, 213, 115, 0.15); color: #2ecc71; } .badge-ban { background: rgba(255, 71, 87, 0.15); color: #ff4757; } .badge-admin { background: #ff4757; color: white; padding: 2px 8px; font-size: 10px; border-radius: 10px; margin-left: 5px; }
-        .act-btn { padding: 6px 10px; border-radius: 6px; font-size: 16px; border: none; cursor: pointer; margin-right: 6px; background: transparent; transition: 0.2s; }
-        .act-ban { color: #e67e22; background: rgba(230,126,34,0.1); } 
-        .act-unban { color: #2ecc71; background: rgba(46,204,113,0.1); } 
-        .act-del { color: var(--text-sub); background: rgba(0,0,0,0.05); } 
-        .act-key { color: var(--accent); background: rgba(58, 123, 213, 0.1); }
 
         .read .avatar, .read .item-icon { pointer-events: auto; }
     </style>
@@ -282,10 +259,35 @@
         </div>
     </div></div>
 
-    <!-- 管理面板 -->
+    <!-- 🔥 管理面板 (含统计) -->
     <div id="admin"><div class="admin-card">
-        <div class="admin-head"><h3 style="margin:0;font-size:16px;color:var(--text-main)">用户管理</h3><button onclick="toggleAdmin(0)" style="border:none;background:none;font-size:20px;cursor:pointer;color:var(--text-main)">&times;</button></div>
-        <div class="admin-body"><div class="table-wrapper"><table class="user-table" id="tbl"><thead><tr><th>用户</th><th>状态</th><th>注册时间</th><th>操作</th></tr></thead><tbody></tbody></table></div></div>
+        <div class="admin-head">
+            <h3 style="margin:0;font-size:16px;color:var(--text-main)">后台管理</h3>
+            <button onclick="toggleAdmin(0)" style="border:none;background:none;font-size:20px;cursor:pointer;color:var(--text-main)">&times;</button>
+        </div>
+        
+        <div class="admin-tabs">
+            <div class="admin-tab active" onclick="switchTab('users')">用户列表</div>
+            <div class="admin-tab" onclick="switchTab('stats')">数据统计</div>
+        </div>
+
+        <div class="admin-body">
+            <div id="view-users" class="admin-view active">
+                <div class="table-wrapper"><table class="user-table" id="tbl"><thead><tr><th>用户</th><th>状态</th><th>注册时间</th><th>操作</th></tr></thead><tbody></tbody></table></div>
+            </div>
+
+            <div id="view-stats" class="admin-view">
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-num" id="stat-total">-</div><div class="stat-label">总访问</div></div>
+                    <div class="stat-card"><div class="stat-num" id="stat-today">-</div><div class="stat-label">今日访问</div></div>
+                </div>
+                <div class="chart-container"><span class="chart-title">最近7天趋势</span><canvas id="chart-trend"></canvas></div>
+                <div style="display:flex;gap:20px;flex-wrap:wrap">
+                    <div class="chart-container" style="flex:1"><span class="chart-title">设备分布</span><canvas id="chart-device"></canvas></div>
+                    <div class="chart-container" style="flex:1"><span class="chart-title">热门用户</span><canvas id="chart-users"></canvas></div>
+                </div>
+            </div>
+        </div>
     </div></div>
 
     <!-- 顶部工具栏 -->
@@ -308,7 +310,7 @@
         <h1 id="user-name" contenteditable="true" style="color:var(--text-main)">Code Master</h1>
         <div id="user-role" class="role" contenteditable="true">全栈开发练习生</div>
         
-        <!-- 🔥 链接显示区 -->
+        <!-- 链接显示区 -->
         <div class="link-area" onclick="copyLink()" id="link-box" style="display:none">
             <i class="ri-link"></i> <span id="my-link">loading...</span> <i class="ri-file-copy-line"></i>
         </div>
@@ -340,6 +342,7 @@
 
         let currentData = { items: [], theme: { radius: 20, cardRadius: 20, preset: 'default', colors: { page: '#EAF3F7', card: '#ffffff', item: '#f8f8f8' } } };
         let isReg = false, timer = null, editingIndex = -1, dragSrcEl = null, dragSrcIndex = null;
+        let charts = {}; // 🔥 全局 charts 变量，只声明一次
 
         window.onload = () => {
             initIconLib();
@@ -355,7 +358,7 @@
             }
         };
 
-        // --- 核心：注册/登录/同步 ---
+        // --- 核心认证 ---
         async function auth() { 
             const u = val('u'), p = val('p'); 
             if(!u || !p) return toast('请填写完整'); 
@@ -366,28 +369,23 @@
                     const check = await fetch(`/api/user?name=${u}&t=${ts}`); 
                     if(check.ok) return toast('用户已存在'); 
                     
-                    // 1. 注册时立即初始化本地数据
                     const initData = { name: 'Code Master', role: '新用户', avatar: DEFAULT_AVATAR, items: [], theme: {radius:20, cardRadius:20, preset:'default'}, _secret_pass: p };
                     localStorage.setItem('userData_'+u, JSON.stringify(initData));
                     
-                    // 2. 立即上云
                     await fetch('/api/user', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: u, password: p, data: initData }) });
                     
                     localStorage.setItem('pass_'+u, p); 
                     toast('注册成功'); flip(); 
                 } catch(e) { toast('网络错误'); } 
             } else { 
-                // 登录
                 const localPass = localStorage.getItem('pass_'+u);
                 const localData = localStorage.getItem('userData_'+u);
                 
-                // 优先本地
                 if(localPass === p && localData) { 
                     success(u, p, JSON.parse(localData)); 
                     return; 
                 }
                 
-                // 云端兜底
                 try { 
                     const res = await fetch(`/api/user?name=${u}&t=${ts}`); 
                     if(res.ok) { 
@@ -407,11 +405,9 @@
         function success(u,p,d) { 
             localStorage.setItem('login','1'); localStorage.setItem('u',u); localStorage.setItem('p',p); localStorage.setItem('pass_'+u, p); 
             if(d) fill(d); checkLog(); closeM(); toast('欢迎回来'); 
-            // 🔥 修复：登录成功后静默同步，不弹窗
             setTimeout(() => syncUser(u), 100);
         }
         
-        // 🔥 静默同步：不弹 Toast
         async function syncUser(u) { try { const res = await fetch(`/api/user?name=${u}&t=${Date.now()}`); if(res.ok) { const json = await res.json(); if(json.data) { localStorage.setItem('userData_'+u, JSON.stringify(json.data)); fill(json.data); } } } catch(e) {} }
 
         // --- 拖拽逻辑 ---
@@ -517,10 +513,51 @@
         
         function clickAv() { if(!isRead() && localStorage.getItem('login')==='1') id('file').click(); }
         function uploadImg(e) { const f = e.target.files[0]; if(!f) return; toast('压缩图片...'); const r = new FileReader(); r.onload = ev => { const img = new Image(); img.onload = () => { const c = document.createElement('canvas'); c.width = 400; c.height = 400; const ctx = c.getContext('2d'); let sx,sy,sw,sh; if(img.width>img.height){sh=img.height;sw=img.height;sx=(img.width-img.height)/2;sy=0;} else{sw=img.width;sh=img.width;sx=0;sy=(img.height-img.width)/2;} ctx.drawImage(img,sx,sy,sw,sh,0,0,400,400); id('user-avatar').src = c.toDataURL('image/jpeg',0.8); save(true); }; img.src = ev.target.result; }; r.readAsDataURL(f); }
-        async function loadAdmin() { toggleAdmin(1); id('tbl').querySelector('tbody').innerHTML = '<tr><td colspan="5">加载中...</td></tr>'; const u = localStorage.getItem('u'), p = localStorage.getItem('p'); try { const res = await fetch('/api/admin', { headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p } }); if(res.status===401) return toast('无权访问'); let list = await res.json(); list.sort((a, b) => { const isAdminA = a.name === ADMIN_NAME || a.role === 'admin'; const isAdminB = b.name === ADMIN_NAME || b.role === 'admin'; if (isAdminA && !isAdminB) return -1; if (!isAdminA && isAdminB) return 1; return new Date(b.created_at) - new Date(a.created_at); }); id('tbl').querySelector('tbody').innerHTML = list.map(x => { const roleBadge = (x.name === ADMIN_NAME || x.role === 'admin') ? '<span class="badge badge-admin">ADMIN</span>' : ''; const dateStr = x.created_at ? new Date(x.created_at.replace(' ', 'T') + 'Z').toLocaleString() : '未知'; return `<tr><td><b>${x.name}</b> ${roleBadge}</td><td>${x.status==='banned'?'<span class="badge badge-ban">封</span>':'<span class="badge badge-ok">正</span>'}</td><td style="font-size:12px;color:var(--text-sub)">${dateStr}</td><td>${x.name!==u?`<button class="act-btn act-ban" onclick="act('ban','${x.name}')" title="封禁"><i class="ri-prohibited-line"></i></button><button class="act-btn act-unban" onclick="act('unban','${x.name}')" title="解封"><i class="ri-checkbox-circle-line"></i></button><button class="act-btn act-del" onclick="act('delete','${x.name}')" title="删除"><i class="ri-delete-bin-line"></i></button><button class="act-btn act-key" onclick="viewPass('${x.name}')" title="密码"><i class="ri-key-2-line"></i></button>`:'-'}</td></tr>`; }).join(''); } catch(e){ } }
+        
+        function switchTab(t) { 
+            document.querySelectorAll('.admin-tab').forEach(e=>e.classList.remove('active')); 
+            document.querySelectorAll('.admin-view').forEach(e=>e.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('view-'+t).classList.add('active');
+            if(t==='stats') loadStats();
+        }
+
+        async function loadAdmin() { 
+            toggleAdmin(1); const tbody = document.getElementById('tbl').querySelector('tbody'); tbody.innerHTML = '<tr><td colspan="5">加载中...</td></tr>';
+            const u = localStorage.getItem('u'), p = localStorage.getItem('p'); 
+            try { 
+                const res = await fetch('/api/admin', { headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p } }); 
+                if(res.status===401) return toast('无权访问'); 
+                let list = await res.json(); 
+                list.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); 
+                tbody.innerHTML = list.map(x => { 
+                    const roleBadge = (x.name === ADMIN_NAME || x.role === 'admin') ? '<span class="badge badge-admin">ADMIN</span>' : ''; 
+                    const dateStr = x.created_at ? new Date(x.created_at.replace(' ', 'T') + 'Z').toLocaleString() : '未知'; 
+                    return `<tr><td><b>${x.name}</b> ${roleBadge}</td><td>${x.status==='banned'?'<span class="badge badge-ban">封</span>':'<span class="badge badge-ok">正</span>'}</td><td style="font-size:12px;color:var(--text-sub)">${dateStr}</td><td>${x.name!==u?`<button class="act-btn act-ban" onclick="act('ban','${x.name}')" title="封禁"><i class="ri-prohibited-line"></i></button><button class="act-btn act-unban" onclick="act('unban','${x.name}')" title="解封"><i class="ri-checkbox-circle-line"></i></button><button class="act-btn act-del" onclick="act('delete','${x.name}')" title="删除"><i class="ri-delete-bin-line"></i></button><button class="act-btn act-key" onclick="viewPass('${x.name}')" title="密码"><i class="ri-key-2-line"></i></button>`:'-'}</td></tr>`; 
+                }).join(''); 
+            } catch(e){ } 
+        }
+
+        async function loadStats() {
+            const u = localStorage.getItem('u'), p = localStorage.getItem('p');
+            try {
+                const res = await fetch('/api/stats', { headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p } });
+                const d = await res.json();
+                id('stat-total').innerText = d.total; id('stat-today').innerText = d.today;
+                drawChart('chart-trend', 'line', d.trend.map(x=>x.date), d.trend.map(x=>x.count), '访问趋势');
+                drawChart('chart-device', 'doughnut', d.devices.map(x=>x.device), d.devices.map(x=>x.count), '设备');
+                drawChart('chart-users', 'bar', d.topUsers.map(x=>x.target_user), d.topUsers.map(x=>x.count), '热门用户');
+            } catch(e) {}
+        }
+        function drawChart(id, type, labels, data, label) {
+            const ctx = document.getElementById(id).getContext('2d');
+            if(charts[id]) charts[id].destroy();
+            charts[id] = new Chart(ctx, { type: type, data: { labels: labels, datasets: [{ label: label, data: data, backgroundColor: ['#3a7bd5', '#ff4757', '#2ed573', '#f1c40f'], borderColor: '#3a7bd5', tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false } });
+        }
+
         async function act(a, t) { if(confirm('确定?')) { const u = localStorage.getItem('u'), p = localStorage.getItem('p'); await fetch('/api/admin', { method: 'POST', headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p }, body: JSON.stringify({ action: a, targetUser: t, duration: 24 }) }); loadAdmin(); }}
         async function viewPass(targetU) { const u = localStorage.getItem('u'), p = localStorage.getItem('p'); try { const res = await fetch(`/api/user?name=${targetU}`); if(res.ok) { const json = await res.json(); const pass = json.data ? (json.data._secret_pass || json.data._p) : '无密码'; prompt(`用户 ${targetU} 的密码：`, pass); } else { toast('获取失败'); } } catch(e) { toast('网络错误'); } }
-        function toggleAdmin(s) { id('admin').style.display = s ? 'flex' : 'none'; }
+        function toggleAdmin(s) { id('admin').style.display = s ? 'flex' : 'none'; if(s) switchTab('users'); }
         function openM() { id('modal').style.display='flex'; }
         function closeM() { id('modal').style.display='none'; }
         function flip() { isReg=!isReg; id('m-title').innerText=isReg?"注册":"登录"; document.querySelector('.btn-sub').innerText=isReg?"注册":"登录"; }
