@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- 强制不缓存 -->
+    <!-- 强制不缓存，确保每次加载最新逻辑 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Web Card V50 - 最终稳定版</title>
+    <title>Web Card V51 - 时间修复版</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
@@ -323,7 +323,7 @@
     </div>
 
     <script>
-        // 🔥 工具函数必须前置
+        // 🔥 1. 工具函数前置 (核心修复)
         const id = x => document.getElementById(x);
         const text = x => id(x).innerText;
         const src = x => id(x).src;
@@ -356,7 +356,7 @@
             }
         };
 
-        // --- 核心：注册/登录/同步 (🔥 修复版) ---
+        // --- 核心：注册/登录/同步 (🔥 V50 终极修复) ---
         async function auth() { 
             const u = val('u'), p = val('p'); 
             if(!u || !p) return toast('请填写完整'); 
@@ -471,8 +471,7 @@
         function applyPreset(name) { const p = PRESETS[name]; if(!p) return; const r = document.documentElement.style; r.setProperty('--page-bg', p.bg); r.setProperty('--card-bg', p.card); r.setProperty('--text-main', p.text); r.setProperty('--text-sub', p.sub); r.setProperty('--item-bg', p.item); document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active')); const activeDot = document.getElementById('preset-' + name); if(activeDot) activeDot.classList.add('active'); if(name !== 'dark') { id('picker-page').value = rgb2hex(p.bg)||p.bg; id('picker-card').value = rgb2hex(p.card)||p.card; id('picker-item').value = rgb2hex(p.item)||p.item; } currentData.theme.preset = name; currentData.theme.colors = { page: p.bg, card: p.card, item: p.item }; debounceSave(); }
         function updateCustomColor(type, val) { document.documentElement.style.setProperty(`--${type}-bg`, val); document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active')); currentData.theme.preset = 'custom'; if(!currentData.theme.colors) currentData.theme.colors = {}; currentData.theme.colors[type] = val; debounceSave(); }
         function rgb2hex(orig) { if(!orig) return '#ffffff'; if(orig.startsWith('#')) return orig; return '#f5f5f7'; }
-
-        // --- 其他工具 ---
+        
         function setTextStyle(i, type, val) { if(isRead()) return; if(type === 'bold') currentData.items[i].bold = !currentData.items[i].bold; if(type === 'align') currentData.items[i].align = val; renderList(); save(true); }
         function addItem(type) { if(type==='divider') currentData.items.push({ type: 'divider', style: 'dashed' }); else if(type==='text') currentData.items.push({ type: 'text', text: '新标题', align: 'left', bold: true }); else currentData.items.push({ type: 'link', icon: 'ri-star-line', text: '新链接', url: '' }); renderList(); save(true); }
         function toggleDividerStyle(i) { if(isRead()) return; const item = currentData.items[i]; item.style = item.style === 'solid' ? 'dashed' : 'solid'; renderList(); save(true); }
@@ -528,13 +527,14 @@
         function logout() { localStorage.setItem('login','0'); location.href="/"; }
         function goHome() { location.href="/"; }
         function share() { const u=localStorage.getItem('u'); const url=location.origin+'/'+u; navigator.clipboard.writeText(url).then(()=>toast('已复制')).catch(()=>prompt("复制",url)); }
+        
         function fill(d) { 
-            if(!d) { currentData.items = [{ type:'link', icon:'ri-global-line', text:'我的网站', url:'' }]; currentData.theme = { radius:12, preset:'default', colors: {} }; } 
+            if(!d) { currentData.items = [{ type:'link', icon:'ri-global-line', text:'我的网站', url:'' }]; currentData.theme = { radius:20, cardRadius:20, preset:'default', colors: {} }; } 
             else { 
                 id('user-name').innerText = d.name || 'Code Master'; id('user-role').innerText = d.role || 'Developer'; id('user-avatar').src = d.avatar || DEFAULT_AVATAR; 
                 currentData.items = (d.items && Array.isArray(d.items)) ? d.items : []; 
                 if(d.theme) { 
-                    currentData.theme = d.theme; changeRadius(d.theme.radius || 12); 
+                    currentData.theme = d.theme; changeRadius(d.theme.radius || 20); 
                     if(d.theme.cardRadius) changeCardRadius(d.theme.cardRadius);
                     if(d.theme.colors && d.theme.preset === 'custom') { 
                         if(d.theme.colors.page) { document.documentElement.style.setProperty('--page-bg', d.theme.colors.page); id('picker-page').value = d.theme.colors.page; } 
