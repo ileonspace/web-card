@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <!-- 强制不缓存 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Web Card V51 - 安全最终版</title>
+    <title>Web Card V52 - 最终修复版</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
-        /* --- 1. 基础变量 (保持 V50 外观) --- */
+        /* --- 1. 基础变量 --- */
         :root {
             --page-bg: #EAF3F7; 
             --card-bg: #ffffff;
@@ -81,6 +81,7 @@
         
         .item.sort-dragging { background: #fff !important; box-shadow: 0 10px 20px rgba(0,0,0,0.15); border-color: var(--accent); z-index: 100; opacity: 0.95; transform: scale(1.02); }
         
+        /* 仅链接条目有悬停动效 */
         body:not(.touch-device) .item:not(.type-text):not(.type-divider):hover { 
             transform: translateY(-2px); 
             background: rgba(0,0,0,0.06); 
@@ -112,6 +113,7 @@
 
         .item-icon { font-size: 24px; color: var(--text-sub); margin-right: 15px; min-width: 24px; text-align: center; flex-shrink: 0; transition: 0.3s; }
         body:not(.read) .item-icon { cursor: pointer; }
+        /* 图标悬停变橙色 */
         body:not(.touch-device) .item:not(.type-text):not(.type-divider):hover .item-icon { color: #ff9f43; transform: scale(1.1); }
         
         .item-content { flex: 1; overflow: hidden; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
@@ -303,7 +305,7 @@
         <h1 id="user-name" contenteditable="true" style="color:var(--text-main)">Code Master</h1>
         <div id="user-role" class="role" contenteditable="true">全栈开发练习生</div>
         
-        <!-- 🔥 链接显示区 (修复：登录即显示) -->
+        <!-- 🔥 链接显示区 -->
         <div class="link-area" onclick="copyLink()" id="link-box" style="display:none">
             <i class="ri-link"></i> <span id="my-link">loading...</span> <i class="ri-file-copy-line"></i>
         </div>
@@ -350,50 +352,50 @@
             }
         };
 
-        // --- 核心：注册/登录/同步 ---
+        // --- 🔥 修复：登录逻辑 (移除本地优先，强制云端验证) ---
         async function auth() { 
             const u = val('u'), p = val('p'); 
             if(!u || !p) return toast('请填写完整'); 
             const ts = Date.now();
             
             if(isReg) { 
+                // 注册逻辑保持不变 (查重 -> 上云 -> 本地)
                 try { 
                     const check = await fetch(`/api/user?name=${u}&t=${ts}`); 
                     if(check.ok) return toast('用户已存在'); 
                     
                     const initData = { name: 'Code Master', role: '新用户', avatar: DEFAULT_AVATAR, items: [], theme: {radius:20, cardRadius:20, preset:'default'}, _secret_pass: p };
-                    localStorage.setItem('userData_'+u, JSON.stringify(initData));
-                    
-                    // 🔥 注册后立即上云
                     await fetch('/api/user', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: u, password: p, data: initData }) });
                     
+                    localStorage.setItem('userData_'+u, JSON.stringify(initData)); // 补充：注册成功立即写本地，防止刷新丢状态
                     localStorage.setItem('pass_'+u, p); 
                     toast('注册成功'); flip(); 
                 } catch(e) { toast('网络错误'); } 
             } else { 
-                // 登录
-                const localPass = localStorage.getItem('pass_'+u);
-                const localData = localStorage.getItem('userData_'+u);
-                
-                // 优先本地
-                if(localPass === p && localData) { 
-                    success(u, p, JSON.parse(localData)); 
-                    return; 
-                }
-                
-                // 🔥 本地没有，去云端验证 (解决换设备登录问题)
+                // 🔥 登录逻辑：直接查云端，不信任本地
+                toast('正在验证...');
                 try { 
                     const res = await fetch(`/api/user?name=${u}&t=${ts}`); 
                     if(res.ok) { 
                         const json = await res.json(); 
                         if(json.status === 'banned') return toast('🚫 账号已封禁'); 
+                        
                         const cp = json.data ? (json.data._secret_pass || json.data._p) : null; 
                         
                         if(cp === p) { 
+                            // 验证成功：覆盖本地缓存
                             localStorage.setItem('userData_'+u, JSON.stringify(json.data)); 
                             success(u, p, json.data); 
                         } else toast('密码错误'); 
-                    } else toast('用户不存在'); 
+                    } else {
+                        // 404 Not Found (说明账号已删)
+                        // 🔥 关键：清理本地残留，允许重新注册
+                        if(localStorage.getItem('pass_'+u)) {
+                            localStorage.removeItem('pass_'+u);
+                            localStorage.removeItem('userData_'+u);
+                        }
+                        toast('用户不存在 (或已删除)'); 
+                    }
                 } catch(e) { toast('网络错误'); } 
             } 
         }
@@ -518,6 +520,7 @@
         function flip() { isReg=!isReg; id('m-title').innerText=isReg?"注册":"登录"; document.querySelector('.btn-sub').innerText=isReg?"注册":"登录"; }
         function logout() { localStorage.setItem('login','0'); location.href="/"; }
         function goHome() { location.href="/"; }
+        function share() { const u=localStorage.getItem('u'); const url=location.origin+'/'+u; navigator.clipboard.writeText(url).then(()=>toast('已复制')).catch(()=>prompt("复制",url)); }
         
         function fill(d) { 
             if(!d) { currentData.items = [{ type:'link', icon:'ri-global-line', text:'我的网站', url:'' }]; currentData.theme = { radius:20, cardRadius:20, preset:'default', colors: {} }; } 
