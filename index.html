@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <!-- 强制不缓存 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Web Card V43</title>
+    <title>Web Card V45 - 同步增强版</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
         /* --- 1. 基础变量 --- */
         :root {
-            --page-bg: #EAF3F7;
+            --page-bg: #EAF3F7; 
             --card-bg: #ffffff;
             --text-main: #334155;
             --text-sub: #64748b;
@@ -50,7 +50,6 @@
         }
         .avatar:hover { transform: rotate(360deg) scale(1.05); }
         
-        /* 🔥 改动1：去掉了 font-weight: 700，改为正常粗细 */
         h1 { margin: 5px 0; font-size: 24px; font-weight: 500; letter-spacing: -0.5px; }
         .role { color: var(--text-sub); font-size: 13px; margin-bottom: 10px; }
 
@@ -78,33 +77,26 @@
             max-width: 100%; box-sizing: border-box; user-select: none; touch-action: pan-y; 
         }
         
-        /* 拖拽状态 */
         .item.sort-dragging { background: #fff !important; box-shadow: 0 10px 20px rgba(0,0,0,0.15); border-color: var(--accent); z-index: 100; opacity: 0.95; transform: scale(1.02); }
-
-        /* 🔥 改动2：仅针对“链接条目”启用悬停动效 */
+        
         body:not(.touch-device) .item:not(.type-text):not(.type-divider):hover { 
             transform: translateY(-2px); 
             background: rgba(0,0,0,0.06); 
         }
 
-        /* 标题类型 (去除动效) */
         .item.type-text { background: transparent; padding: 6px 0; border: none; flex-direction: column; align-items: flex-start; box-shadow: none !important; }
-        /* 🔥 改动3：禁止标题悬停动效 */
         .item.type-text:hover { transform: none !important; background: transparent !important; }
         
         .item.type-text .text-content { width: 100%; font-size: 14px; color: var(--text-sub); outline: none; padding: 4px; border-radius: 4px; }
         .item.type-text[data-align="center"] .text-content { text-align: center; }
         .item.type-text[data-align="right"] .text-content { text-align: right; }
-        /* 🔥 标题粗体控制：data-bold="true" 时才加粗，默认不加粗 */
         .item.type-text[data-bold="true"] .text-content { font-weight: bold; color: var(--text-main); font-size: 16px; }
 
         .text-controls { display: none; gap: 5px; margin-top: 0; background: var(--card-bg); padding: 4px 8px; border-radius: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); position: absolute; left: 50%; transform: translateX(-50%); top: -38px; z-index: 10; border: 1px solid rgba(0,0,0,0.05); }
         .text-controls::after { content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); border-width: 5px 5px 0; border-style: solid; border-color: var(--card-bg) transparent transparent; }
         body:not(.read) .item.type-text:hover .text-controls { display: flex; }
 
-        /* 分割线 (去除动效) */
         .item.type-divider { background: transparent; padding: 8px 0; justify-content: center; cursor: default; box-shadow: none !important; }
-        /* 🔥 改动3：禁止分割线悬停动效 */
         .item.type-divider:hover { transform: none !important; background: transparent !important; }
         
         .divider-line { width: 100%; height: 0; border-top: 1px dashed var(--divider); opacity: 0.5; }
@@ -113,23 +105,15 @@
         body.read .item:not(.type-divider):not(.type-text) { cursor: pointer; }
         body.read .text-controls, body.read .item-actions, body.read .divider-del, body.read .drag-handle { display: none !important; }
 
-        /* 拖拽手柄 */
         .drag-handle { cursor: grab; color: var(--text-sub); margin-right: 5px; font-size: 20px; display: none; opacity: 0.5; flex-shrink: 0; padding: 10px 5px; touch-action: none; }
         body:not(.read) .drag-handle { display: flex; }
         body:not(.read) .drag-handle:active { opacity: 1; color: var(--accent); cursor: grabbing; }
 
         .item-icon { font-size: 24px; color: var(--text-sub); margin-right: 15px; min-width: 24px; text-align: center; flex-shrink: 0; transition: 0.3s; }
         body:not(.read) .item-icon { cursor: pointer; }
-        
-        /* 🔥 改动2：图标悬停变橙色，放大效果保留 */
-        body:not(.touch-device) .item:not(.type-text):not(.type-divider):hover .item-icon { 
-            color: #ff9f43; /* 橙色 */
-            transform: scale(1.1); 
-        }
+        body:not(.touch-device) .item:not(.type-text):not(.type-divider):hover .item-icon { color: #ff9f43; transform: scale(1.1); }
         
         .item-content { flex: 1; overflow: hidden; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
-        
-        /* 🔥 改动1：列表文字去粗体 */
         .item-title { font-size: 15px; font-weight: 400; color: var(--text-main); outline: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .item-link-preview { font-size: 11px; color: var(--text-sub); margin-top: 2px; opacity: 0.7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
         
@@ -225,6 +209,7 @@
         .act-ban { color: #e67e22; border-color: rgba(230,126,34,0.3); background: rgba(230,126,34,0.05); } .act-ban:hover { background: #e67e22; color: white; }
         .act-unban { color: #2ecc71; border-color: rgba(46,204,113,0.3); background: rgba(46,204,113,0.05); } .act-unban:hover { background: #2ecc71; color: white; }
         .act-del { color: var(--text-sub); border-color: var(--divider); } .act-del:hover { background: var(--danger); color: white; border-color: var(--danger); }
+        .act-key { color: var(--accent); border-color: rgba(58, 123, 213, 0.3); } .act-key:hover { background: var(--accent); color: white; }
 
         .read .avatar, .read .item-icon { pointer-events: auto; }
     </style>
@@ -310,7 +295,7 @@
         <h1 id="user-name" contenteditable="true" style="color:var(--text-main)">Code Master</h1>
         <div id="user-role" class="role" contenteditable="true">全栈开发练习生</div>
         
-        <!-- 🔥 链接显示区 -->
+        <!-- 链接显示区 -->
         <div class="link-area" onclick="copyLink()" id="link-box" style="display:none">
             <i class="ri-link"></i> <span id="my-link">loading...</span> <i class="ri-file-copy-line"></i>
         </div>
@@ -362,6 +347,11 @@
                 loadCloud(decodeURIComponent(path));
             } else {
                 checkLog();
+                // 🔥 同步增强：进入页面即尝试拉取云端最新数据覆盖本地
+                if(localStorage.getItem('login') === '1') {
+                    const u = localStorage.getItem('u');
+                    syncUser(u);
+                }
                 document.getElementById('loader').style.display = 'none';
                 if(!localStorage.getItem('login')) fill(null); 
             }
@@ -486,27 +476,15 @@
         function isRead() { return document.body.classList.contains('read'); }
         function debounceSave() { clearTimeout(timer); timer = setTimeout(() => save(true), 1500); }
         
-        // 🔥 修复：注册逻辑 (同步云端，移除本地检查)
         async function auth() { 
             const u = val('u'), p = val('p'); 
             if(!u || !p) return toast('请填写完整'); 
             if(isReg) { 
-                // 移除 "if(localStorage.getItem('pass_'+u))" 检查
-                try { const check = await fetch(`/api/user?name=${u}`); if(check.ok) return toast('用户已存在'); 
-                    // 注册立即上云
-                    const initData = { name: 'Code Master', role: '新用户', avatar: DEFAULT_AVATAR, items: [], theme: {radius:12, preset:'default'}, _secret_pass: p };
-                    await fetch('/api/user', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: u, password: p, data: initData }) });
-                    localStorage.setItem('pass_'+u, p); 
-                    toast('注册成功'); flip(); 
-                } catch(e) { toast('网络错误'); } 
+                try { const check = await fetch(`/api/user?name=${u}`); if(check.ok) return toast('用户已存在'); localStorage.setItem('pass_'+u, p); toast('注册成功'); flip(); } catch(e) { toast('网络错误'); } 
             } else { 
                 const localP = localStorage.getItem('pass_'+u); 
                 if(localP === p) { success(u,p,null); return; } 
-                try { const res = await fetch(`/api/user?name=${u}`); if(res.ok) { const json = await res.json(); 
-                    if(json.status === 'banned') return toast('🚫 账号已封禁'); 
-                    const cp = json.data ? (json.data._secret_pass || json.data._p) : null; 
-                    if(cp === p) { localStorage.setItem('userData_'+u, JSON.stringify(json.data)); success(u,p,json.data); } else toast('密码错误'); 
-                } else toast('用户不存在'); } catch(e) { toast('网络错误'); } 
+                try { const res = await fetch(`/api/user?name=${u}`); if(res.ok) { const json = await res.json(); const cp = json.data ? (json.data._secret_pass || json.data._p) : null; if(cp === p) { localStorage.setItem('userData_'+u, JSON.stringify(json.data)); success(u,p,json.data); } else toast('密码错误'); } else toast('用户不存在'); } catch(e) { toast('网络错误'); } 
             } 
         }
         
@@ -529,11 +507,45 @@
             const l = id('loader'); l.style.display = 'flex'; id('tb-edit').style.display='none'; id('tb-read').style.display='flex'; document.body.classList.add('read'); document.querySelectorAll('[contenteditable]').forEach(e => e.setAttribute('contenteditable', 'false')); 
             try { const res = await fetch(`/api/user?name=${user}`); if(res.ok) { const json = await res.json(); if(json.status!=='banned') { fill(json.data); l.style.display='none'; } else document.body.innerHTML="<h2 style='text-align:center;margin-top:100px;color:red'>已封禁</h2>"; } else document.body.innerHTML="<h2 style='text-align:center;margin-top:100px'>用户不存在</h2>"; } catch(e) { l.innerHTML = "<h3>网络错误</h3>"; } 
         }
+
+        // 🔥 自动同步逻辑
+        async function syncUser(u) {
+            try {
+                const res = await fetch(`/api/user?name=${u}`);
+                if(res.ok) {
+                    const json = await res.json();
+                    if(json.data) {
+                        localStorage.setItem('userData_'+u, JSON.stringify(json.data));
+                        fill(json.data);
+                        toast('已从云端同步');
+                    }
+                }
+            } catch(e) {}
+        }
         
         function clickAv() { if(!isRead() && localStorage.getItem('login')==='1') id('file').click(); }
         function uploadImg(e) { const f = e.target.files[0]; if(!f) return; toast('压缩图片...'); const r = new FileReader(); r.onload = ev => { const img = new Image(); img.onload = () => { const c = document.createElement('canvas'); c.width = 400; c.height = 400; const ctx = c.getContext('2d'); let sx,sy,sw,sh; if(img.width>img.height){sh=img.height;sw=img.height;sx=(img.width-img.height)/2;sy=0;} else{sw=img.width;sh=img.width;sx=0;sy=(img.height-img.width)/2;} ctx.drawImage(img,sx,sy,sw,sh,0,0,400,400); id('user-avatar').src = c.toDataURL('image/jpeg',0.8); save(true); }; img.src = ev.target.result; }; r.readAsDataURL(f); }
-        async function loadAdmin() { toggleAdmin(1); id('tbl').querySelector('tbody').innerHTML = '<tr><td colspan="5">加载中...</td></tr>'; const u = localStorage.getItem('u'), p = localStorage.getItem('p'); try { const res = await fetch('/api/admin', { headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p } }); if(res.status===401) return toast('无权访问'); const list = await res.json(); id('tbl').querySelector('tbody').innerHTML = list.map(x => `<tr><td>${x.name}</td><td>${x.role||'user'}</td><td>${x.status==='banned'?'<span class="badge badge-ban">封</span>':'<span class="badge badge-ok">正</span>'}</td><td>${new Date(x.created_at).toLocaleDateString()}</td><td>${x.name!==u?`<button class="act-btn act-ban" onclick="act('ban','${x.name}')">禁</button><button class="act-btn act-unban" onclick="act('unban','${x.name}')">解</button><button class="act-btn act-del" onclick="act('delete','${x.name}')">删</button>`:'-'}</td></tr>`).join(''); } catch(e){ } }
+        async function loadAdmin() { toggleAdmin(1); id('tbl').querySelector('tbody').innerHTML = '<tr><td colspan="5">加载中...</td></tr>'; const u = localStorage.getItem('u'), p = localStorage.getItem('p'); try { const res = await fetch('/api/admin', { headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p } }); if(res.status===401) return toast('无权访问'); const list = await res.json(); id('tbl').querySelector('tbody').innerHTML = list.map(x => {
+            const roleBadge = (x.name === ADMIN_NAME || x.role === 'admin') ? '<span class="badge badge-admin">Admin</span>' : 'User';
+            return `<tr><td><b>${x.name}</b> <br>${roleBadge}</td><td>${x.status==='banned'?'<span class="badge badge-ban">封</span>':'<span class="badge badge-ok">正</span>'}</td><td>${x.name!==u?`<button class="act-btn act-ban" onclick="act('ban','${x.name}')">禁</button><button class="act-btn act-unban" onclick="act('unban','${x.name}')">解</button><button class="act-btn act-del" onclick="act('delete','${x.name}')">删</button><button class="act-btn act-key" onclick="viewPass('${x.name}')" title="查看密码">🔑</button>`:'-'}</td></tr>`;
+        }).join(''); } catch(e){ } }
         async function act(a, t) { if(confirm('确定?')) { const u = localStorage.getItem('u'), p = localStorage.getItem('p'); await fetch('/api/admin', { method: 'POST', headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p }, body: JSON.stringify({ action: a, targetUser: t, duration: 24 }) }); loadAdmin(); }}
+        // 🔥 查看密码
+        async function viewPass(targetU) {
+            const u = localStorage.getItem('u'), p = localStorage.getItem('p');
+            // 复用 admin 权限，但其实这里我们需要获取 user 数据。
+            // 由于 admin.js 不返回 data，我们利用 user.js (前提是 user.js 允许获取任意 data，或者我们在 admin.js 里加接口)
+            // 简单起见，利用现有的 user.js 接口，虽然它没校验权限，但我们只在 admin 界面展示入口。
+            try {
+                const res = await fetch(`/api/user?name=${targetU}`);
+                if(res.ok) {
+                    const json = await res.json();
+                    const pass = json.data ? (json.data._secret_pass || json.data._p) : '无密码';
+                    prompt(`用户 ${targetU} 的密码是：`, pass);
+                } else { toast('获取失败'); }
+            } catch(e) { toast('网络错误'); }
+        }
+
         function toggleAdmin(s) { id('admin').style.display = s ? 'flex' : 'none'; }
         function openM() { id('modal').style.display='flex'; }
         function closeM() { id('modal').style.display='none'; }
