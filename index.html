@@ -5,18 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <!-- 强制不缓存 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Web Card V47 - 完美体验版</title>
+    <title>Web Card V48 - 稳定修复版</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
-        /* --- 1. 基础变量 --- */
+        /* --- 1. 基础变量 (保持外观设置不变) --- */
         :root {
             --page-bg: #EAF3F7; 
             --card-bg: #ffffff;
             --text-main: #334155;
             --text-sub: #64748b;
             --item-bg: rgba(0,0,0,0.03);
-            /* 🔥 圆角默认改为 20px */
             --item-radius: 20px; 
             --card-radius: 20px;
             
@@ -39,7 +38,7 @@
         .card { 
             background: var(--card-bg); width: 100%; max-width: 380px; 
             padding: 35px 25px 40px 25px; 
-            border-radius: var(--card-radius); /* 绑定变量 */
+            border-radius: var(--card-radius); 
             text-align: center; 
             box-shadow: var(--shadow); position: relative; transition: 0.3s; 
         }
@@ -53,21 +52,20 @@
         }
         .avatar:hover { transform: rotate(360deg) scale(1.05); }
         
-        /* 标题不加粗，字体大小不变 */
         h1 { margin: 5px 0; font-size: 24px; font-weight: 500; letter-spacing: -0.5px; }
         .role { color: var(--text-sub); font-size: 13px; margin-bottom: 10px; }
 
-        /* 嵌入式链接条 */
+        /* 🔥 修复：嵌入式链接条 */
         .link-area {
             background: rgba(58, 123, 213, 0.08); color: var(--accent);
-            padding: 8px 12px; border-radius: 8px; font-size: 12px;
-            display: inline-flex; align-items: center; gap: 6px;
+            padding: 10px 14px; border-radius: 12px; font-size: 13px;
+            display: inline-flex; align-items: center; gap: 8px;
             margin-bottom: 25px; cursor: pointer; transition: 0.2s;
             border: 1px dashed rgba(58, 123, 213, 0.3);
             max-width: 100%; overflow: hidden;
         }
         .link-area:hover { background: rgba(58, 123, 213, 0.15); transform: translateY(-1px); }
-        .link-area span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .link-area span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
         body.read .link-area { display: none !important; }
 
         /* --- 3. 列表与条目 --- */
@@ -97,7 +95,6 @@
         .item.type-text[data-align="right"] .text-content { text-align: right; }
         .item.type-text[data-bold="true"] .text-content { font-weight: bold; color: var(--text-main); font-size: 16px; }
 
-        /* 文字编辑条居中 */
         .text-controls { display: none; gap: 5px; margin-top: 0; background: var(--card-bg); padding: 4px 8px; border-radius: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); position: absolute; left: 50%; transform: translateX(-50%); top: -38px; z-index: 10; border: 1px solid rgba(0,0,0,0.05); }
         .text-controls::after { content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); border-width: 5px 5px 0; border-style: solid; border-color: var(--card-bg) transparent transparent; }
         body:not(.read) .item.type-text:hover .text-controls { display: flex; }
@@ -170,12 +167,11 @@
             .tool-btn span { display: none; } 
         }
 
-        /* --- 🔥 外观设置 (精修版) --- */
+        /* --- 5. 外观设置面板 (完美状态) --- */
         #theme-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 4000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
         .theme-box { background: var(--card-bg); width: 90%; max-width: 340px; padding: 25px; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); text-align: left; max-height: 85vh; overflow-y: auto; }
         
         .setting-section { margin-bottom: 20px; }
-        /* 🔥 标题大一号 */
         .setting-title { font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 12px; display: block; }
         
         .preset-grid { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
@@ -184,15 +180,8 @@
             border: 1px solid rgba(0,0,0,0.1); transition: 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); 
             box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative;
         }
-        /* 🔥 按钮按压效果 */
         .color-dot:active { transform: scale(0.9); }
-        
-        /* 🔥 选定状态标识：外单圈加粗灰色 */
-        .color-dot.active { 
-            border: 3px solid #64748b; /* 灰色加粗边框 */
-            transform: scale(1.05);
-            box-shadow: none;
-        }
+        .color-dot.active { border: 3px solid #64748b; transform: scale(1.05); box-shadow: none; }
 
         .color-picker-row { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
         .color-picker-item { flex: 1; display: flex; flex-direction: column; gap: 5px; font-size: 12px; color: var(--text-sub); align-items: center; }
@@ -201,6 +190,7 @@
         .range-slider { width: 100%; -webkit-appearance: none; height: 6px; background: #ddd; border-radius: 3px; outline: none; }
         .range-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: var(--accent); border-radius: 50%; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
+        /* 其他组件 */
         #icon-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 4000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
         .icon-box { background: var(--card-bg); width: 90%; max-width: 500px; max-height: 80vh; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; }
         .icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 10px; overflow-y: auto; padding: 5px; flex: 1; }
@@ -262,7 +252,7 @@
         <div class="icon-grid" id="lib-grid"></div>
     </div></div>
 
-    <!-- 🔥 外观设置 (升级版) -->
+    <!-- 外观设置 -->
     <div id="theme-modal"><div class="theme-box">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
             <h3 style="margin:0;color:var(--text-main);font-weight:700">外观设置</h3>
@@ -285,14 +275,12 @@
                     <div class="color-picker-item"><span>卡片</span><input type="color" class="color-input" id="picker-card" value="#ffffff" oninput="updateCustomColor('card', this.value)"></div>
                     <div class="color-picker-item">
                         <span>条目</span>
-                        <!-- 🔥 默认值改为浅灰色 -->
                         <input type="color" class="color-input" id="picker-item" value="#f8f8f8" oninput="updateCustomColor('item', this.value)">
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 形状样式 -->
         <div class="setting-section">
             <span class="setting-title">形状样式</span>
             <div style="margin-bottom:15px">
@@ -300,7 +288,6 @@
                     <span>条目圆角</span> <span id="radius-val" class="range-val">20</span>
                 </div>
                 <div class="range-wrap">
-                    <!-- 🔥 默认 20，最大 60 -->
                     <input type="range" min="0" max="60" value="20" class="range-slider" oninput="changeRadius(this.value)">
                 </div>
             </div>
@@ -310,7 +297,6 @@
                     <span>卡片圆角</span> <span id="card-radius-val" class="range-val">20</span>
                 </div>
                 <div class="range-wrap">
-                    <!-- 🔥 默认 20，最大 60 -->
                     <input type="range" min="0" max="60" value="20" class="range-slider" oninput="changeCardRadius(this.value)">
                 </div>
             </div>
@@ -343,7 +329,7 @@
         <h1 id="user-name" contenteditable="true" style="color:var(--text-main)">Code Master</h1>
         <div id="user-role" class="role" contenteditable="true">全栈开发练习生</div>
         
-        <!-- 链接显示区 -->
+        <!-- 🔥 链接显示区 -->
         <div class="link-area" onclick="copyLink()" id="link-box" style="display:none">
             <i class="ri-link"></i> <span id="my-link">loading...</span> <i class="ri-file-copy-line"></i>
         </div>
@@ -383,7 +369,6 @@
             'ri-restaurant-line', 'ri-cake-line', 'ri-briefcase-line', 'ri-medal-line', 'ri-trophy-line'
         ];
 
-        // 🔥 默认参数更新：圆角 20
         let currentData = { items: [], theme: { radius: 20, cardRadius: 20, preset: 'default', colors: { page: '#EAF3F7', card: '#ffffff', item: '#f8f8f8' } } };
         let isReg = false, timer = null, editingIndex = -1, dragSrcEl = null, dragSrcIndex = null;
 
@@ -401,17 +386,81 @@
             }
         };
 
+        // --- 🔥 修复：数据同步与登录逻辑 ---
+        async function auth() { 
+            const u = val('u'), p = val('p'); 
+            if(!u || !p) return toast('请填写完整'); 
+            const ts = Date.now();
+            
+            if(isReg) { 
+                try { 
+                    const check = await fetch(`/api/user?name=${u}&t=${ts}`); 
+                    if(check.ok) return toast('用户已存在'); 
+                    
+                    // 1. 注册时立即初始化本地数据
+                    const initData = { name: 'Code Master', role: '新用户', avatar: DEFAULT_AVATAR, items: [], theme: {radius:20, cardRadius:20, preset:'default'}, _secret_pass: p };
+                    localStorage.setItem('userData_'+u, JSON.stringify(initData));
+                    
+                    // 2. 立即上云
+                    await fetch('/api/user', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: u, password: p, data: initData }) });
+                    
+                    localStorage.setItem('pass_'+u, p); 
+                    toast('注册成功'); flip(); 
+                } catch(e) { toast('网络错误'); } 
+            } else { 
+                // 登录
+                const localPass = localStorage.getItem('pass_'+u);
+                const localData = localStorage.getItem('userData_'+u);
+                
+                // 优先检查本地：密码对且有数据，直接进
+                if(localPass === p && localData) { 
+                    success(u, p, JSON.parse(localData)); 
+                    return; 
+                }
+                
+                // 否则去云端拉取 (针对换设备或清空缓存的情况)
+                try { 
+                    const res = await fetch(`/api/user?name=${u}&t=${ts}`); 
+                    if(res.ok) { 
+                        const json = await res.json(); 
+                        if(json.status === 'banned') return toast('🚫 账号已封禁'); 
+                        const cp = json.data ? (json.data._secret_pass || json.data._p) : null; 
+                        
+                        if(cp === p) { 
+                            localStorage.setItem('userData_'+u, JSON.stringify(json.data)); 
+                            success(u, p, json.data); 
+                        } else toast('密码错误'); 
+                    } else toast('用户不存在'); 
+                } catch(e) { toast('网络错误'); } 
+            } 
+        }
+
+        function success(u,p,d) { 
+            localStorage.setItem('login','1'); 
+            localStorage.setItem('u',u); 
+            localStorage.setItem('p',p); 
+            localStorage.setItem('pass_'+u, p); 
+            if(d) fill(d); 
+            checkLog(); 
+            closeM(); 
+            toast('欢迎回来'); 
+            
+            // 登录成功后，无论如何再尝试同步一次最新数据
+            setTimeout(() => syncUser(u), 100);
+        }
+        
+        async function syncUser(u) { try { const res = await fetch(`/api/user?name=${u}&t=${Date.now()}`); if(res.ok) { const json = await res.json(); if(json.data) { localStorage.setItem('userData_'+u, JSON.stringify(json.data)); fill(json.data); } } } catch(e) {} }
+
+        // --- 下面保持 V47 逻辑不变 ---
+        
         function toggleThemeModal(show) { 
             document.getElementById('theme-modal').style.display = show ? 'flex' : 'none'; 
             if(show) {
-                // 打开时更新颜色选择器的值以匹配当前主题，防止默认变黑
                 const t = currentData.theme;
                 const c = t.preset === 'custom' ? t.colors : PRESETS[t.preset] || PRESETS['default'];
                 id('picker-page').value = rgb2hex(c.bg || c.page);
                 id('picker-card').value = rgb2hex(c.card);
                 id('picker-item').value = rgb2hex(c.item);
-                
-                // 更新滑块
                 document.querySelectorAll('.range-slider')[0].value = t.radius;
                 document.querySelectorAll('.range-slider')[1].value = t.cardRadius;
                 id('radius-val').innerText = t.radius;
@@ -419,61 +468,13 @@
             }
         }
         
-        function changeRadius(val) {
-            document.documentElement.style.setProperty('--item-radius', val + 'px');
-            document.getElementById('radius-val').innerText = val;
-            currentData.theme.radius = val;
-            debounceSave();
-        }
-        
-        function changeCardRadius(val) {
-            document.documentElement.style.setProperty('--card-radius', val + 'px');
-            document.getElementById('card-radius-val').innerText = val;
-            currentData.theme.cardRadius = val;
-            debounceSave();
-        }
+        function changeRadius(val) { document.documentElement.style.setProperty('--item-radius', val + 'px'); id('radius-val').innerText = val; currentData.theme.radius = val; debounceSave(); }
+        function changeCardRadius(val) { document.documentElement.style.setProperty('--card-radius', val + 'px'); id('card-radius-val').innerText = val; currentData.theme.cardRadius = val; debounceSave(); }
 
-        const PRESETS = {
-            default: { bg:'#EAF3F7', card:'#ffffff', text:'#334155', sub:'#64748b', item:'rgba(0,0,0,0.03)' },
-            dark: { bg:'#0f172a', card:'#1e293b', text:'#f8fafc', sub:'#94a3b8', item:'rgba(255,255,255,0.05)' },
-            warm: { bg:'#FFF0F5', card:'#ffffff', text:'#5D4037', sub:'#8D6E63', item:'rgba(255,235,238,0.5)' },
-            mint: { bg:'#e0f2f1', card:'#ffffff', text:'#004D40', sub:'#00796B', item:'rgba(224,242,241,0.5)' }
-        };
-
-        function applyPreset(name) {
-            const p = PRESETS[name];
-            if(!p) return;
-            const r = document.documentElement.style;
-            r.setProperty('--page-bg', p.bg); r.setProperty('--card-bg', p.card); r.setProperty('--text-main', p.text); r.setProperty('--text-sub', p.sub); r.setProperty('--item-bg', p.item);
-            document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
-            const activeDot = document.getElementById('preset-' + name);
-            if(activeDot) activeDot.classList.add('active');
-            
-            // 更新选择器值以免下次打开变黑
-            id('picker-page').value = rgb2hex(p.bg); 
-            id('picker-card').value = rgb2hex(p.card); 
-            id('picker-item').value = rgb2hex(p.item);
-
-            currentData.theme.preset = name; 
-            currentData.theme.colors = { page: p.bg, card: p.card, item: p.item }; 
-            debounceSave();
-        }
-
-        function updateCustomColor(type, val) {
-            document.documentElement.style.setProperty(`--${type}-bg`, val);
-            document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
-            currentData.theme.preset = 'custom';
-            if(!currentData.theme.colors) currentData.theme.colors = {};
-            currentData.theme.colors[type] = val;
-            debounceSave();
-        }
-
-        function rgb2hex(orig) { 
-            if(!orig) return '#ffffff';
-            if(orig.startsWith('#')) return orig; 
-            // 简单处理 rgba 转 hex，对于复杂颜色可能不准，但够用
-            return '#f5f5f7'; 
-        }
+        const PRESETS = { default: { bg:'#EAF3F7', card:'#ffffff', text:'#334155', sub:'#64748b', item:'rgba(0,0,0,0.03)' }, dark: { bg:'#0f172a', card:'#1e293b', text:'#f8fafc', sub:'#94a3b8', item:'rgba(255,255,255,0.05)' }, warm: { bg:'#FFF0F5', card:'#ffffff', text:'#5D4037', sub:'#8D6E63', item:'rgba(255,235,238,0.5)' }, mint: { bg:'#e0f2f1', card:'#ffffff', text:'#004D40', sub:'#00796B', item:'rgba(224,242,241,0.5)' } };
+        function applyPreset(name) { const p = PRESETS[name]; if(!p) return; const r = document.documentElement.style; r.setProperty('--page-bg', p.bg); r.setProperty('--card-bg', p.card); r.setProperty('--text-main', p.text); r.setProperty('--text-sub', p.sub); r.setProperty('--item-bg', p.item); document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active')); const activeDot = document.getElementById('preset-' + name); if(activeDot) activeDot.classList.add('active'); if(name !== 'dark') { id('picker-page').value = rgb2hex(p.bg)||p.bg; id('picker-card').value = rgb2hex(p.card)||p.card; id('picker-item').value = rgb2hex(p.item)||p.item; } currentData.theme.preset = name; currentData.theme.colors = { page: p.bg, card: p.card, item: p.item }; debounceSave(); }
+        function updateCustomColor(type, val) { document.documentElement.style.setProperty(`--${type}-bg`, val); document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active')); currentData.theme.preset = 'custom'; if(!currentData.theme.colors) currentData.theme.colors = {}; currentData.theme.colors[type] = val; debounceSave(); }
+        function rgb2hex(orig) { if(!orig) return '#ffffff'; if(orig.startsWith('#')) return orig; return '#f5f5f7'; }
 
         function renderList() {
             const el = document.getElementById('dynamic-list');
@@ -486,39 +487,14 @@
                 
                 if (item.type === 'divider') {
                     div.onclick = () => toggleDividerStyle(i);
-                    div.innerHTML = `
-                        ${!isRead() ? getDragHandle(i) : ''}
-                        <div class="divider-line ${item.style==='solid'?'solid':''}"></div>
-                        <div class="divider-del" onclick="delItem(${i}, event)"><i class="ri-close-circle-fill"></i></div>
-                    `;
+                    div.innerHTML = `${!isRead() ? getDragHandle(i) : ''}<div class="divider-line ${item.style==='solid'?'solid':''}"></div><div class="divider-del" onclick="delItem(${i}, event)"><i class="ri-close-circle-fill"></i></div>`;
                 } else if (item.type === 'text') {
                     div.setAttribute('data-align', item.align || 'left');
                     div.setAttribute('data-bold', item.bold || false);
-                    div.innerHTML = `
-                        ${!isRead() ? getDragHandle(i) : ''}
-                        <div class="text-content" contenteditable="${!isRead()}" oninput="updateItem(${i}, 'text', this.innerText)">${item.text}</div>
-                        <div class="text-controls">
-                            <div class="act-icon" onclick="setTextStyle(${i}, 'bold')"><i class="ri-bold"></i></div>
-                            <div class="act-icon" onclick="setTextStyle(${i}, 'align', 'left')"><i class="ri-align-left"></i></div>
-                            <div class="act-icon" onclick="setTextStyle(${i}, 'align', 'center')"><i class="ri-align-center"></i></div>
-                            <div class="act-icon" onclick="setTextStyle(${i}, 'align', 'right')"><i class="ri-align-right"></i></div>
-                            <div class="act-icon act-del" onclick="delItem(${i}, event)"><i class="ri-delete-bin-line"></i></div>
-                        </div>
-                    `;
+                    div.innerHTML = `${!isRead() ? getDragHandle(i) : ''}<div class="text-content" contenteditable="${!isRead()}" oninput="updateItem(${i}, 'text', this.innerText)">${item.text}</div><div class="text-controls"><div class="act-icon" onclick="setTextStyle(${i}, 'bold')"><i class="ri-bold"></i></div><div class="act-icon" onclick="setTextStyle(${i}, 'align', 'left')"><i class="ri-align-left"></i></div><div class="act-icon" onclick="setTextStyle(${i}, 'align', 'center')"><i class="ri-align-center"></i></div><div class="act-icon" onclick="setTextStyle(${i}, 'align', 'right')"><i class="ri-align-right"></i></div><div class="act-icon act-del" onclick="delItem(${i}, event)"><i class="ri-delete-bin-line"></i></div></div>`;
                 } else {
                     div.onclick = (e) => handleJump(e, item.url);
-                    div.innerHTML = `
-                        ${!isRead() ? getDragHandle(i) : ''}
-                        <i class="${item.icon} item-icon" onclick="openIconLib(${i}, event)"></i>
-                        <div class="item-content">
-                            <div class="item-title" contenteditable="${!isRead()}" oninput="updateItem(${i}, 'text', this.innerText)">${item.text}</div>
-                            ${!isRead() ? `<div class="item-link-preview">${item.url || '未设置链接'}</div>` : ''}
-                        </div>
-                        <div class="item-actions">
-                            <div class="act-icon" onclick="editUrl(${i}, event)"><i class="ri-link"></i></div>
-                            <div class="act-icon act-del" onclick="delItem(${i}, event)"><i class="ri-delete-bin-line"></i></div>
-                        </div>
-                    `;
+                    div.innerHTML = `${!isRead() ? getDragHandle(i) : ''}<i class="${item.icon} item-icon" onclick="openIconLib(${i}, event)"></i><div class="item-content"><div class="item-title" contenteditable="${!isRead()}" oninput="updateItem(${i}, 'text', this.innerText)">${item.text}</div>${!isRead() ? `<div class="item-link-preview">${item.url || '未设置链接'}</div>` : ''}</div><div class="item-actions"><div class="act-icon" onclick="editUrl(${i}, event)"><i class="ri-link"></i></div><div class="act-icon act-del" onclick="delItem(${i}, event)"><i class="ri-delete-bin-line"></i></div></div>`;
                 }
                 el.appendChild(div);
             });
@@ -552,7 +528,6 @@
             currentData.items = newItems; renderList(); save(true); dragSrcEl = null;
         }
 
-        // --- 其他逻辑 ---
         function setTextStyle(i, type, val) { if(isRead()) return; if(type === 'bold') currentData.items[i].bold = !currentData.items[i].bold; if(type === 'align') currentData.items[i].align = val; renderList(); save(true); }
         function addItem(type) { if(type==='divider') currentData.items.push({ type: 'divider', style: 'dashed' }); else if(type==='text') currentData.items.push({ type: 'text', text: '新标题', align: 'left', bold: true }); else currentData.items.push({ type: 'link', icon: 'ri-star-line', text: '新链接', url: '' }); renderList(); save(true); }
         function toggleDividerStyle(i) { if(isRead()) return; const item = currentData.items[i]; item.style = item.style === 'solid' ? 'dashed' : 'solid'; renderList(); save(true); }
@@ -579,36 +554,6 @@
         function isRead() { return document.body.classList.contains('read'); }
         function debounceSave() { clearTimeout(timer); timer = setTimeout(() => save(true), 1500); }
         
-        // 🔥 修复：登录/注册逻辑
-        async function auth() { 
-            const u = val('u'), p = val('p'); 
-            if(!u || !p) return toast('请填写完整'); 
-            // 强制加时间戳防止缓存
-            const ts = Date.now();
-            if(isReg) { 
-                try { 
-                    const check = await fetch(`/api/user?name=${u}&t=${ts}`); 
-                    if(check.ok) return toast('用户已存在'); 
-                    
-                    const initData = { name: 'Code Master', role: '新用户', avatar: DEFAULT_AVATAR, items: [], theme: {radius:20, cardRadius:20, preset:'default'}, _secret_pass: p };
-                    await fetch('/api/user', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: u, password: p, data: initData }) });
-                    
-                    localStorage.setItem('pass_'+u, p); 
-                    toast('注册成功'); flip(); 
-                } catch(e) { toast('网络错误'); } 
-            } else { 
-                const localP = localStorage.getItem('pass_'+u); 
-                if(localP === p) { success(u,p,null); return; } 
-                try { const res = await fetch(`/api/user?name=${u}&t=${ts}`); if(res.ok) { const json = await res.json(); 
-                    if(json.status === 'banned') return toast('🚫 账号已封禁'); 
-                    const cp = json.data ? (json.data._secret_pass || json.data._p) : null; 
-                    if(cp === p) { localStorage.setItem('userData_'+u, JSON.stringify(json.data)); success(u,p,json.data); } else toast('密码错误'); 
-                } else toast('用户不存在'); } catch(e) { toast('网络错误'); } 
-            } 
-        }
-        
-        function success(u,p,d) { localStorage.setItem('login','1'); localStorage.setItem('u',u); localStorage.setItem('p',p); localStorage.setItem('pass_'+u, p); if(d) fill(d); checkLog(); closeM(); toast('欢迎回来'); }
-        
         function checkLog() { 
             const isLog = localStorage.getItem('login') === '1'; const u = localStorage.getItem('u'); 
             id('btn-login').style.display = isLog ? 'none' : 'flex'; id('btn-out').style.display = isLog ? 'flex' : 'none'; 
@@ -626,9 +571,6 @@
             const l = id('loader'); l.style.display = 'flex'; id('tb-edit').style.display='none'; id('tb-read').style.display='flex'; document.body.classList.add('read'); document.querySelectorAll('[contenteditable]').forEach(e => e.setAttribute('contenteditable', 'false')); 
             try { const res = await fetch(`/api/user?name=${user}`); if(res.ok) { const json = await res.json(); if(json.status!=='banned') { fill(json.data); l.style.display='none'; } else document.body.innerHTML="<h2 style='text-align:center;margin-top:100px;color:red'>已封禁</h2>"; } else document.body.innerHTML="<h2 style='text-align:center;margin-top:100px'>用户不存在</h2>"; } catch(e) { l.innerHTML = "<h3>网络错误</h3>"; } 
         }
-
-        // 🔥 自动同步
-        async function syncUser(u) { try { const res = await fetch(`/api/user?name=${u}&t=${Date.now()}`); if(res.ok) { const json = await res.json(); if(json.data) { localStorage.setItem('userData_'+u, JSON.stringify(json.data)); fill(json.data); toast('已同步云端'); } } } catch(e) {} }
         
         function clickAv() { if(!isRead() && localStorage.getItem('login')==='1') id('file').click(); }
         function uploadImg(e) { const f = e.target.files[0]; if(!f) return; toast('压缩图片...'); const r = new FileReader(); r.onload = ev => { const img = new Image(); img.onload = () => { const c = document.createElement('canvas'); c.width = 400; c.height = 400; const ctx = c.getContext('2d'); let sx,sy,sw,sh; if(img.width>img.height){sh=img.height;sw=img.height;sx=(img.width-img.height)/2;sy=0;} else{sw=img.width;sh=img.width;sx=0;sy=(img.height-img.width)/2;} ctx.drawImage(img,sx,sy,sw,sh,0,0,400,400); id('user-avatar').src = c.toDataURL('image/jpeg',0.8); save(true); }; img.src = ev.target.result; }; r.readAsDataURL(f); }
