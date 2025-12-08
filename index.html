@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <!-- 强制不缓存 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Web Card V44 - 完美外观版</title>
+    <title>Web Card V47 - 完美体验版</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
@@ -16,8 +16,9 @@
             --text-main: #334155;
             --text-sub: #64748b;
             --item-bg: rgba(0,0,0,0.03);
-            --item-radius: 12px;
-            --card-radius: 28px; /* 🔥 新增：卡片圆角变量 */
+            /* 🔥 圆角默认改为 20px */
+            --item-radius: 20px; 
+            --card-radius: 20px;
             
             --accent: #3a7bd5; 
             --danger: #ff4757; 
@@ -38,7 +39,7 @@
         .card { 
             background: var(--card-bg); width: 100%; max-width: 380px; 
             padding: 35px 25px 40px 25px; 
-            border-radius: var(--card-radius); /* 🔥 绑定变量 */
+            border-radius: var(--card-radius); /* 绑定变量 */
             text-align: center; 
             box-shadow: var(--shadow); position: relative; transition: 0.3s; 
         }
@@ -52,6 +53,7 @@
         }
         .avatar:hover { transform: rotate(360deg) scale(1.05); }
         
+        /* 标题不加粗，字体大小不变 */
         h1 { margin: 5px 0; font-size: 24px; font-weight: 500; letter-spacing: -0.5px; }
         .role { color: var(--text-sub); font-size: 13px; margin-bottom: 10px; }
 
@@ -81,6 +83,7 @@
         
         .item.sort-dragging { background: #fff !important; box-shadow: 0 10px 20px rgba(0,0,0,0.15); border-color: var(--accent); z-index: 100; opacity: 0.95; transform: scale(1.02); }
         
+        /* 仅链接条目有悬停动效 */
         body:not(.touch-device) .item:not(.type-text):not(.type-divider):hover { 
             transform: translateY(-2px); 
             background: rgba(0,0,0,0.06); 
@@ -94,13 +97,13 @@
         .item.type-text[data-align="right"] .text-content { text-align: right; }
         .item.type-text[data-bold="true"] .text-content { font-weight: bold; color: var(--text-main); font-size: 16px; }
 
+        /* 文字编辑条居中 */
         .text-controls { display: none; gap: 5px; margin-top: 0; background: var(--card-bg); padding: 4px 8px; border-radius: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); position: absolute; left: 50%; transform: translateX(-50%); top: -38px; z-index: 10; border: 1px solid rgba(0,0,0,0.05); }
         .text-controls::after { content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); border-width: 5px 5px 0; border-style: solid; border-color: var(--card-bg) transparent transparent; }
         body:not(.read) .item.type-text:hover .text-controls { display: flex; }
 
         .item.type-divider { background: transparent; padding: 8px 0; justify-content: center; cursor: default; box-shadow: none !important; }
         .item.type-divider:hover { transform: none !important; background: transparent !important; }
-        
         .divider-line { width: 100%; height: 0; border-top: 1px dashed var(--divider); opacity: 0.5; }
         .divider-line.solid { border-top-style: solid; opacity: 0.7; }
         
@@ -113,6 +116,7 @@
 
         .item-icon { font-size: 24px; color: var(--text-sub); margin-right: 15px; min-width: 24px; text-align: center; flex-shrink: 0; transition: 0.3s; }
         body:not(.read) .item-icon { cursor: pointer; }
+        /* 图标悬停橙色 */
         body:not(.touch-device) .item:not(.type-text):not(.type-divider):hover .item-icon { color: #ff9f43; transform: scale(1.1); }
         
         .item-content { flex: 1; overflow: hidden; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
@@ -136,7 +140,7 @@
 
         [contenteditable]:focus { outline: none; border-bottom: 2px solid var(--accent); background: rgba(58,123,213,0.05); }
 
-        /* --- 4. 移动端按钮 --- */
+        /* --- 4. 按钮优化 --- */
         .toolbar, .visitor-nav { position: absolute; top: 20px; z-index: 100; display: flex; gap: 10px; }
         .toolbar { right: 20px; } .visitor-nav { left: 20px; display: none; }
         
@@ -159,44 +163,43 @@
             .toolbar { gap: 10px; right: 15px; top: 15px; } 
             .tool-btn { 
                 padding: 0; width: 40px; height: 40px; justify-content: center; 
-                border-radius: 50%; font-size: 18px; /* 图标放大 */
+                border-radius: 50%; font-size: 18px; 
                 background: #fff; border: 1px solid rgba(0,0,0,0.1);
                 box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             }
             .tool-btn span { display: none; } 
         }
 
-        /* --- 弹窗与管理 --- */
+        /* --- 🔥 外观设置 (精修版) --- */
         #theme-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 4000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
-        /* 弹窗高度自适应 */
         .theme-box { background: var(--card-bg); width: 90%; max-width: 340px; padding: 25px; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); text-align: left; max-height: 85vh; overflow-y: auto; }
         
-        .setting-section { margin-bottom: 25px; }
-        .setting-header { margin-bottom: 12px; font-size: 13px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
+        .setting-section { margin-bottom: 20px; }
+        /* 🔥 标题大一号 */
+        .setting-title { font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 12px; display: block; }
         
-        /* 🔥 2. 预设颜色球 (单圈加粗灰色选中态) */
-        .preset-grid { display: flex; gap: 15px; margin-bottom: 5px; flex-wrap: wrap; }
+        .preset-grid { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
         .color-dot { 
-            width: 40px; height: 40px; border-radius: 50%; cursor: pointer; 
-            border: 1px solid rgba(0,0,0,0.1); transition: 0.2s; 
+            width: 36px; height: 36px; border-radius: 50%; cursor: pointer; 
+            border: 1px solid rgba(0,0,0,0.1); transition: 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); 
             box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative;
         }
-        .color-dot:hover { transform: scale(1.05); }
+        /* 🔥 按钮按压效果 */
+        .color-dot:active { transform: scale(0.9); }
+        
+        /* 🔥 选定状态标识：外单圈加粗灰色 */
         .color-dot.active { 
-            border: 3px solid #94a3b8; /* 灰色加粗边框 */
-            transform: scale(1.1);
+            border: 3px solid #64748b; /* 灰色加粗边框 */
+            transform: scale(1.05);
             box-shadow: none;
         }
 
-        .color-picker-row { display: flex; justify-content: space-between; gap: 10px; }
-        .color-picker-item { flex: 1; display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-sub); align-items: center; }
-        .color-input { width: 100%; height: 36px; padding: 0; border: none; border-radius: 8px; cursor: pointer; background: none; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); }
+        .color-picker-row { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+        .color-picker-item { flex: 1; display: flex; flex-direction: column; gap: 5px; font-size: 12px; color: var(--text-sub); align-items: center; }
+        .color-input { width: 100%; height: 36px; padding: 0; border: none; border-radius: 8px; cursor: pointer; background: none; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.1); }
         
-        /* 滑块美化 */
-        .range-wrap { display: flex; align-items: center; gap: 10px; }
-        .range-slider { flex: 1; -webkit-appearance: none; height: 6px; background: rgba(0,0,0,0.1); border-radius: 3px; outline: none; }
-        .range-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: var(--accent); border-radius: 50%; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.2); border: 2px solid #fff; }
-        .range-val { font-size: 14px; font-weight: bold; color: var(--text-main); min-width: 40px; text-align: right; }
+        .range-slider { width: 100%; -webkit-appearance: none; height: 6px; background: #ddd; border-radius: 3px; outline: none; }
+        .range-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: var(--accent); border-radius: 50%; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
         #icon-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 4000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
         .icon-box { background: var(--card-bg); width: 90%; max-width: 500px; max-height: 80vh; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; }
@@ -236,7 +239,7 @@
 <body>
 
     <div id="toast">提示</div>
-    <div id="loader"><i class="ri-loader-4-line ri-spin" style="font-size:32px;color:var(--accent)"></i><p style="margin-top:10px;font-size:12px;color:var(--text-sub)">数据同步中...</p></div>
+    <div id="loader"><i class="ri-loader-4-line ri-spin" style="font-size:32px;color:var(--accent)"></i><p style="margin-top:10px;font-size:12px;color:var(--text-sub)">加载数据...</p></div>
 
     <input type="file" id="file" hidden accept="image/*" onchange="uploadImg(event)">
 
@@ -259,16 +262,15 @@
         <div class="icon-grid" id="lib-grid"></div>
     </div></div>
 
-    <!-- 🔥 外观设置 (布局美化) -->
+    <!-- 🔥 外观设置 (升级版) -->
     <div id="theme-modal"><div class="theme-box">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:25px">
-            <h3 style="margin:0;color:var(--text-main)">外观设置</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+            <h3 style="margin:0;color:var(--text-main);font-weight:700">外观设置</h3>
             <button onclick="toggleThemeModal(false)" style="border:none;background:none;font-size:24px;cursor:pointer;color:var(--text-main)">&times;</button>
         </div>
         
-        <!-- 色彩风格 -->
         <div class="setting-section">
-            <div class="setting-header">色彩风格</div>
+            <span class="setting-title">色彩风格</span>
             <div class="preset-grid">
                 <div class="color-dot active" id="preset-default" style="background:#EAF3F7" onclick="applyPreset('default')" title="默认"></div>
                 <div class="color-dot" id="preset-dark" style="background:#0f172a" onclick="applyPreset('dark')" title="暗夜"></div>
@@ -277,14 +279,14 @@
             </div>
             
             <div style="margin-top:15px; border-top:1px dashed var(--divider); padding-top:15px;">
-                <div class="setting-header" style="margin-bottom:10px">自定义 (覆盖预设)</div>
+                <div class="setting-title" style="margin-bottom:8px">自定义</div>
                 <div class="color-picker-row">
-                    <div class="color-picker-item"><span>主页</span><input type="color" class="color-input" id="picker-page" oninput="updateCustomColor('page', this.value)"></div>
-                    <div class="color-picker-item"><span>卡片</span><input type="color" class="color-input" id="picker-card" oninput="updateCustomColor('card', this.value)"></div>
+                    <div class="color-picker-item"><span>主页</span><input type="color" class="color-input" id="picker-page" value="#EAF3F7" oninput="updateCustomColor('page', this.value)"></div>
+                    <div class="color-picker-item"><span>卡片</span><input type="color" class="color-input" id="picker-card" value="#ffffff" oninput="updateCustomColor('card', this.value)"></div>
                     <div class="color-picker-item">
                         <span>条目</span>
-                        <!-- 🔥 3. 默认改成浅灰色 #f5f5f7 -->
-                        <input type="color" class="color-input" id="picker-item" value="#f5f5f7" oninput="updateCustomColor('item', this.value)">
+                        <!-- 🔥 默认值改为浅灰色 -->
+                        <input type="color" class="color-input" id="picker-item" value="#f8f8f8" oninput="updateCustomColor('item', this.value)">
                     </div>
                 </div>
             </div>
@@ -292,23 +294,24 @@
 
         <!-- 形状样式 -->
         <div class="setting-section">
-            <div class="setting-header">形状样式</div>
+            <span class="setting-title">形状样式</span>
             <div style="margin-bottom:15px">
                 <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:13px;color:var(--text-main)">
-                    <span>条目圆角</span> <span id="radius-val" class="range-val">12</span>
+                    <span>条目圆角</span> <span id="radius-val" class="range-val">20</span>
                 </div>
                 <div class="range-wrap">
-                    <input type="range" min="0" max="30" value="12" class="range-slider" oninput="changeRadius(this.value)">
+                    <!-- 🔥 默认 20，最大 60 -->
+                    <input type="range" min="0" max="60" value="20" class="range-slider" oninput="changeRadius(this.value)">
                 </div>
             </div>
             
-            <!-- 🔥 1. 新增卡片圆角 -->
             <div>
                 <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:13px;color:var(--text-main)">
-                    <span>卡片圆角</span> <span id="card-radius-val" class="range-val">28</span>
+                    <span>卡片圆角</span> <span id="card-radius-val" class="range-val">20</span>
                 </div>
                 <div class="range-wrap">
-                    <input type="range" min="0" max="60" value="28" class="range-slider" oninput="changeCardRadius(this.value)">
+                    <!-- 🔥 默认 20，最大 60 -->
+                    <input type="range" min="0" max="60" value="20" class="range-slider" oninput="changeCardRadius(this.value)">
                 </div>
             </div>
         </div>
@@ -380,7 +383,8 @@
             'ri-restaurant-line', 'ri-cake-line', 'ri-briefcase-line', 'ri-medal-line', 'ri-trophy-line'
         ];
 
-        let currentData = { items: [], theme: { radius: 12, cardRadius: 28, preset: 'default', colors: { page: '#EAF3F7', card: '#ffffff', item: '#f5f5f7' } } };
+        // 🔥 默认参数更新：圆角 20
+        let currentData = { items: [], theme: { radius: 20, cardRadius: 20, preset: 'default', colors: { page: '#EAF3F7', card: '#ffffff', item: '#f8f8f8' } } };
         let isReg = false, timer = null, editingIndex = -1, dragSrcEl = null, dragSrcIndex = null;
 
         window.onload = () => {
@@ -397,7 +401,23 @@
             }
         };
 
-        function toggleThemeModal(show) { document.getElementById('theme-modal').style.display = show ? 'flex' : 'none'; }
+        function toggleThemeModal(show) { 
+            document.getElementById('theme-modal').style.display = show ? 'flex' : 'none'; 
+            if(show) {
+                // 打开时更新颜色选择器的值以匹配当前主题，防止默认变黑
+                const t = currentData.theme;
+                const c = t.preset === 'custom' ? t.colors : PRESETS[t.preset] || PRESETS['default'];
+                id('picker-page').value = rgb2hex(c.bg || c.page);
+                id('picker-card').value = rgb2hex(c.card);
+                id('picker-item').value = rgb2hex(c.item);
+                
+                // 更新滑块
+                document.querySelectorAll('.range-slider')[0].value = t.radius;
+                document.querySelectorAll('.range-slider')[1].value = t.cardRadius;
+                id('radius-val').innerText = t.radius;
+                id('card-radius-val').innerText = t.cardRadius;
+            }
+        }
         
         function changeRadius(val) {
             document.documentElement.style.setProperty('--item-radius', val + 'px');
@@ -406,7 +426,6 @@
             debounceSave();
         }
         
-        // 🔥 新增：卡片圆角逻辑
         function changeCardRadius(val) {
             document.documentElement.style.setProperty('--card-radius', val + 'px');
             document.getElementById('card-radius-val').innerText = val;
@@ -430,13 +449,11 @@
             const activeDot = document.getElementById('preset-' + name);
             if(activeDot) activeDot.classList.add('active');
             
-            // 更新选择器值
-            if(name !== 'dark') { 
-                id('picker-page').value = rgb2hex(p.bg)||p.bg; 
-                id('picker-card').value = rgb2hex(p.card)||p.card; 
-                id('picker-item').value = rgb2hex(p.item)||p.item;
-            }
-            
+            // 更新选择器值以免下次打开变黑
+            id('picker-page').value = rgb2hex(p.bg); 
+            id('picker-card').value = rgb2hex(p.card); 
+            id('picker-item').value = rgb2hex(p.item);
+
             currentData.theme.preset = name; 
             currentData.theme.colors = { page: p.bg, card: p.card, item: p.item }; 
             debounceSave();
@@ -451,9 +468,13 @@
             debounceSave();
         }
 
-        function rgb2hex(orig) { if(!orig || orig.startsWith('#')) return orig; return orig; } // 简化版
+        function rgb2hex(orig) { 
+            if(!orig) return '#ffffff';
+            if(orig.startsWith('#')) return orig; 
+            // 简单处理 rgba 转 hex，对于复杂颜色可能不准，但够用
+            return '#f5f5f7'; 
+        }
 
-        // --- 拖拽与渲染 (保持稳定逻辑) ---
         function renderList() {
             const el = document.getElementById('dynamic-list');
             el.innerHTML = '';
@@ -531,35 +552,7 @@
             currentData.items = newItems; renderList(); save(true); dragSrcEl = null;
         }
 
-        // --- 数据填充 (包含主题恢复) ---
-        function fill(d) { 
-            if(!d) { currentData.items = [{ type:'link', icon:'ri-global-line', text:'我的网站', url:'' }]; currentData.theme = { radius:12, cardRadius:28, preset:'default', colors: {} }; } 
-            else { 
-                id('user-name').innerText = d.name || 'Code Master'; id('user-role').innerText = d.role || 'Developer'; id('user-avatar').src = d.avatar || DEFAULT_AVATAR; 
-                currentData.items = (d.items && Array.isArray(d.items)) ? d.items : []; 
-                if(d.theme) { 
-                    currentData.theme = d.theme; 
-                    changeRadius(d.theme.radius || 12); 
-                    changeCardRadius(d.theme.cardRadius || 28); // 恢复卡片圆角
-                    document.querySelector('.range-slider').value = d.theme.radius || 12;
-                    // 这里假设有两个 range-slider, 需要按顺序获取或加ID区分。上面加了 oninput 区分，这里DOM获取简单处理
-                    // 实际最好给 input 加 id。
-                    // 简便起见，直接在 UI 上设置 input value 
-                    
-                    if(d.theme.colors && d.theme.preset === 'custom') { 
-                        if(d.theme.colors.page) { document.documentElement.style.setProperty('--page-bg', d.theme.colors.page); id('picker-page').value = d.theme.colors.page; } 
-                        if(d.theme.colors.card) { document.documentElement.style.setProperty('--card-bg', d.theme.colors.card); id('picker-card').value = d.theme.colors.card; } 
-                        if(d.theme.colors.item) { document.documentElement.style.setProperty('--item-bg', d.theme.colors.item); id('picker-item').value = d.theme.colors.item; } 
-                        document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active')); 
-                    } else {
-                        applyPreset(d.theme.preset || 'default');
-                    }
-                } 
-            } 
-            renderList();
-        }
-
-        // --- 保持其他基础逻辑不变 ---
+        // --- 其他逻辑 ---
         function setTextStyle(i, type, val) { if(isRead()) return; if(type === 'bold') currentData.items[i].bold = !currentData.items[i].bold; if(type === 'align') currentData.items[i].align = val; renderList(); save(true); }
         function addItem(type) { if(type==='divider') currentData.items.push({ type: 'divider', style: 'dashed' }); else if(type==='text') currentData.items.push({ type: 'text', text: '新标题', align: 'left', bold: true }); else currentData.items.push({ type: 'link', icon: 'ri-star-line', text: '新链接', url: '' }); renderList(); save(true); }
         function toggleDividerStyle(i) { if(isRead()) return; const item = currentData.items[i]; item.style = item.style === 'solid' ? 'dashed' : 'solid'; renderList(); save(true); }
@@ -572,16 +565,71 @@
         function filterIcons(val) { const filtered = ALL_ICONS.filter(i => i.includes(val.toLowerCase())); renderIcons(filtered); }
         function openIconLib(i, e) { if(isRead()) return; e.stopPropagation(); editingIndex = i; document.getElementById('icon-modal').style.display = 'flex'; }
         function selectIcon(icon) { if(editingIndex > -1) { currentData.items[editingIndex].icon = icon; renderList(); save(true); } document.getElementById('icon-modal').style.display = 'none'; }
-        async function save(silent = false) { if (localStorage.getItem('login') !== '1') return; const u = localStorage.getItem('u'), p = localStorage.getItem('p'); const st = id('save-status'); st.style.opacity = 1; st.innerText = '同步...'; if(!silent) toast('正在保存...'); const data = { name: text('user-name'), role: text('user-role'), avatar: src('user-avatar'), items: currentData.items, theme: currentData.theme, _secret_pass: p }; try { const res = await fetch('/api/user', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: u, password: p, data: data }) }); if(res.ok) { localStorage.setItem('userData_' + u, JSON.stringify(data)); st.innerText = '已同步'; setTimeout(() => st.style.opacity = 0, 2000); if(!silent) toast('已保存'); } else { st.innerText = '同步失败'; } } catch(e) { st.innerText = '网络错误'; } }
+        
+        async function save(silent = false) { 
+            if (localStorage.getItem('login') !== '1') return; 
+            const u = localStorage.getItem('u'), p = localStorage.getItem('p'); 
+            const st = id('save-status'); st.style.opacity = 1; st.innerText = '同步...'; 
+            if(!silent) toast('正在保存...'); 
+            const data = { name: text('user-name'), role: text('user-role'), avatar: src('user-avatar'), items: currentData.items, theme: currentData.theme, _secret_pass: p }; 
+            try { const res = await fetch('/api/user', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: u, password: p, data: data }) }); if(res.ok) { localStorage.setItem('userData_' + u, JSON.stringify(data)); st.innerText = '已同步'; setTimeout(() => st.style.opacity = 0, 2000); if(!silent) toast('已保存'); } else { st.innerText = '同步失败'; } } catch(e) { st.innerText = '网络错误'; } 
+        }
+        
         const id = x => document.getElementById(x); const text = x => id(x).innerText; const src = x => id(x).src; const cls = x => id(x).className; const val = x => id(x).value;
         function isRead() { return document.body.classList.contains('read'); }
         function debounceSave() { clearTimeout(timer); timer = setTimeout(() => save(true), 1500); }
-        async function auth() { const u = val('u'), p = val('p'); if(!u || !p) return toast('请填写完整'); if(isReg) { try { const check = await fetch(`/api/user?name=${u}`); if(check.ok) return toast('用户已存在'); const initData = { name: 'Code Master', role: '新用户', avatar: DEFAULT_AVATAR, items: [], theme: {radius:12, cardRadius:28, preset:'default'}, _secret_pass: p }; await fetch('/api/user', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: u, password: p, data: initData }) }); localStorage.setItem('pass_'+u, p); toast('注册成功'); flip(); } catch(e) { toast('网络错误'); } } else { const localP = localStorage.getItem('pass_'+u); if(localP === p) { success(u,p,null); return; } try { const res = await fetch(`/api/user?name=${u}`); if(res.ok) { const json = await res.json(); if(json.status === 'banned') return toast('🚫 账号已封禁'); const cp = json.data ? (json.data._secret_pass || json.data._p) : null; if(cp === p) { localStorage.setItem('userData_'+u, JSON.stringify(json.data)); success(u,p,json.data); } else toast('密码错误'); } else toast('用户不存在'); } catch(e) { toast('网络错误'); } } }
+        
+        // 🔥 修复：登录/注册逻辑
+        async function auth() { 
+            const u = val('u'), p = val('p'); 
+            if(!u || !p) return toast('请填写完整'); 
+            // 强制加时间戳防止缓存
+            const ts = Date.now();
+            if(isReg) { 
+                try { 
+                    const check = await fetch(`/api/user?name=${u}&t=${ts}`); 
+                    if(check.ok) return toast('用户已存在'); 
+                    
+                    const initData = { name: 'Code Master', role: '新用户', avatar: DEFAULT_AVATAR, items: [], theme: {radius:20, cardRadius:20, preset:'default'}, _secret_pass: p };
+                    await fetch('/api/user', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: u, password: p, data: initData }) });
+                    
+                    localStorage.setItem('pass_'+u, p); 
+                    toast('注册成功'); flip(); 
+                } catch(e) { toast('网络错误'); } 
+            } else { 
+                const localP = localStorage.getItem('pass_'+u); 
+                if(localP === p) { success(u,p,null); return; } 
+                try { const res = await fetch(`/api/user?name=${u}&t=${ts}`); if(res.ok) { const json = await res.json(); 
+                    if(json.status === 'banned') return toast('🚫 账号已封禁'); 
+                    const cp = json.data ? (json.data._secret_pass || json.data._p) : null; 
+                    if(cp === p) { localStorage.setItem('userData_'+u, JSON.stringify(json.data)); success(u,p,json.data); } else toast('密码错误'); 
+                } else toast('用户不存在'); } catch(e) { toast('网络错误'); } 
+            } 
+        }
+        
         function success(u,p,d) { localStorage.setItem('login','1'); localStorage.setItem('u',u); localStorage.setItem('p',p); localStorage.setItem('pass_'+u, p); if(d) fill(d); checkLog(); closeM(); toast('欢迎回来'); }
-        function checkLog() { const isLog = localStorage.getItem('login') === '1'; const u = localStorage.getItem('u'); id('btn-login').style.display = isLog ? 'none' : 'flex'; id('btn-out').style.display = isLog ? 'flex' : 'none'; id('btn-share').style.display = isLog ? 'flex' : 'none'; if(isLog && u === ADMIN_NAME) id('btn-admin').style.display = 'flex'; if(isLog) { const c = localStorage.getItem('userData_'+u); if(c) fill(JSON.parse(c)); id('link-box').style.display = 'inline-flex'; id('my-link').innerText = location.origin + '/' + u; } else { id('link-box').style.display = 'none'; } }
+        
+        function checkLog() { 
+            const isLog = localStorage.getItem('login') === '1'; const u = localStorage.getItem('u'); 
+            id('btn-login').style.display = isLog ? 'none' : 'flex'; id('btn-out').style.display = isLog ? 'flex' : 'none'; 
+            if(isLog && u === ADMIN_NAME) id('btn-admin').style.display = 'flex'; 
+            if(isLog) { 
+                const c = localStorage.getItem('userData_'+u); if(c) fill(JSON.parse(c)); 
+                id('link-box').style.display = 'inline-flex'; id('my-link').innerText = location.origin + '/' + u; 
+            } else {
+                id('link-box').style.display = 'none';
+            }
+        }
         function copyLink() { const u = id('my-link').innerText; navigator.clipboard.writeText(u).then(()=>toast('已复制')); }
-        async function loadCloud(user) { const l = id('loader'); l.style.display = 'flex'; id('tb-edit').style.display='none'; id('tb-read').style.display='flex'; document.body.classList.add('read'); document.querySelectorAll('[contenteditable]').forEach(e => e.setAttribute('contenteditable', 'false')); try { const res = await fetch(`/api/user?name=${user}`); if(res.ok) { const json = await res.json(); if(json.status!=='banned') { fill(json.data); l.style.display='none'; } else document.body.innerHTML="<h2 style='text-align:center;margin-top:100px;color:red'>已封禁</h2>"; } else document.body.innerHTML="<h2 style='text-align:center;margin-top:100px'>用户不存在</h2>"; } catch(e) { l.innerHTML = "<h3>网络错误</h3>"; } }
-        async function syncUser(u) { try { const res = await fetch(`/api/user?name=${u}`); if(res.ok) { const json = await res.json(); if(json.data) { localStorage.setItem('userData_'+u, JSON.stringify(json.data)); fill(json.data); toast('已同步云端'); } } } catch(e) {} }
+        
+        async function loadCloud(user) { 
+            const l = id('loader'); l.style.display = 'flex'; id('tb-edit').style.display='none'; id('tb-read').style.display='flex'; document.body.classList.add('read'); document.querySelectorAll('[contenteditable]').forEach(e => e.setAttribute('contenteditable', 'false')); 
+            try { const res = await fetch(`/api/user?name=${user}`); if(res.ok) { const json = await res.json(); if(json.status!=='banned') { fill(json.data); l.style.display='none'; } else document.body.innerHTML="<h2 style='text-align:center;margin-top:100px;color:red'>已封禁</h2>"; } else document.body.innerHTML="<h2 style='text-align:center;margin-top:100px'>用户不存在</h2>"; } catch(e) { l.innerHTML = "<h3>网络错误</h3>"; } 
+        }
+
+        // 🔥 自动同步
+        async function syncUser(u) { try { const res = await fetch(`/api/user?name=${u}&t=${Date.now()}`); if(res.ok) { const json = await res.json(); if(json.data) { localStorage.setItem('userData_'+u, JSON.stringify(json.data)); fill(json.data); toast('已同步云端'); } } } catch(e) {} }
+        
         function clickAv() { if(!isRead() && localStorage.getItem('login')==='1') id('file').click(); }
         function uploadImg(e) { const f = e.target.files[0]; if(!f) return; toast('压缩图片...'); const r = new FileReader(); r.onload = ev => { const img = new Image(); img.onload = () => { const c = document.createElement('canvas'); c.width = 400; c.height = 400; const ctx = c.getContext('2d'); let sx,sy,sw,sh; if(img.width>img.height){sh=img.height;sw=img.height;sx=(img.width-img.height)/2;sy=0;} else{sw=img.width;sh=img.width;sx=0;sy=(img.height-img.width)/2;} ctx.drawImage(img,sx,sy,sw,sh,0,0,400,400); id('user-avatar').src = c.toDataURL('image/jpeg',0.8); save(true); }; img.src = ev.target.result; }; r.readAsDataURL(f); }
         async function loadAdmin() { toggleAdmin(1); id('tbl').querySelector('tbody').innerHTML = '<tr><td colspan="5">加载中...</td></tr>'; const u = localStorage.getItem('u'), p = localStorage.getItem('p'); try { const res = await fetch('/api/admin', { headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p } }); if(res.status===401) return toast('无权访问'); let list = await res.json(); list.sort((a, b) => { const isAdminA = a.name === ADMIN_NAME || a.role === 'admin'; const isAdminB = b.name === ADMIN_NAME || b.role === 'admin'; if (isAdminA && !isAdminB) return -1; if (!isAdminA && isAdminB) return 1; return new Date(b.created_at) - new Date(a.created_at); }); id('tbl').querySelector('tbody').innerHTML = list.map(x => { const roleBadge = (x.name === ADMIN_NAME || x.role === 'admin') ? '<span class="badge badge-admin">ADMIN</span>' : ''; const dateStr = x.created_at ? new Date(x.created_at).toLocaleString() : '未知'; return `<tr><td><b>${x.name}</b> ${roleBadge}</td><td>${x.status==='banned'?'<span class="badge badge-ban">封</span>':'<span class="badge badge-ok">正</span>'}</td><td style="font-size:12px;color:var(--text-sub)">${dateStr}</td><td>${x.name!==u?`<button class="act-btn act-ban" onclick="act('ban','${x.name}')" title="封禁"><i class="ri-prohibited-line"></i></button><button class="act-btn act-unban" onclick="act('unban','${x.name}')" title="解封"><i class="ri-checkbox-circle-line"></i></button><button class="act-btn act-del" onclick="act('delete','${x.name}')" title="删除"><i class="ri-delete-bin-line"></i></button><button class="act-btn act-key" onclick="viewPass('${x.name}')" title="密码"><i class="ri-key-2-line"></i></button>`:'-'}</td></tr>`; }).join(''); } catch(e){ } }
