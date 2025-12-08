@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <!-- 强制不缓存 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Web Card V45 - 同步增强版</title>
+    <title>Web Card V46 - 管理优化版</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
@@ -164,7 +164,7 @@
             .tool-btn span { display: none; } 
         }
 
-        /* --- 弹窗与管理 --- */
+        /* --- 弹窗与管理 (🔥 优化版) --- */
         #theme-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 4000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
         .theme-box { background: var(--card-bg); width: 90%; max-width: 340px; padding: 25px; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); text-align: left; max-height: 85vh; overflow-y: auto; }
         .setting-section { margin-bottom: 20px; }
@@ -195,21 +195,28 @@
         #save-status { position: fixed; bottom: 20px; right: 20px; font-size: 12px; color: var(--text-sub); opacity: 0; transition: 0.3s; pointer-events: none; }
         #loader { position: fixed; inset: 0; background: var(--page-bg); z-index: 5000; display: none; justify-content: center; align-items: center; flex-direction: column; }
         
+        /* 🔥 管理面板 (简洁无溢出) */
         #admin { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 3000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
         .admin-card { background: var(--card-bg); width: 95%; max-width: 650px; max-height: 80vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
         .admin-head { padding: 15px 20px; border-bottom: 1px solid rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.02); }
         .admin-body { flex: 1; overflow-y: auto; padding: 0; -webkit-overflow-scrolling: touch; }
         .table-wrapper { flex: 1; overflow: auto; padding: 0; -webkit-overflow-scrolling: touch; }
+        
         table { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }
         th { text-align: left; padding: 12px 15px; color: var(--text-sub); font-weight: 600; background: rgba(0,0,0,0.02); position: sticky; top: 0; }
         td { padding: 12px 15px; border-bottom: 1px solid rgba(0,0,0,0.05); color: var(--text-main); vertical-align: middle; }
+        
         .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
-        .badge-ok { background: rgba(46, 213, 115, 0.15); color: #2ecc71; } .badge-ban { background: rgba(255, 71, 87, 0.15); color: #ff4757; } .badge-admin { background: rgba(142, 68, 173, 0.1); color: #8e44ad; }
-        .act-btn { padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; border: 1px solid transparent; cursor: pointer; margin-right: 6px; background: transparent; transition: 0.2s; }
-        .act-ban { color: #e67e22; border-color: rgba(230,126,34,0.3); background: rgba(230,126,34,0.05); } .act-ban:hover { background: #e67e22; color: white; }
-        .act-unban { color: #2ecc71; border-color: rgba(46,204,113,0.3); background: rgba(46,204,113,0.05); } .act-unban:hover { background: #2ecc71; color: white; }
-        .act-del { color: var(--text-sub); border-color: var(--divider); } .act-del:hover { background: var(--danger); color: white; border-color: var(--danger); }
-        .act-key { color: var(--accent); border-color: rgba(58, 123, 213, 0.3); } .act-key:hover { background: var(--accent); color: white; }
+        .badge-ok { background: rgba(46, 213, 115, 0.15); color: #2ecc71; } 
+        .badge-ban { background: rgba(255, 71, 87, 0.15); color: #ff4757; } 
+        /* 🔥 Admin 徽章高亮 (红底白字) */
+        .badge-admin { background: #ff4757; color: white; padding: 2px 8px; font-size: 10px; border-radius: 10px; margin-left: 5px; }
+        
+        .act-btn { padding: 6px 10px; border-radius: 6px; font-size: 16px; border: none; cursor: pointer; margin-right: 6px; background: transparent; transition: 0.2s; }
+        .act-ban { color: #e67e22; background: rgba(230,126,34,0.1); } 
+        .act-unban { color: #2ecc71; background: rgba(46,204,113,0.1); } 
+        .act-del { color: var(--text-sub); background: rgba(0,0,0,0.05); } 
+        .act-key { color: var(--accent); background: rgba(58, 123, 213, 0.1); }
 
         .read .avatar, .read .item-icon { pointer-events: auto; }
     </style>
@@ -217,7 +224,7 @@
 <body>
 
     <div id="toast">提示</div>
-    <div id="loader"><i class="ri-loader-4-line ri-spin" style="font-size:32px;color:var(--accent)"></i><p style="margin-top:10px;font-size:12px;color:var(--text-sub)">加载数据...</p></div>
+    <div id="loader"><i class="ri-loader-4-line ri-spin" style="font-size:32px;color:var(--accent)"></i><p style="margin-top:10px;font-size:12px;color:var(--text-sub)">数据同步中...</p></div>
 
     <input type="file" id="file" hidden accept="image/*" onchange="uploadImg(event)">
 
@@ -269,10 +276,10 @@
         </div>
     </div></div>
 
-    <!-- 管理面板 -->
+    <!-- 🔥 管理面板 (修复) -->
     <div id="admin"><div class="admin-card">
         <div class="admin-head"><h3 style="margin:0;font-size:16px;color:var(--text-main)">用户管理</h3><button onclick="toggleAdmin(0)" style="border:none;background:none;font-size:20px;cursor:pointer;color:var(--text-main)">&times;</button></div>
-        <div class="admin-body"><div class="table-wrapper"><table class="user-table" id="tbl"><thead><tr><th>用户</th><th>角色</th><th>状态</th><th>注册时间</th><th>操作</th></tr></thead><tbody></tbody></table></div></div>
+        <div class="admin-body"><div class="table-wrapper"><table class="user-table" id="tbl"><thead><tr><th>用户</th><th>状态</th><th>注册时间</th><th>操作</th></tr></thead><tbody></tbody></table></div></div>
     </div></div>
 
     <!-- 顶部工具栏 -->
@@ -347,7 +354,6 @@
                 loadCloud(decodeURIComponent(path));
             } else {
                 checkLog();
-                // 🔥 同步增强：进入页面即尝试拉取云端最新数据覆盖本地
                 if(localStorage.getItem('login') === '1') {
                     const u = localStorage.getItem('u');
                     syncUser(u);
@@ -357,7 +363,7 @@
             }
         };
 
-        // --- 拖拽逻辑 ---
+        // --- 渲染逻辑 ---
         function renderList() {
             const el = document.getElementById('dynamic-list');
             el.innerHTML = '';
@@ -410,7 +416,6 @@
         function getDragHandle(index) {
             return `<div class="drag-handle" ontouchstart="touchDragStart(event)" onmousedown="mouseDragStart(event)"><i class="ri-draggable"></i></div>`;
         }
-
         function touchDragStart(e) { e.preventDefault(); if (navigator.vibrate) navigator.vibrate(20); initDrag(e.target.closest('.item'), e.touches[0].clientY); document.addEventListener('touchmove', touchDragMove, { passive: false }); document.addEventListener('touchend', dragEnd); }
         function mouseDragStart(e) { e.preventDefault(); initDrag(e.target.closest('.item'), e.clientY); document.addEventListener('mousemove', mouseDragMove); document.addEventListener('mouseup', dragEnd); }
         function initDrag(item, startY) { dragSrcEl = item; dragSrcIndex = [...item.parentNode.children].indexOf(item); item.classList.add('sort-dragging'); }
@@ -480,11 +485,21 @@
             const u = val('u'), p = val('p'); 
             if(!u || !p) return toast('请填写完整'); 
             if(isReg) { 
-                try { const check = await fetch(`/api/user?name=${u}`); if(check.ok) return toast('用户已存在'); localStorage.setItem('pass_'+u, p); toast('注册成功'); flip(); } catch(e) { toast('网络错误'); } 
+                try { const check = await fetch(`/api/user?name=${u}`); if(check.ok) return toast('用户已存在'); 
+                    // 注册时立即上云
+                    const initData = { name: 'Code Master', role: '新用户', avatar: DEFAULT_AVATAR, items: [], theme: {radius:12, preset:'default'}, _secret_pass: p };
+                    await fetch('/api/user', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: u, password: p, data: initData }) });
+                    localStorage.setItem('pass_'+u, p); 
+                    toast('注册成功'); flip(); 
+                } catch(e) { toast('网络错误'); } 
             } else { 
                 const localP = localStorage.getItem('pass_'+u); 
                 if(localP === p) { success(u,p,null); return; } 
-                try { const res = await fetch(`/api/user?name=${u}`); if(res.ok) { const json = await res.json(); const cp = json.data ? (json.data._secret_pass || json.data._p) : null; if(cp === p) { localStorage.setItem('userData_'+u, JSON.stringify(json.data)); success(u,p,json.data); } else toast('密码错误'); } else toast('用户不存在'); } catch(e) { toast('网络错误'); } 
+                try { const res = await fetch(`/api/user?name=${u}`); if(res.ok) { const json = await res.json(); 
+                    if(json.status === 'banned') return toast('🚫 账号已封禁'); 
+                    const cp = json.data ? (json.data._secret_pass || json.data._p) : null; 
+                    if(cp === p) { localStorage.setItem('userData_'+u, JSON.stringify(json.data)); success(u,p,json.data); } else toast('密码错误'); 
+                } else toast('用户不存在'); } catch(e) { toast('网络错误'); } 
             } 
         }
         
@@ -508,43 +523,31 @@
             try { const res = await fetch(`/api/user?name=${user}`); if(res.ok) { const json = await res.json(); if(json.status!=='banned') { fill(json.data); l.style.display='none'; } else document.body.innerHTML="<h2 style='text-align:center;margin-top:100px;color:red'>已封禁</h2>"; } else document.body.innerHTML="<h2 style='text-align:center;margin-top:100px'>用户不存在</h2>"; } catch(e) { l.innerHTML = "<h3>网络错误</h3>"; } 
         }
 
-        // 🔥 自动同步逻辑
         async function syncUser(u) {
-            try {
-                const res = await fetch(`/api/user?name=${u}`);
-                if(res.ok) {
-                    const json = await res.json();
-                    if(json.data) {
-                        localStorage.setItem('userData_'+u, JSON.stringify(json.data));
-                        fill(json.data);
-                        toast('已从云端同步');
-                    }
-                }
-            } catch(e) {}
+            try { const res = await fetch(`/api/user?name=${u}`); if(res.ok) { const json = await res.json(); if(json.data) { localStorage.setItem('userData_'+u, JSON.stringify(json.data)); fill(json.data); toast('已同步云端'); } } } catch(e) {}
         }
         
         function clickAv() { if(!isRead() && localStorage.getItem('login')==='1') id('file').click(); }
         function uploadImg(e) { const f = e.target.files[0]; if(!f) return; toast('压缩图片...'); const r = new FileReader(); r.onload = ev => { const img = new Image(); img.onload = () => { const c = document.createElement('canvas'); c.width = 400; c.height = 400; const ctx = c.getContext('2d'); let sx,sy,sw,sh; if(img.width>img.height){sh=img.height;sw=img.height;sx=(img.width-img.height)/2;sy=0;} else{sw=img.width;sh=img.width;sx=0;sy=(img.height-img.width)/2;} ctx.drawImage(img,sx,sy,sw,sh,0,0,400,400); id('user-avatar').src = c.toDataURL('image/jpeg',0.8); save(true); }; img.src = ev.target.result; }; r.readAsDataURL(f); }
-        async function loadAdmin() { toggleAdmin(1); id('tbl').querySelector('tbody').innerHTML = '<tr><td colspan="5">加载中...</td></tr>'; const u = localStorage.getItem('u'), p = localStorage.getItem('p'); try { const res = await fetch('/api/admin', { headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p } }); if(res.status===401) return toast('无权访问'); const list = await res.json(); id('tbl').querySelector('tbody').innerHTML = list.map(x => {
-            const roleBadge = (x.name === ADMIN_NAME || x.role === 'admin') ? '<span class="badge badge-admin">Admin</span>' : 'User';
-            return `<tr><td><b>${x.name}</b> <br>${roleBadge}</td><td>${x.status==='banned'?'<span class="badge badge-ban">封</span>':'<span class="badge badge-ok">正</span>'}</td><td>${x.name!==u?`<button class="act-btn act-ban" onclick="act('ban','${x.name}')">禁</button><button class="act-btn act-unban" onclick="act('unban','${x.name}')">解</button><button class="act-btn act-del" onclick="act('delete','${x.name}')">删</button><button class="act-btn act-key" onclick="viewPass('${x.name}')" title="查看密码">🔑</button>`:'-'}</td></tr>`;
-        }).join(''); } catch(e){ } }
+        
+        // 🔥 管理面板：已排序 (Admin > Time) + 注册时间格式化
+        async function loadAdmin() { toggleAdmin(1); id('tbl').querySelector('tbody').innerHTML = '<tr><td colspan="5">加载中...</td></tr>'; const u = localStorage.getItem('u'), p = localStorage.getItem('p'); try { const res = await fetch('/api/admin', { headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p } }); if(res.status===401) return toast('无权访问'); let list = await res.json(); 
+            // 排序：Admin置顶，然后按时间倒序
+            list.sort((a, b) => {
+                const isAdminA = a.name === ADMIN_NAME || a.role === 'admin';
+                const isAdminB = b.name === ADMIN_NAME || b.role === 'admin';
+                if (isAdminA && !isAdminB) return -1;
+                if (!isAdminA && isAdminB) return 1;
+                return new Date(b.created_at) - new Date(a.created_at);
+            });
+            id('tbl').querySelector('tbody').innerHTML = list.map(x => {
+                const roleBadge = (x.name === ADMIN_NAME || x.role === 'admin') ? '<span class="badge badge-admin">ADMIN</span>' : '';
+                // 格式化时间
+                const dateStr = x.created_at ? new Date(x.created_at).toLocaleString() : '未知';
+                return `<tr><td><b>${x.name}</b> ${roleBadge}</td><td>${x.status==='banned'?'<span class="badge badge-ban">封</span>':'<span class="badge badge-ok">正</span>'}</td><td style="font-size:12px;color:var(--text-sub)">${dateStr}</td><td>${x.name!==u?`<button class="act-btn act-ban" onclick="act('ban','${x.name}')" title="封禁"><i class="ri-prohibited-line"></i></button><button class="act-btn act-unban" onclick="act('unban','${x.name}')" title="解封"><i class="ri-checkbox-circle-line"></i></button><button class="act-btn act-del" onclick="act('delete','${x.name}')" title="删除"><i class="ri-delete-bin-line"></i></button><button class="act-btn act-key" onclick="viewPass('${x.name}')" title="密码"><i class="ri-key-2-line"></i></button>`:'-'}</td></tr>`;
+            }).join(''); } catch(e){ } }
         async function act(a, t) { if(confirm('确定?')) { const u = localStorage.getItem('u'), p = localStorage.getItem('p'); await fetch('/api/admin', { method: 'POST', headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p }, body: JSON.stringify({ action: a, targetUser: t, duration: 24 }) }); loadAdmin(); }}
-        // 🔥 查看密码
-        async function viewPass(targetU) {
-            const u = localStorage.getItem('u'), p = localStorage.getItem('p');
-            // 复用 admin 权限，但其实这里我们需要获取 user 数据。
-            // 由于 admin.js 不返回 data，我们利用 user.js (前提是 user.js 允许获取任意 data，或者我们在 admin.js 里加接口)
-            // 简单起见，利用现有的 user.js 接口，虽然它没校验权限，但我们只在 admin 界面展示入口。
-            try {
-                const res = await fetch(`/api/user?name=${targetU}`);
-                if(res.ok) {
-                    const json = await res.json();
-                    const pass = json.data ? (json.data._secret_pass || json.data._p) : '无密码';
-                    prompt(`用户 ${targetU} 的密码是：`, pass);
-                } else { toast('获取失败'); }
-            } catch(e) { toast('网络错误'); }
-        }
+        async function viewPass(targetU) { const u = localStorage.getItem('u'), p = localStorage.getItem('p'); try { const res = await fetch(`/api/user?name=${targetU}`); if(res.ok) { const json = await res.json(); const pass = json.data ? (json.data._secret_pass || json.data._p) : '无密码'; prompt(`用户 ${targetU} 的密码：`, pass); } else { toast('获取失败'); } } catch(e) { toast('网络错误'); } }
 
         function toggleAdmin(s) { id('admin').style.display = s ? 'flex' : 'none'; }
         function openM() { id('modal').style.display='flex'; }
