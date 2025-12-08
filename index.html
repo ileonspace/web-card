@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- 强制不缓存 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Web Card V42</title>
+    <title>Web Card V43</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
@@ -32,20 +33,19 @@
             overscroll-behavior-y: contain;
         }
 
-        /* --- 2. 卡片布局 (🔥 调整间距，更精致) --- */
+        /* --- 2. 卡片布局 --- */
         .card { 
             background: var(--card-bg); width: 100%; max-width: 380px; 
-            /* 🔥 上间距缩小到 35px，整体更紧凑 */
             padding: 35px 25px 40px 25px; 
             border-radius: 28px; text-align: center; 
             box-shadow: var(--shadow); position: relative; transition: 0.3s; 
         }
         
         .avatar {
-            width: 120px; height: 120px; /* 微调尺寸 */
+            width: 120px; height: 120px; 
             border-radius: 50%; object-fit: cover; 
             border: 4px solid var(--card-bg); 
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1); /* 阴影更精致 */
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1); 
             margin-bottom: 15px; cursor: pointer; transition: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         .avatar:hover { transform: rotate(360deg) scale(1.05); }
@@ -53,7 +53,7 @@
         h1 { margin: 5px 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
         .role { color: var(--text-sub); font-size: 13px; margin-bottom: 10px; }
 
-        /* 🔥 新增：嵌入式链接条 (只在编辑模式显示) */
+        /* 嵌入式链接条 */
         .link-area {
             background: rgba(58, 123, 213, 0.08); color: var(--accent);
             padding: 8px 12px; border-radius: 8px; font-size: 12px;
@@ -64,7 +64,6 @@
         }
         .link-area:hover { background: rgba(58, 123, 213, 0.15); transform: translateY(-1px); }
         .link-area span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        /* 访客模式隐藏链接条 */
         body.read .link-area { display: none !important; }
 
         /* --- 3. 列表与条目 --- */
@@ -127,7 +126,7 @@
 
         [contenteditable]:focus { outline: none; border-bottom: 2px solid var(--accent); background: rgba(58,123,213,0.05); }
 
-        /* --- 4. 移动端按钮重新设计 (精致、明显) --- */
+        /* --- 4. 移动端按钮 (精致、明显) --- */
         .toolbar, .visitor-nav { position: absolute; top: 20px; z-index: 100; display: flex; gap: 12px; }
         .toolbar { right: 20px; } .visitor-nav { left: 20px; display: none; }
         
@@ -146,7 +145,6 @@
         .btn-admin { color: #8e44ad; border-color: rgba(142, 68, 173, 0.2); } 
         .btn-admin:hover { background: #8e44ad !important; color: #fff !important; }
 
-        /* 🔥 移动端特调：按钮变为圆形图标，更加精致明显 */
         @media (max-width: 480px) { 
             .toolbar { gap: 10px; right: 15px; top: 15px; } 
             .tool-btn { 
@@ -210,7 +208,7 @@
 <body>
 
     <div id="toast">提示</div>
-    <div id="loader"><i class="ri-loader-4-line ri-spin" style="font-size:32px;color:var(--accent)"></i><p style="margin-top:10px;font-size:12px;color:var(--text-sub)">加载数据...</p></div>
+    <div id="loader"><i class="ri-loader-4-line ri-spin" style="font-size:32px;color:var(--accent)"></i><p style="margin-top:10px;font-size:12px;color:var(--text-sub)">数据同步中...</p></div>
 
     <input type="file" id="file" hidden accept="image/*" onchange="uploadImg(event)">
 
@@ -274,12 +272,12 @@
         <button class="tool-btn btn-admin" id="btn-admin" onclick="loadAdmin()" style="display:none"><i class="ri-command-line"></i> <span>管理</span></button>
         <button class="tool-btn btn-red" id="btn-out" onclick="logout()" style="display:none"><i class="ri-logout-box-r-line"></i> <span>退出</span></button>
         <button class="tool-btn" onclick="toggleThemeModal(true)"><i class="ri-palette-line"></i> <span>外观</span></button>
-        <button class="tool-btn" onclick="mode()"><i class="ri-moon-line"></i></button>
+        <!-- 🔥 移除独立的模式按钮，用外观按钮代替 -->
     </div>
 
     <!-- 访客栏 -->
     <div class="visitor-nav" id="tb-read">
-        <button class="tool-btn" onclick="goHome()"><i class="ri-arrow-left-s-line"></i> <span>返回</span></button>
+        <!-- 🔥 访客栏不再显示任何多余按钮 -->
     </div>
 
     <div id="save-status"></div>
@@ -465,17 +463,18 @@
         function isRead() { return document.body.classList.contains('read'); }
         function debounceSave() { clearTimeout(timer); timer = setTimeout(() => save(true), 1500); }
         
+        // 🔥 修复：注册逻辑 (不检查本地)
         async function auth() { 
             const u = val('u'), p = val('p'); 
             if(!u || !p) return toast('请填写完整'); 
             if(isReg) { 
-                if(localStorage.getItem('pass_'+u)) return toast('本地已存在'); 
+                // 移除 "if(localStorage.getItem('pass_'+u))" 检查
                 try { const check = await fetch(`/api/user?name=${u}`); if(check.ok) return toast('用户已存在'); localStorage.setItem('pass_'+u, p); toast('注册成功'); flip(); } catch(e) { toast('网络错误'); } 
             } else { 
                 const localP = localStorage.getItem('pass_'+u); 
                 if(localP === p) { success(u,p,null); return; } 
                 try { const res = await fetch(`/api/user?name=${u}`); if(res.ok) { const json = await res.json(); 
-                    if(json.status === 'banned') return toast('🚫 账号已封禁'); // 🔥 修复1：封禁拦截
+                    if(json.status === 'banned') return toast('🚫 账号已封禁'); 
                     const cp = json.data ? (json.data._secret_pass || json.data._p) : null; 
                     if(cp === p) { localStorage.setItem('userData_'+u, JSON.stringify(json.data)); success(u,p,json.data); } else toast('密码错误'); 
                 } else toast('用户不存在'); } catch(e) { toast('网络错误'); } 
@@ -487,6 +486,7 @@
         function checkLog() { 
             const isLog = localStorage.getItem('login') === '1'; const u = localStorage.getItem('u'); 
             id('btn-login').style.display = isLog ? 'none' : 'flex'; id('btn-out').style.display = isLog ? 'flex' : 'none'; 
+            id('btn-share').style.display = isLog ? 'flex' : 'none'; 
             if(isLog && u === ADMIN_NAME) id('btn-admin').style.display = 'flex'; 
             if(isLog) { 
                 const c = localStorage.getItem('userData_'+u); if(c) fill(JSON.parse(c)); 
@@ -511,8 +511,8 @@
         function closeM() { id('modal').style.display='none'; }
         function flip() { isReg=!isReg; id('m-title').innerText=isReg?"注册":"登录"; document.querySelector('.btn-sub').innerText=isReg?"注册":"登录"; }
         function logout() { localStorage.setItem('login','0'); location.href="/"; }
-        function mode() { document.body.classList.toggle('dark'); }
         function goHome() { location.href="/"; }
+        function share() { const u=localStorage.getItem('u'); const url=location.origin+'/'+u; navigator.clipboard.writeText(url).then(()=>toast('已复制')).catch(()=>prompt("复制",url)); }
         function toast(t) { const el = id('toast'); el.innerText = t; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2000); }
     </script>
 </body>
