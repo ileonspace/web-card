@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- 强制不缓存，确保每次加载最新逻辑 -->
+    <!-- 强制不缓存 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Web Card V51 - 时间修复版</title>
+    <title>Web Card V52 - 时间修复版</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
-        /* --- 1. 基础变量 (保持 V48/V49 外观) --- */
+        /* --- 1. 基础变量 --- */
         :root {
             --page-bg: #EAF3F7; 
             --card-bg: #ffffff;
@@ -52,7 +52,6 @@
         }
         .avatar:hover { transform: rotate(360deg) scale(1.05); }
         
-        /* 标题不加粗 */
         h1 { margin: 5px 0; font-size: 24px; font-weight: 500; letter-spacing: -0.5px; }
         .role { color: var(--text-sub); font-size: 13px; margin-bottom: 10px; }
 
@@ -82,13 +81,11 @@
         
         .item.sort-dragging { background: #fff !important; box-shadow: 0 10px 20px rgba(0,0,0,0.15); border-color: var(--accent); z-index: 100; opacity: 0.95; transform: scale(1.02); }
         
-        /* 仅链接条目有悬停动效 */
         body:not(.touch-device) .item:not(.type-text):not(.type-divider):hover { 
             transform: translateY(-2px); 
             background: rgba(0,0,0,0.06); 
         }
 
-        /* 标题类型 (无动效) */
         .item.type-text { background: transparent; padding: 6px 0; border: none; flex-direction: column; align-items: flex-start; box-shadow: none !important; }
         .item.type-text:hover { transform: none !important; background: transparent !important; }
         
@@ -101,7 +98,6 @@
         .text-controls::after { content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); border-width: 5px 5px 0; border-style: solid; border-color: var(--card-bg) transparent transparent; }
         body:not(.read) .item.type-text:hover .text-controls { display: flex; }
 
-        /* 分割线 (无动效) */
         .item.type-divider { background: transparent; padding: 8px 0; justify-content: center; cursor: default; box-shadow: none !important; }
         .item.type-divider:hover { transform: none !important; background: transparent !important; }
         .divider-line { width: 100%; height: 0; border-top: 1px dashed var(--divider); opacity: 0.5; }
@@ -116,7 +112,6 @@
 
         .item-icon { font-size: 24px; color: var(--text-sub); margin-right: 15px; min-width: 24px; text-align: center; flex-shrink: 0; transition: 0.3s; }
         body:not(.read) .item-icon { cursor: pointer; }
-        /* 图标悬停变橙色 */
         body:not(.touch-device) .item:not(.type-text):not(.type-divider):hover .item-icon { color: #ff9f43; transform: scale(1.1); }
         
         .item-content { flex: 1; overflow: hidden; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
@@ -308,7 +303,7 @@
         <h1 id="user-name" contenteditable="true" style="color:var(--text-main)">Code Master</h1>
         <div id="user-role" class="role" contenteditable="true">全栈开发练习生</div>
         
-        <!-- 🔥 链接显示区 -->
+        <!-- 链接显示区 -->
         <div class="link-area" onclick="copyLink()" id="link-box" style="display:none">
             <i class="ri-link"></i> <span id="my-link">loading...</span> <i class="ri-file-copy-line"></i>
         </div>
@@ -323,7 +318,6 @@
     </div>
 
     <script>
-        // 🔥 1. 工具函数前置 (核心修复)
         const id = x => document.getElementById(x);
         const text = x => id(x).innerText;
         const src = x => id(x).src;
@@ -356,7 +350,7 @@
             }
         };
 
-        // --- 核心：注册/登录/同步 (🔥 V50 终极修复) ---
+        // --- 核心：注册/登录 (🔥 V51 修复：注册后立即上云) ---
         async function auth() { 
             const u = val('u'), p = val('p'); 
             if(!u || !p) return toast('请填写完整'); 
@@ -371,7 +365,7 @@
                     const initData = { name: 'Code Master', role: '新用户', avatar: DEFAULT_AVATAR, items: [], theme: {radius:20, cardRadius:20, preset:'default'}, _secret_pass: p };
                     localStorage.setItem('userData_'+u, JSON.stringify(initData));
                     
-                    // 2. 立即上云
+                    // 2. 立即上云 (确保新账号有数据)
                     await fetch('/api/user', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: u, password: p, data: initData }) });
                     
                     localStorage.setItem('pass_'+u, p); 
@@ -408,7 +402,6 @@
         function success(u,p,d) { 
             localStorage.setItem('login','1'); localStorage.setItem('u',u); localStorage.setItem('p',p); localStorage.setItem('pass_'+u, p); 
             if(d) fill(d); checkLog(); closeM(); toast('欢迎回来'); 
-            // 登录成功后立即同步
             setTimeout(() => syncUser(u), 100);
         }
         
@@ -517,7 +510,7 @@
         
         function clickAv() { if(!isRead() && localStorage.getItem('login')==='1') id('file').click(); }
         function uploadImg(e) { const f = e.target.files[0]; if(!f) return; toast('压缩图片...'); const r = new FileReader(); r.onload = ev => { const img = new Image(); img.onload = () => { const c = document.createElement('canvas'); c.width = 400; c.height = 400; const ctx = c.getContext('2d'); let sx,sy,sw,sh; if(img.width>img.height){sh=img.height;sw=img.height;sx=(img.width-img.height)/2;sy=0;} else{sw=img.width;sh=img.width;sx=0;sy=(img.height-img.width)/2;} ctx.drawImage(img,sx,sy,sw,sh,0,0,400,400); id('user-avatar').src = c.toDataURL('image/jpeg',0.8); save(true); }; img.src = ev.target.result; }; r.readAsDataURL(f); }
-        async function loadAdmin() { toggleAdmin(1); id('tbl').querySelector('tbody').innerHTML = '<tr><td colspan="5">加载中...</td></tr>'; const u = localStorage.getItem('u'), p = localStorage.getItem('p'); try { const res = await fetch('/api/admin', { headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p } }); if(res.status===401) return toast('无权访问'); let list = await res.json(); list.sort((a, b) => { const isAdminA = a.name === ADMIN_NAME || a.role === 'admin'; const isAdminB = b.name === ADMIN_NAME || b.role === 'admin'; if (isAdminA && !isAdminB) return -1; if (!isAdminA && isAdminB) return 1; return new Date(b.created_at) - new Date(a.created_at); }); id('tbl').querySelector('tbody').innerHTML = list.map(x => { const roleBadge = (x.name === ADMIN_NAME || x.role === 'admin') ? '<span class="badge badge-admin">ADMIN</span>' : ''; const dateStr = x.created_at ? new Date(x.created_at).toLocaleString() : '未知'; return `<tr><td><b>${x.name}</b> ${roleBadge}</td><td>${x.status==='banned'?'<span class="badge badge-ban">封</span>':'<span class="badge badge-ok">正</span>'}</td><td style="font-size:12px;color:var(--text-sub)">${dateStr}</td><td>${x.name!==u?`<button class="act-btn act-ban" onclick="act('ban','${x.name}')" title="封禁"><i class="ri-prohibited-line"></i></button><button class="act-btn act-unban" onclick="act('unban','${x.name}')" title="解封"><i class="ri-checkbox-circle-line"></i></button><button class="act-btn act-del" onclick="act('delete','${x.name}')" title="删除"><i class="ri-delete-bin-line"></i></button><button class="act-btn act-key" onclick="viewPass('${x.name}')" title="密码"><i class="ri-key-2-line"></i></button>`:'-'}</td></tr>`; }).join(''); } catch(e){ } }
+        async function loadAdmin() { toggleAdmin(1); id('tbl').querySelector('tbody').innerHTML = '<tr><td colspan="5">加载中...</td></tr>'; const u = localStorage.getItem('u'), p = localStorage.getItem('p'); try { const res = await fetch('/api/admin', { headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p } }); if(res.status===401) return toast('无权访问'); let list = await res.json(); list.sort((a, b) => { const isAdminA = a.name === ADMIN_NAME || a.role === 'admin'; const isAdminB = b.name === ADMIN_NAME || b.role === 'admin'; if (isAdminA && !isAdminB) return -1; if (!isAdminA && isAdminB) return 1; return new Date(b.created_at) - new Date(a.created_at); }); id('tbl').querySelector('tbody').innerHTML = list.map(x => { const roleBadge = (x.name === ADMIN_NAME || x.role === 'admin') ? '<span class="badge badge-admin">ADMIN</span>' : ''; const dateStr = x.created_at ? new Date(x.created_at.replace(' ', 'T') + 'Z').toLocaleString() : '未知'; return `<tr><td><b>${x.name}</b> ${roleBadge}</td><td>${x.status==='banned'?'<span class="badge badge-ban">封</span>':'<span class="badge badge-ok">正</span>'}</td><td style="font-size:12px;color:var(--text-sub)">${dateStr}</td><td>${x.name!==u?`<button class="act-btn act-ban" onclick="act('ban','${x.name}')" title="封禁"><i class="ri-prohibited-line"></i></button><button class="act-btn act-unban" onclick="act('unban','${x.name}')" title="解封"><i class="ri-checkbox-circle-line"></i></button><button class="act-btn act-del" onclick="act('delete','${x.name}')" title="删除"><i class="ri-delete-bin-line"></i></button><button class="act-btn act-key" onclick="viewPass('${x.name}')" title="密码"><i class="ri-key-2-line"></i></button>`:'-'}</td></tr>`; }).join(''); } catch(e){ } }
         async function act(a, t) { if(confirm('确定?')) { const u = localStorage.getItem('u'), p = localStorage.getItem('p'); await fetch('/api/admin', { method: 'POST', headers: { 'X-Admin-Name': u, 'X-Admin-Pass': p }, body: JSON.stringify({ action: a, targetUser: t, duration: 24 }) }); loadAdmin(); }}
         async function viewPass(targetU) { const u = localStorage.getItem('u'), p = localStorage.getItem('p'); try { const res = await fetch(`/api/user?name=${targetU}`); if(res.ok) { const json = await res.json(); const pass = json.data ? (json.data._secret_pass || json.data._p) : '无密码'; prompt(`用户 ${targetU} 的密码：`, pass); } else { toast('获取失败'); } } catch(e) { toast('网络错误'); } }
         function toggleAdmin(s) { id('admin').style.display = s ? 'flex' : 'none'; }
