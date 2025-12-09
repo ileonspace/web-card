@@ -3,26 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- 强制不缓存 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Web Card V54 - 数据看板版</title>
+    <title>Web Card V55 - 诊断版</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-    <!-- 🔥 引入图表库 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
-        /* --- 1. 基础变量 --- */
+        /* --- 1. 基础变量 (保持不变) --- */
         :root {
-            --page-bg: #EAF3F7; 
-            --card-bg: #ffffff;
-            --text-main: #334155;
-            --text-sub: #64748b;
-            --item-bg: rgba(0,0,0,0.03);
-            --item-radius: 20px; 
-            --card-radius: 20px;
-            --accent: #3a7bd5; 
-            --danger: #ff4757; 
-            --success: #2ed573;
-            --divider: #94a3b8;
+            --page-bg: #EAF3F7; --card-bg: #ffffff; --text-main: #334155; --text-sub: #64748b;
+            --item-bg: rgba(0,0,0,0.03); --item-radius: 20px; --card-radius: 20px;
+            --accent: #3a7bd5; --danger: #ff4757; --success: #2ed573; --divider: #94a3b8;
             --shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
         }
         body {
@@ -39,7 +31,7 @@
             background: var(--card-bg); width: 100%; max-width: 380px; 
             padding: 35px 25px 40px 25px; border-radius: var(--card-radius); 
             text-align: center; box-shadow: var(--shadow); position: relative; transition: 0.3s; 
-            margin-bottom: 20px; /* 留出底部空间 */
+            margin-bottom: 20px;
         }
         .avatar {
             width: 120px; height: 120px; border-radius: 50%; object-fit: cover; 
@@ -131,40 +123,7 @@
         .btn-admin { color: #8e44ad; border-color: rgba(142, 68, 173, 0.2); } .btn-admin:hover { background: #8e44ad !important; color: #fff !important; }
         @media (max-width: 480px) { .toolbar { gap: 10px; right: 15px; top: 15px; } .tool-btn { padding: 0; width: 40px; height: 40px; justify-content: center; border-radius: 50%; font-size: 18px; background: #fff; border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 4px 8px rgba(0,0,0,0.1); } .tool-btn span { display: none; } }
 
-        /* --- 5. 管理面板 (🔥 含统计图表支持) --- */
-        #admin { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 3000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
-        /* 加宽加高以容纳图表 */
-        .admin-card { background: var(--card-bg); width: 95%; max-width: 800px; max-height: 90vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
-        .admin-head { padding: 15px 20px; border-bottom: 1px solid rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.02); }
-        .admin-body { flex: 1; overflow-y: auto; padding: 0; -webkit-overflow-scrolling: touch; }
-        
-        /* 🔥 统计 Tab 栏 */
-        .admin-tabs { display: flex; padding: 0 20px; border-bottom: 1px solid rgba(0,0,0,0.05); background: rgba(0,0,0,0.01); }
-        .admin-tab { padding: 12px 15px; font-size: 13px; font-weight: 600; color: var(--text-sub); cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; }
-        .admin-tab:hover { color: var(--accent); }
-        .admin-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-
-        .admin-view { display: none; padding: 20px; }
-        .admin-view.active { display: block; }
-
-        /* 🔥 统计卡片样式 */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .stat-card { background: rgba(0,0,0,0.02); border-radius: 12px; padding: 15px; text-align: center; border: 1px solid rgba(0,0,0,0.05); }
-        .stat-num { font-size: 24px; font-weight: 800; color: var(--text-main); display: block; margin-bottom: 5px; }
-        .stat-label { font-size: 12px; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
-        .chart-container { position: relative; height: 250px; width: 100%; margin-bottom: 20px; }
-        .chart-title { font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 10px; display: block; }
-
-        .table-wrapper { flex: 1; overflow: auto; padding: 0; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }
-        th { text-align: left; padding: 12px 15px; color: var(--text-sub); font-weight: 600; background: rgba(0,0,0,0.02); position: sticky; top: 0; }
-        td { padding: 12px 15px; border-bottom: 1px solid rgba(0,0,0,0.05); color: var(--text-main); vertical-align: middle; }
-        .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
-        .badge-ok { background: rgba(46, 213, 115, 0.15); color: #2ecc71; } .badge-ban { background: rgba(255, 71, 87, 0.15); color: #ff4757; } .badge-admin { background: #ff4757; color: white; padding: 2px 8px; font-size: 10px; border-radius: 10px; margin-left: 5px; }
-        .act-btn { padding: 6px 10px; border-radius: 6px; font-size: 16px; border: none; cursor: pointer; margin-right: 6px; background: transparent; transition: 0.2s; }
-        .act-ban { color: #e67e22; background: rgba(230,126,34,0.1); } .act-unban { color: #2ecc71; background: rgba(46,204,113,0.1); } .act-del { color: var(--text-sub); background: rgba(0,0,0,0.05); } .act-key { color: var(--accent); background: rgba(58, 123, 213, 0.1); }
-
-        /* --- 其他弹窗 --- */
+        /* --- 弹窗与管理 --- */
         #theme-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 4000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
         .theme-box { background: var(--card-bg); width: 90%; max-width: 340px; padding: 25px; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); text-align: left; max-height: 85vh; overflow-y: auto; }
         .setting-section { margin-bottom: 20px; }
@@ -194,6 +153,35 @@
         #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
         #save-status { position: fixed; bottom: 20px; right: 20px; font-size: 12px; color: var(--text-sub); opacity: 0; transition: 0.3s; pointer-events: none; }
         #loader { position: fixed; inset: 0; background: var(--page-bg); z-index: 5000; display: none; justify-content: center; align-items: center; flex-direction: column; }
+        
+        #admin { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 3000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
+        .admin-card { background: var(--card-bg); width: 95%; max-width: 800px; max-height: 90vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
+        .admin-head { padding: 15px 20px; border-bottom: 1px solid rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.02); }
+        .admin-body { flex: 1; overflow-y: auto; padding: 0; -webkit-overflow-scrolling: touch; }
+        
+        .admin-tabs { display: flex; padding: 0 20px; border-bottom: 1px solid rgba(0,0,0,0.05); background: rgba(0,0,0,0.01); }
+        .admin-tab { padding: 12px 15px; font-size: 13px; font-weight: 600; color: var(--text-sub); cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; }
+        .admin-tab:hover { color: var(--accent); }
+        .admin-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+        .admin-view { display: none; padding: 20px; }
+        .admin-view.active { display: block; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: rgba(0,0,0,0.02); border-radius: 12px; padding: 15px; text-align: center; border: 1px solid rgba(0,0,0,0.05); }
+        .stat-num { font-size: 24px; font-weight: 800; color: var(--text-main); display: block; margin-bottom: 5px; }
+        .stat-label { font-size: 12px; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
+        .chart-container { position: relative; height: 250px; width: 100%; margin-bottom: 20px; }
+        .chart-title { font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 10px; display: block; }
+
+        .table-wrapper { flex: 1; overflow: auto; padding: 0; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }
+        th { text-align: left; padding: 12px 15px; color: var(--text-sub); font-weight: 600; background: rgba(0,0,0,0.02); position: sticky; top: 0; }
+        td { padding: 12px 15px; border-bottom: 1px solid rgba(0,0,0,0.05); color: var(--text-main); vertical-align: middle; }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+        .badge-ok { background: rgba(46, 213, 115, 0.15); color: #2ecc71; } .badge-ban { background: rgba(255, 71, 87, 0.15); color: #ff4757; } .badge-admin { background: #ff4757; color: white; padding: 2px 8px; font-size: 10px; border-radius: 10px; margin-left: 5px; }
+        .act-btn { padding: 6px 10px; border-radius: 6px; font-size: 16px; border: none; cursor: pointer; margin-right: 6px; background: transparent; transition: 0.2s; }
+        .act-ban { color: #e67e22; background: rgba(230,126,34,0.1); } .act-unban { color: #2ecc71; background: rgba(46,204,113,0.1); } .act-del { color: var(--text-sub); background: rgba(0,0,0,0.05); } .act-key { color: var(--accent); background: rgba(58, 123, 213, 0.1); }
 
         .read .avatar, .read .item-icon { pointer-events: auto; }
     </style>
@@ -260,7 +248,7 @@
         </div>
     </div></div>
 
-    <!-- 🔥 管理面板 (含统计) -->
+    <!-- 管理面板 (含统计) -->
     <div id="admin"><div class="admin-card">
         <div class="admin-head">
             <h3 style="margin:0;font-size:16px;color:var(--text-main)">后台管理</h3>
@@ -343,7 +331,7 @@
 
         let currentData = { items: [], theme: { radius: 20, cardRadius: 20, preset: 'default', colors: { page: '#EAF3F7', card: '#ffffff', item: '#f8f8f8' } } };
         let isReg = false, timer = null, editingIndex = -1, dragSrcEl = null, dragSrcIndex = null;
-        let charts = {}; // 全局图表对象
+        let charts = {}; // 全局图表
 
         window.onload = () => {
             initIconLib();
@@ -359,7 +347,29 @@
             }
         };
 
-        // --- 核心认证 ---
+        // --- 修复保存: 显示具体错误 ---
+        async function save(silent = false) { 
+            if (localStorage.getItem('login') !== '1') return; 
+            const u = localStorage.getItem('u'), p = localStorage.getItem('p'); 
+            const st = id('save-status'); st.style.opacity = 1; st.innerText = '同步...'; 
+            if(!silent) toast('正在保存...'); 
+            const data = { name: text('user-name'), role: text('user-role'), avatar: src('user-avatar'), items: currentData.items, theme: currentData.theme, _secret_pass: p }; 
+            try { 
+                const res = await fetch('/api/user', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: u, password: p, data: data }) }); 
+                if(res.ok) { 
+                    localStorage.setItem('userData_' + u, JSON.stringify(data)); st.innerText = '已同步'; setTimeout(() => st.style.opacity = 0, 2000); if(!silent) toast('已保存'); 
+                } else { 
+                    const err = await res.text();
+                    st.innerText = '同步失败'; 
+                    if(!silent) toast('错误: ' + err);
+                } 
+            } catch(e) { st.innerText = '网络错误'; } 
+        }
+
+        function isRead() { return document.body.classList.contains('read'); }
+        function debounceSave() { clearTimeout(timer); timer = setTimeout(() => save(true), 1500); }
+        
+        // --- 修复认证逻辑 ---
         async function auth() { 
             const u = val('u'), p = val('p'); 
             if(!u || !p) return toast('请填写完整'); 
@@ -379,6 +389,7 @@
                     toast('注册成功'); flip(); 
                 } catch(e) { toast('网络错误'); } 
             } else { 
+                // 登录
                 const localPass = localStorage.getItem('pass_'+u);
                 const localData = localStorage.getItem('userData_'+u);
                 
@@ -406,7 +417,6 @@
         function success(u,p,d) { 
             localStorage.setItem('login','1'); localStorage.setItem('u',u); localStorage.setItem('p',p); localStorage.setItem('pass_'+u, p); 
             if(d) fill(d); checkLog(); closeM(); toast('欢迎回来'); 
-            // 🔥 静默同步
             setTimeout(() => syncUser(u), 100);
         }
         
@@ -483,18 +493,6 @@
         function openIconLib(i, e) { if(isRead()) return; e.stopPropagation(); editingIndex = i; document.getElementById('icon-modal').style.display = 'flex'; }
         function selectIcon(icon) { if(editingIndex > -1) { currentData.items[editingIndex].icon = icon; renderList(); save(true); } document.getElementById('icon-modal').style.display = 'none'; }
         
-        async function save(silent = false) { 
-            if (localStorage.getItem('login') !== '1') return; 
-            const u = localStorage.getItem('u'), p = localStorage.getItem('p'); 
-            const st = id('save-status'); st.style.opacity = 1; st.innerText = '同步...'; 
-            if(!silent) toast('正在保存...'); 
-            const data = { name: text('user-name'), role: text('user-role'), avatar: src('user-avatar'), items: currentData.items, theme: currentData.theme, _secret_pass: p }; 
-            try { const res = await fetch('/api/user', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: u, password: p, data: data }) }); if(res.ok) { localStorage.setItem('userData_' + u, JSON.stringify(data)); st.innerText = '已同步'; setTimeout(() => st.style.opacity = 0, 2000); if(!silent) toast('已保存'); } else { st.innerText = '同步失败'; } } catch(e) { st.innerText = '网络错误'; } 
-        }
-
-        function isRead() { return document.body.classList.contains('read'); }
-        function debounceSave() { clearTimeout(timer); timer = setTimeout(() => save(true), 1500); }
-        
         function checkLog() { 
             const isLog = localStorage.getItem('login') === '1'; const u = localStorage.getItem('u'); 
             id('btn-login').style.display = isLog ? 'none' : 'flex'; id('btn-out').style.display = isLog ? 'flex' : 'none'; 
@@ -516,12 +514,10 @@
         function clickAv() { if(!isRead() && localStorage.getItem('login')==='1') id('file').click(); }
         function uploadImg(e) { const f = e.target.files[0]; if(!f) return; toast('压缩图片...'); const r = new FileReader(); r.onload = ev => { const img = new Image(); img.onload = () => { const c = document.createElement('canvas'); c.width = 400; c.height = 400; const ctx = c.getContext('2d'); let sx,sy,sw,sh; if(img.width>img.height){sh=img.height;sw=img.height;sx=(img.width-img.height)/2;sy=0;} else{sw=img.width;sh=img.width;sx=0;sy=(img.height-img.width)/2;} ctx.drawImage(img,sx,sy,sw,sh,0,0,400,400); id('user-avatar').src = c.toDataURL('image/jpeg',0.8); save(true); }; img.src = ev.target.result; }; r.readAsDataURL(f); }
 
-        // --- 管理面板逻辑 (Tab + 统计 + 列表) ---
         function switchTab(t) { 
             document.querySelectorAll('.admin-tab').forEach(e=>e.classList.remove('active')); 
             document.querySelectorAll('.admin-view').forEach(e=>e.classList.remove('active'));
-            event.target.classList.add('active');
-            document.getElementById('view-'+t).classList.add('active');
+            event.target.classList.add('active'); document.getElementById('view-'+t).classList.add('active');
             if(t==='stats') loadStats();
         }
 
