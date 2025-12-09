@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <!-- 强制不缓存 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Web Card V53 - 稳定版</title>
+    <title>Web Card V53 - 体验优化版</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
-        /* --- 1. 基础变量 --- */
+        /* --- 1. 基础变量 (保持 V50 外观) --- */
         :root {
             --page-bg: #EAF3F7; 
             --card-bg: #ffffff;
@@ -41,7 +41,6 @@
             border-radius: var(--card-radius); 
             text-align: center; 
             box-shadow: var(--shadow); position: relative; transition: 0.3s; 
-            margin-bottom: 20px;
         }
         
         .avatar {
@@ -53,6 +52,7 @@
         }
         .avatar:hover { transform: rotate(360deg) scale(1.05); }
         
+        /* 标题不加粗 */
         h1 { margin: 5px 0; font-size: 24px; font-weight: 500; letter-spacing: -0.5px; }
         .role { color: var(--text-sub); font-size: 13px; margin-bottom: 10px; }
 
@@ -82,11 +82,13 @@
         
         .item.sort-dragging { background: #fff !important; box-shadow: 0 10px 20px rgba(0,0,0,0.15); border-color: var(--accent); z-index: 100; opacity: 0.95; transform: scale(1.02); }
         
+        /* 仅链接条目有悬停动效 */
         body:not(.touch-device) .item:not(.type-text):not(.type-divider):hover { 
             transform: translateY(-2px); 
             background: rgba(0,0,0,0.06); 
         }
 
+        /* 标题类型 (无动效) */
         .item.type-text { background: transparent; padding: 6px 0; border: none; flex-direction: column; align-items: flex-start; box-shadow: none !important; }
         .item.type-text:hover { transform: none !important; background: transparent !important; }
         
@@ -99,6 +101,7 @@
         .text-controls::after { content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); border-width: 5px 5px 0; border-style: solid; border-color: var(--card-bg) transparent transparent; }
         body:not(.read) .item.type-text:hover .text-controls { display: flex; }
 
+        /* 分割线 (无动效) */
         .item.type-divider { background: transparent; padding: 8px 0; justify-content: center; cursor: default; box-shadow: none !important; }
         .item.type-divider:hover { transform: none !important; background: transparent !important; }
         .divider-line { width: 100%; height: 0; border-top: 1px dashed var(--divider); opacity: 0.5; }
@@ -167,31 +170,11 @@
             .tool-btn span { display: none; } 
         }
 
-        /* --- 5. 外观设置面板 (右下角悬浮) --- */
-        #theme-modal { 
-            position: fixed; bottom: 0; left: 0; right: 0; top: auto;
-            z-index: 4000; display: none; flex-direction: column; justify-content: flex-end;
-            background: transparent; pointer-events: none;
-        }
-        #theme-modal.active { display: flex; }
-        
-        .theme-box { 
-            pointer-events: auto; background: var(--card-bg); width: 100%; max-width: 500px; margin: 0 auto;
-            padding: 25px; border-radius: 24px 24px 0 0; 
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.15); 
-            text-align: left; max-height: 60vh; overflow-y: auto; 
-            animation: slideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-            border: 1px solid rgba(0,0,0,0.05); border-bottom: none;
-        }
-        @media (min-width: 600px) {
-            #theme-modal { right: 20px; bottom: 20px; left: auto; top: auto; align-items: flex-end; }
-            .theme-box { width: 340px; border-radius: 24px; margin-bottom: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
-        }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        
+        /* --- 弹窗与管理 --- */
+        #theme-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 4000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
+        .theme-box { background: var(--card-bg); width: 90%; max-width: 340px; padding: 25px; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); text-align: left; max-height: 85vh; overflow-y: auto; }
         .setting-section { margin-bottom: 20px; }
         .setting-title { font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 12px; display: block; }
-        
         .preset-grid { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
         .color-dot { width: 36px; height: 36px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(0,0,0,0.1); transition: 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; }
         .color-dot:active { transform: scale(0.9); }
@@ -202,17 +185,23 @@
         .range-slider { width: 100%; -webkit-appearance: none; height: 6px; background: #ddd; border-radius: 3px; outline: none; }
         .range-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: var(--accent); border-radius: 50%; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
-        /* 其他弹窗 (仍需遮罩) */
-        #icon-modal, #modal, #admin { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 4000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
+        #icon-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 4000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
         .icon-box { background: var(--card-bg); width: 90%; max-width: 500px; max-height: 80vh; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; }
         .icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 10px; overflow-y: auto; padding: 5px; flex: 1; }
         .lib-icon { aspect-ratio: 1; display: flex; justify-content: center; align-items: center; font-size: 24px; color: var(--text-sub); border-radius: 12px; cursor: pointer; background: rgba(0,0,0,0.03); transition: 0.2s; }
         .lib-icon:hover { background: var(--accent); color: white; transform: scale(1.1); }
-        
+
+        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); z-index: 2000; display: none; justify-content: center; align-items: center; }
         .box { background: var(--card-bg); width: 85%; max-width: 280px; padding: 30px 25px; border-radius: 20px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
         .inp { width: 100%; padding: 10px 12px; margin: 8px 0; border: 1px solid var(--divider); border-radius: 10px; background: rgba(0,0,0,0.02); color: var(--text-main); font-size: 14px; box-sizing: border-box; outline: none; }
         .btn-sub { width: 100%; padding: 10px; background: var(--accent); color: #fff; border: none; border-radius: 10px; cursor: pointer; margin-top: 10px; font-weight: bold; }
+
+        #toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-20px); background: rgba(0,0,0,0.8); color: #fff; padding: 8px 20px; border-radius: 30px; font-size: 13px; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 10000; backdrop-filter: blur(4px); display: flex; align-items: center; gap: 6px; }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        #save-status { position: fixed; bottom: 20px; right: 20px; font-size: 12px; color: var(--text-sub); opacity: 0; transition: 0.3s; pointer-events: none; }
+        #loader { position: fixed; inset: 0; background: var(--page-bg); z-index: 5000; display: none; justify-content: center; align-items: center; flex-direction: column; }
         
+        #admin { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 3000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
         .admin-card { background: var(--card-bg); width: 95%; max-width: 650px; max-height: 80vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
         .admin-head { padding: 15px 20px; border-bottom: 1px solid rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.02); }
         .admin-body { flex: 1; overflow-y: auto; padding: 0; -webkit-overflow-scrolling: touch; }
@@ -228,11 +217,6 @@
         .act-del { color: var(--text-sub); background: rgba(0,0,0,0.05); } 
         .act-key { color: var(--accent); background: rgba(58, 123, 213, 0.1); }
 
-        #toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-20px); background: rgba(0,0,0,0.8); color: #fff; padding: 8px 20px; border-radius: 30px; font-size: 13px; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 10000; backdrop-filter: blur(4px); display: flex; align-items: center; gap: 6px; }
-        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-        #save-status { position: fixed; bottom: 20px; right: 20px; font-size: 12px; color: var(--text-sub); opacity: 0; transition: 0.3s; pointer-events: none; }
-        #loader { position: fixed; inset: 0; background: var(--page-bg); z-index: 5000; display: none; justify-content: center; align-items: center; flex-direction: column; }
-        
         .read .avatar, .read .item-icon { pointer-events: auto; }
     </style>
 </head>
@@ -324,7 +308,7 @@
         <h1 id="user-name" contenteditable="true" style="color:var(--text-main)">Code Master</h1>
         <div id="user-role" class="role" contenteditable="true">全栈开发练习生</div>
         
-        <!-- 链接显示区 -->
+        <!-- 🔥 链接显示区 -->
         <div class="link-area" onclick="copyLink()" id="link-box" style="display:none">
             <i class="ri-link"></i> <span id="my-link">loading...</span> <i class="ri-file-copy-line"></i>
         </div>
@@ -339,7 +323,6 @@
     </div>
 
     <script>
-        // 工具函数前置
         const id = x => document.getElementById(x);
         const text = x => id(x).innerText;
         const src = x => id(x).src;
@@ -372,7 +355,7 @@
             }
         };
 
-        // --- 核心认证 ---
+        // --- 核心：注册/登录/同步 ---
         async function auth() { 
             const u = val('u'), p = val('p'); 
             if(!u || !p) return toast('请填写完整'); 
@@ -383,19 +366,22 @@
                     const check = await fetch(`/api/user?name=${u}&t=${ts}`); 
                     if(check.ok) return toast('用户已存在'); 
                     
+                    // 1. 注册时立即初始化本地数据
                     const initData = { name: 'Code Master', role: '新用户', avatar: DEFAULT_AVATAR, items: [], theme: {radius:20, cardRadius:20, preset:'default'}, _secret_pass: p };
                     localStorage.setItem('userData_'+u, JSON.stringify(initData));
                     
+                    // 2. 立即上云
                     await fetch('/api/user', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: u, password: p, data: initData }) });
                     
                     localStorage.setItem('pass_'+u, p); 
                     toast('注册成功'); flip(); 
                 } catch(e) { toast('网络错误'); } 
             } else { 
+                // 登录
                 const localPass = localStorage.getItem('pass_'+u);
                 const localData = localStorage.getItem('userData_'+u);
                 
-                // 本地优先
+                // 优先本地
                 if(localPass === p && localData) { 
                     success(u, p, JSON.parse(localData)); 
                     return; 
@@ -421,9 +407,11 @@
         function success(u,p,d) { 
             localStorage.setItem('login','1'); localStorage.setItem('u',u); localStorage.setItem('p',p); localStorage.setItem('pass_'+u, p); 
             if(d) fill(d); checkLog(); closeM(); toast('欢迎回来'); 
+            // 🔥 修复：登录成功后静默同步，不弹窗
             setTimeout(() => syncUser(u), 100);
         }
         
+        // 🔥 静默同步：不弹 Toast
         async function syncUser(u) { try { const res = await fetch(`/api/user?name=${u}&t=${Date.now()}`); if(res.ok) { const json = await res.json(); if(json.data) { localStorage.setItem('userData_'+u, JSON.stringify(json.data)); fill(json.data); } } } catch(e) {} }
 
         // --- 拖拽逻辑 ---
@@ -468,10 +456,7 @@
 
         // --- 外观设置 ---
         function toggleThemeModal(show) { 
-            const m = document.getElementById('theme-modal');
-            if(show) m.classList.add('active');
-            else m.classList.remove('active');
-            
+            document.getElementById('theme-modal').style.display = show ? 'flex' : 'none'; 
             if(show) {
                 const t = currentData.theme;
                 const c = t.preset === 'custom' ? t.colors : PRESETS[t.preset] || PRESETS['default'];
