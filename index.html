@@ -118,6 +118,7 @@
         .add-btn { flex: 1; padding: 12px; border: 1px dashed var(--divider); border-radius: 14px; color: var(--text-sub); font-size: 13px; cursor: pointer; background: transparent; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 4px; }
         .add-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(58,123,213,0.05); transform: translateY(-1px); }
         .add-btn:active { transform: scale(0.98); }
+
         [contenteditable]:focus { outline: none; border-bottom: 2px solid var(--accent); background: rgba(58,123,213,0.05); }
 
         /* --- 4. 按钮 --- */
@@ -342,7 +343,7 @@
 
         let currentData = { items: [], theme: { radius: 20, cardRadius: 20, preset: 'default', colors: { page: '#EAF3F7', card: '#ffffff', item: '#f8f8f8' } } };
         let isReg = false, timer = null, editingIndex = -1, dragSrcEl = null, dragSrcIndex = null;
-        let charts = {}; // 🔥 全局 charts 变量，只声明一次
+        let charts = {}; // 全局图表对象
 
         window.onload = () => {
             initIconLib();
@@ -405,6 +406,7 @@
         function success(u,p,d) { 
             localStorage.setItem('login','1'); localStorage.setItem('u',u); localStorage.setItem('p',p); localStorage.setItem('pass_'+u, p); 
             if(d) fill(d); checkLog(); closeM(); toast('欢迎回来'); 
+            // 🔥 静默同步
             setTimeout(() => syncUser(u), 100);
         }
         
@@ -513,7 +515,8 @@
         
         function clickAv() { if(!isRead() && localStorage.getItem('login')==='1') id('file').click(); }
         function uploadImg(e) { const f = e.target.files[0]; if(!f) return; toast('压缩图片...'); const r = new FileReader(); r.onload = ev => { const img = new Image(); img.onload = () => { const c = document.createElement('canvas'); c.width = 400; c.height = 400; const ctx = c.getContext('2d'); let sx,sy,sw,sh; if(img.width>img.height){sh=img.height;sw=img.height;sx=(img.width-img.height)/2;sy=0;} else{sw=img.width;sh=img.width;sx=0;sy=(img.height-img.width)/2;} ctx.drawImage(img,sx,sy,sw,sh,0,0,400,400); id('user-avatar').src = c.toDataURL('image/jpeg',0.8); save(true); }; img.src = ev.target.result; }; r.readAsDataURL(f); }
-        
+
+        // --- 管理面板逻辑 (Tab + 统计 + 列表) ---
         function switchTab(t) { 
             document.querySelectorAll('.admin-tab').forEach(e=>e.classList.remove('active')); 
             document.querySelectorAll('.admin-view').forEach(e=>e.classList.remove('active'));
