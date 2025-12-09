@@ -15,7 +15,7 @@ export async function onRequest(context) {
     // 2. 今日访问
     const today = await env.DB.prepare("SELECT COUNT(*) as count FROM visits WHERE created_at >= date('now')").first();
 
-    // 3. 最近 7 天趋势 (SQLite 语法)
+    // 3. 最近 7 天趋势
     const trend = await env.DB.prepare(`
       SELECT date(created_at) as date, COUNT(*) as count 
       FROM visits 
