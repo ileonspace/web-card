@@ -1,21 +1,12 @@
 export async function onRequestGet(context) {
   const { request, env } = context;
   const url = new URL(request.url);
-  const name = searchParams.get('name');
-  
-  // 获取访客信息 (Cloudflare 自动提供的)
-  const country = request.cf?.country || 'Unknown';
-  const city = request.cf?.city || 'Unknown';
-  const ua = request.headers.get('User-Agent') || '';
-  // 简易判断设备类型
-  const device = /mobile/i.test(ua) ? 'Mobile' : 'Desktop';
-  // IP 匿名化处理 (只存部分，保护隐私)
-  const ip = request.headers.get('CF-Connecting-IP') || '0.0.0.0';
+  const name = url.searchParams.get('name');
 
   if (!name) return new Response("Missing name", { status: 400 });
 
   try {
-    // 1. 获取用户数据
+    // 1. 先办正事：查询用户数据
     const result = await env.DB.prepare(
       "SELECT data, status, ban_until FROM users WHERE name = ?"
     ).bind(name).first();
@@ -24,17 +15,23 @@ export async function onRequestGet(context) {
       return new Response(JSON.stringify({ error: "Not found" }), { status: 404 });
     }
 
-    // 2. 🔥 核心新增：记录访问日志 (异步执行，不阻塞主线程)
-    // 只有当访问者不是管理员自己时才记录 (简单判断：referer不包含 admin)
-    // 这里为了简单，全部记录
+    // 2. 🔥 顺手记一笔日志 (放在 try-catch 里，绝对不影响主流程)
     try {
-        await env.DB.prepare(
+        const country = request.cf?.country || 'Unknown';
+        const city = request.cf?.city || 'Unknown';
+        const ua = request.headers.get('User-Agent') || '';
+        const device = /mobile/i.test(ua) ? 'Mobile' : 'Desktop';
+        const ip = request.headers.get('CF-Connecting-IP') || '0.0.0.0'; // 隐私保护，只用于粗略统计
+
+        // 异步写入，不 await，让它自己慢慢跑，提高响应速度
+        env.DB.prepare(
           "INSERT INTO visits (target_user, ip, country, city, device) VALUES (?, ?, ?, ?, ?)"
         ).bind(name, ip, country, city, device).run();
-    } catch(e) {
-        console.error("Log failed", e); // 日志失败不影响页面加载
+    } catch (logError) {
+        console.error("Stats logging failed:", logError); // 仅后台记录错误，不崩前台
     }
 
+    // 3. 返回正事数据
     const responseData = {
         data: JSON.parse(result.data),
         status: result.status,
@@ -56,7 +53,7 @@ export async function onRequestPost(context) {
     const { name, data } = input;
     if (!name || !data) return new Response("Missing data", { status: 400 });
 
-    await context.env.DB.prepare(
+    await env.DB.prepare(
       "INSERT INTO users (name, data) VALUES (?1, ?2) ON CONFLICT(name) DO UPDATE SET data = ?2"
     ).bind(name, JSON.stringify(data)).run();
 
